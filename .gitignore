@@ -1,0 +1,52 @@
+# Node.js
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Logs
+logs
+*.log
+logs/*.log
+
+# Build output
+dist/
+build/
+
+# Dependency directories
+node_modules/
+.bower_components/
+
+# Testing
+coverage/
+*.lcov
+
+# Environment variables
+.env
+.env.local
+.env.*.local
+
+# Editor directories and files
+.idea/
+.vscode/
+*.swp
+
+# System files
+.DS_Store
+Thumbs.db
+
+# Git-specific files
+*.orig
+
+# Temporary files
+*.tmp
+*.temp
+
+# Data directory
+data/
+
+# Python cache
+__pycache__/
+*.py[cod]
+
+venv/

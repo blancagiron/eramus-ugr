@@ -1,0 +1,14 @@
+import Sidebar  from "./Sidebar";
+
+export default function TutorDashboard() {
+  const user = JSON.parse(localStorage.getItem("usuario"));
+
+  return (
+    <Sidebar>
+      <h1 className="text-2xl font-bold">Bienvenido/a, {user?.nombre}</h1>
+      <p className="text-gray-600 mt-2">Este es tu panel como tutor Erasmus.</p>
+
+      {/* Aquí irán tus widgets */}
+    </Sidebar>
+  );
+}

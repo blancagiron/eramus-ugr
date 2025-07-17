@@ -1,0 +1,95 @@
+Nombre,Código,Tipo,Créditos,Curso
+Cálculo,CA015,Troncal,6,1
+Fundamentos Físicos y Tecnológicos,FFT015,Troncal,6,1
+Fundamentos de Programación,FP015,Troncal,6,1
+Fundamentos del Software,FS015,Troncal,6,1
+Álgebra Lineal y Estructuras Matemáticas,ALEM015,Troncal,6,1
+Estadística,ES015,Troncal,6,1
+"Ingeniería, Empresa y Sociedad",IES015,Troncal,6,1
+Lógica y Métodos Discretos,LMD015,Troncal,6,1
+Metodología de la Programación,MP015,Troncal,6,1
+Tecnología y Organización de Computadores,TOC015,Troncal,6,1
+Estructura de Computadores,EC015,Obligatoria,6,2
+Estructura de Datos,ED015,Obligatoria,6,2
+Programación y Diseño Orientado a Objetos,PDOO015,Obligatoria,6,2
+Sistemas Concurrentes y Distribuidos,SCD015,Obligatoria,6,2
+Sistemas Operativos,SO015,Obligatoria,6,2
+Algorítmica,ALG015,Obligatoria,6,2
+Arquitectura de Computadores,AC015,Obligatoria,6,2
+Fundamentos de Bases de Datos,FBD015,Obligatoria,6,2
+Fundamentos de Ingeniería del Software,FIS015,Obligatoria,6,2
+Inteligencia Artificial,IA015,Obligatoria,6,2
+Diseño y Desarrollo de Sistemas de Información,DDSI015,Obligatoria,6,3
+Fundamentos de Redes,FR015,Obligatoria,6,3
+Informática Gráfica,IG015,Obligatoria,6,3
+Ingeniería de Servidores,IS015,Obligatoria,6,3
+Modelos de Computación,MC015,Obligatoria,6,3
+Aprendizaje Automático ,AA015,Obligatoria,6,3
+Ingeniería del Conocimiento ,IC015,Obligatoria,6,3
+Metaheurísticas ,MH015,Obligatoria,6,3
+Modelos Avanzados de Computación,MAC015,Obligatoria,6,3
+Técnicas de los Sistemas Inteligentes ,TSI015,Obligatoria,6,3
+Desarrollo de Sistemas Distribuidos ,DSD015,Obligatoria,6,3
+Desarrollo de Software ,DS015,Obligatoria,6,3
+Diseño de Interfaces de Usuario ,DIU015,Obligatoria,6,3
+Sistemas Gráficos ,SG015,Obligatoria,6,3
+Sistemas de Información Basados en Web ,SIBW015,Obligatoria,6,3
+Arquitectura de Sistemas ,AS015,Obligatoria,6,3
+Arquitectura y Computación de Altas Prestaciones ,ACAP015,Obligatoria,6,3
+Desarrollo de Hardware Digital ,DHD015,Obligatoria,6,3
+Diseño de Sistemas Electrónicos ,DSE015,Obligatoria,6,3
+Sistemas con Microprocesadores ,SMP015,Obligatoria,6,3
+Administración de Bases de Datos ,ABD015,Obligatoria,6,3
+Ingeniería de Sistemas de Información ,ISI015,Obligatoria,6,3
+Programación Web ,PW015,Obligatoria,6,3
+Sistemas Multidimensionales ,SMD015,Obligatoria,6,3
+Sistemas de Información para Empresas ,SIE015,Obligatoria,6,3
+Computación Ubicua e Inteligencia Ambiental ,CUIA015,Obligatoria,6,3
+Servidores Web de Altas Prestaciones ,SWAP015,Obligatoria,6,3
+Sistemas Multimedia ,SMM015,Obligatoria,6,3
+Tecnologías Web ,TW015,Obligatoria,6,3
+Transmisión de Datos y Redes de Computadores ,TDRC015,Obligatoria,6,3
+Nuevos Paradigmas de Interacción ,NPI015,Obligatoria,6,4
+Procesadores de Lenguajes ,PL015,Obligatoria,6,4
+Programación Técnica y Científica ,PTC015,Optativa,6,4
+Simulación de Sistemas ,SS015,Optativa,6,4
+Teoría de la Información y la Codificación ,TIC015,Optativa,6,4
+Visión por Computador ,VC015,Obligatoria,6,4
+Creación de Empresas y Gestión Emprendedora,CEGE015,Optativa,6,4
+Criptografía y Computación ,CRIP015,Optativa,6,4
+Derecho Informático,DI015,Optativa,6,4
+Programación Lúdica ,PL015,Optativa,6,4
+Robótica Industrial ,RI015,Optativa,6,4
+Ética Informática y Sociedad de la Información,EISI015,Optativa,6,4
+Desarrollo Basado en Agentes ,DBA015,Obligatoria,6,4
+Dirección y Gestión de Proyectos ,DGP015,Obligatoria,6,4
+Lógica y Programación,LP015,Optativa,6,4
+Metodologías de Desarrollo Ágil ,MDA015,Obligatoria,6,4
+Programación Gráfica de Videojuegos ,PGV015,Optativa,6,4
+Seguridad en Sistemas Operativos ,SSO015,Optativa,6,4
+Animación por Ordenador ,AO015,Optativa,6,4
+Nuevas Tecnologías de la Programación ,NTP015,Optativa,6,4
+Programación Paralela ,PPR015,Optativa,6,4
+Centros de Procesamiento de Datos ,CPD015,Obligatoria,6,4
+Informática Industrial ,II015,Optativa,6,4
+Sistemas Empotrados ,SE015,Obligatoria,6,4
+Tecnologías Emergentes ,TE015,Optativa,6,4
+Tecnologías de Red ,TR015,Obligatoria,6,4
+Circuitos Integrados e Impresos ,CII015,Optativa,6,4
+Mantenimiento de Equipos Informáticos ,MEI015,Optativa,6,4
+Bases de Datos Distribuidas ,BDD015,Obligatoria,6,4
+Gestión de Recursos Digitales ,GRD015,Optativa,6,4
+Inteligencia de Negocio,IN015,Obligatoria,6,4
+Recuperación de Información ,RI015,Obligatoria,6,4
+Redes y Sistemas Complejos ,RSC015,Optativa,6,4
+Sistemas de Información Geográfica ,SIG015,Optativa,6,4
+Periféricos y Dispositivos de Interfaz Humana ,PDIH015,Optativa,6,4
+Sistemas Cooperativos y Gestión de Contenidos ,SCGC015,Optativa,6,4
+Compresión y Recuperación de Información Multimedia,CRIM015,Optativa,6,4
+Desarrollo de Aplicaciones para Internet,DAI015,Obligatoria,6,4
+Infraestructura Virtual,IV015,Obligatoria,6,4
+Seguridad y Protección de Sistemas Informáticos,SPSI015,Obligatoria,6,4
+Tratamiento de Imágenes Digitales,TID015,Optativa,6,4
+Procesamiento Digital de Señales,PDS015,Optativa,6,4
+Programación de Dispositivos Móviles,PDM015,Optativa,6,4
+Redes Multiservicio ,RMS015,Optativa,6,4

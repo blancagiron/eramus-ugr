@@ -1,0 +1,13 @@
+<svg version="1.2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1546 1566" width="1458" height="1477">
+	<title>Proyecto nuevo</title>
+	<style>
+		tspan { white-space:pre } 
+		.s0 { fill: #ffb257 } 
+		.t1 { font-size: 24px;fill: #0c0c0c;font-weight: 400;font-family: "DejaVuSansCondensed", "DejaVu Sans" } 
+	</style>
+	<path fill-rule="evenodd" class="s0" d="m664.4 164.6l-105.4 105.6h-296.5v296.2l-107.3 107.4-107.2 107.4 107.2 107.4 107.3 107.4v303h303l104 103.8 103.9 103.8 103.9-103.7 103.9-103.7 153.3-1.8 153.3-1.8 1.9-153.3 1.8-153.3 103.7-103.9 103.7-103.9-103.8-104-103.9-104v-303h-303.3l-105.4-105.6c-58-58.1-107.1-105.6-109.1-105.6-1.9 0-51 47.5-109 105.6z"/>
+	<text id="3" style="transform: matrix(23.205,0,0,23.205,619.59,989.692)" >
+		<tspan x="0" y="0" class="t1">3
+</tspan>
+	</text>
+</svg>
