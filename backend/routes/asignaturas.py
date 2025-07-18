@@ -4,7 +4,7 @@ from models.asignatura import crear_asignatura
 
 asignaturas_api = Blueprint("asignaturas_api", __name__)
 
-@asignaturas_api.route("/asignaturas", methods=["GET"])
+@asignaturas_api.route("/api/asignaturas", methods=["GET"])
 def obtener_asignaturas():
     grado = request.args.get("grado")
     codigo_grado = request.args.get("codigo_grado")
@@ -18,7 +18,7 @@ def obtener_asignaturas():
     if centro:
         query["centro"] = centro
 
-    asignaturas = list(db.asignaturas_ugr.find(query, {"_id": 0}))
+    asignaturas = list(db.asignaturas.find(query, {"_id": 0}))
     return jsonify(asignaturas)
 
 @asignaturas_api.route("/asignaturas", methods=["POST"])

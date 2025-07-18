@@ -7,6 +7,7 @@ from routes.dudas import dudas_api
 from routes.preguntas import preguntas_api
 from routes.grados import grados_api
 from routes.asignaturas import asignaturas_api
+from routes.centros import centros_api
 
 app = Flask(__name__)
 CORS(app)
@@ -18,6 +19,7 @@ app.register_blueprint(dudas_api)
 app.register_blueprint(preguntas_api)
 app.register_blueprint(grados_api)
 app.register_blueprint(asignaturas_api)
+app.register_blueprint(centros_api)
 
 
 if __name__ == "__main__":

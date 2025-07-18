@@ -1,6 +1,12 @@
 // src/components/landing_page_layout/HeaderLanding.jsx
 import logo from "../../assets/erasmus-logo-blanco.svg";
 import ugrLogo from "../../assets/logo_ugr_blanco.svg";
+import { Link } from "react-router-dom";
+
+// ...
+
+
+
 
 export default function HeaderLanding() {
   return (
@@ -21,6 +27,13 @@ export default function HeaderLanding() {
           className="transition-colors text-xl text-white hover:text-black"
         >
           FAQ
+        </a>
+        <a
+          href="/test-asignatura"
+          className="transition-colors text-xl text-white hover:text-black"
+        >
+          Test Asignatura
+
         </a>
         <a
           href="/auth"

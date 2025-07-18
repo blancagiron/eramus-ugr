@@ -1,0 +1,57 @@
+Nombre,Código,Tipo,Créditos,Curso
+Análisis Matemático,AM015,Troncal,6,1
+Análisis de Circuitos,AC015,Troncal,6,1
+Fundamentos de Informática y Empresa,FIE015,Troncal,6,1
+Álgebra Lineal y Geometría,AL015,Troncal,6,1
+Ecuaciones Diferenciales y Cálculo Numérico,EDCN,Troncal,6,1
+Ecuaciones Diferenciales y Cálculo Numérico,EDCN015,Troncal,6,1
+Estadística y Optimización,EO015,Troncal,6,1
+Fundamentos Físicos de la Ingeniería,FFI015,Troncal,6,1
+Sistemas Lineales,SL015,Troncal,6,1
+Fundamentos de Programación,FP015,Obligatoria,9,2
+Sistemas Telemáticos,ST015,Obligatoria,6,2
+Teoría de la Comunicación,TC015,Obligatoria,6,2
+Transmisión de Ondas,TO015,Obligatoria,9,2
+Comunicaciones I,CI015,Obligatoria,6,2
+Electrónica Analógica,EA015,Obligatoria,6,2
+Electrónica Digital,ED015,Obligatoria,6,2
+Infraestructuras y Redes de Comunicación,IRC015,Obligatoria,6,2
+Señales Digitales,SD015,Obligatoria,6,2
+Comunicaciones II,C2015,Obligatoria,6,3
+Electrónica de Potencia,EP015,Obligatoria,6,3
+Sistemas Electrónicos Digitales,SED015,Obligatoria,6,3
+Sistemas de Conmutación,SC015,Obligatoria,6,3
+Transmisión de Datos y Redes de Computadores,TDRC015,Obligatoria,6,3
+Antenas y Propagación,AP015,Obligatoria,6,3
+Medios y Componentes Ópticos para Comunicaciones,MCOC015,Obligatoria,6,3
+Sistemas de Codificación y Almacenamiento,SCA015,Obligatoria,6,3
+Sistemas de Radiocomunicación,SR015,Obligatoria,6,3
+Tratamiento Digital de Señales,TDS015,Obligatoria,6,3
+Complementos de Programación,CP015,Obligatoria,6,3
+Desarrollo de Aplicaciones en Red,DAR015,Obligatoria,6,3
+Gestión de Redes,GR015,Obligatoria,6,3
+Redes Inalámbricas y Movilidad,RIM015,Obligatoria,6,3
+Seguridad en Redes de Comunicación,SRC015,Obligatoria,6,3
+Circuitos Electrónicos para Radiofrecuencia,CERF015,Obligatoria,6,3
+Diseño de Circuitos y Sistemas Electrónicos,DCSE015,Obligatoria,6,3
+Electrónica de Microondas,EM015,Obligatoria,6,3
+Instrumentación Electrónica,IE015,Obligatoria,6,3
+Sistemas de Alimentación,SAL015,Obligatoria,6,3
+Comunicaciones Inalámbricas,CI015,Obligatoria,6,4
+Comunicaciones Ópticas,CO015,Obligatoria,6,4
+Fundamentos de Fotónica,FF015,Optativa,6,4
+Laboratorio de Telemática,LT015,Optativa,6,4
+Tecnología de Circuitos Impresos,TCI015,Optativa,6,4
+Tecnologías del Habla,TH015,Optativa,6,4
+Televisión y Radio Digital,TRD015,Obligatoria,6,4
+Arquitecturas Especializadas para Telecomunicaciones,AET015,Optativa,6,4
+Complementos de Análisis Matemático,CAM015,Optativa,6,4
+Física Aplicada a las Telecomunicaciones,FAT015,Optativa,6,4
+Procesamiento de Vídeo Digital,PVD015,Optativa,6,4
+Programación de Sistemas Empotrados y de Tiempo Real,PSETR015,Optativa,6,4
+Diseño y Dimensionado de Redes,DDR015,Obligatoria,6,4
+Redes Multimedia,RM015,Obligatoria,6,4
+Redes de Acceso y Corporativas,RAC015,Obligatoria,6,4
+Circuitos Integrados para Comunicaciones,CIC015,Obligatoria,6,4
+Equipos Electrónicos,EE015,Obligatoria,6,4
+Sistemas de Control,SC015,Obligatoria,6,4

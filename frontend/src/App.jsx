@@ -1,5 +1,5 @@
 import { Routes, Route, Link } from "react-router-dom";
-import Perfil from "./components/Perfil";
+import Perfil from "./components/perfil/Perfil";
 import Destinos from "./components/Destinos";
 import LandingPage from "./components/LandingPage";
 import Privacidad from "./components/Privacidad";
@@ -9,7 +9,7 @@ import Auth from "./components/Auth";
 import PrivateRoute from "./components/PrivateRoute";
 import TutorDashboard from "./components/dashboard/TutorDashboard";
 import EstudianteDashboard from "./components/dashboard/EstudianteDashboard";
-
+import TestAsignaturaSearch from "./TestAsignatura";  
 function App() {
   return (
     <div className="min-h-screen w-full text-black">
@@ -21,6 +21,9 @@ function App() {
         <Route path="/legal" element={<Legal />} />
         <Route path="/faq" element={<FaqPage />} />
         <Route path="/auth" element={<Auth />} />
+        <Route path="/test-asignatura" element={<TestAsignaturaSearch />} />
+        
+        {/* Rutas privadas */}
         <Route
           path="/perfil"
           element={
