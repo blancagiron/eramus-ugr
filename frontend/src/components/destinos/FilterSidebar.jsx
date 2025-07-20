@@ -58,12 +58,12 @@ export default function FilterSidebar({ filtro, setFiltro }) {
     <div className="w-full lg:w-80 bg-white rounded-2xl shadow-lg p-6 h-fit">
       <div className="flex items-center gap-3 mb-6">
         <ListFilter className="w-5 h-5 text-gray-600" />
-        <h2 className="text-xl font-bold text-gray-800">Filtros</h2>
+        <h2 className="text-2xl font-semibold text-gray-800" style={{ fontFamily: "Inter, sans-serif" }}>Filtros</h2>
       </div>
 
       {/* País */}
       <div className="mb-6">
-        <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-2">
+        <label className="flex items-center gap-2 text-l font-medium text-gray-700 mb-2">
           <MapPin className="w-4 h-4" />
           País
         </label>
@@ -84,7 +84,7 @@ export default function FilterSidebar({ filtro, setFiltro }) {
 
       {/* Idioma */}
       <div className="mb-6">
-        <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-2">
+        <label className="flex items-center gap-2 text-l font-medium text-gray-700 mb-2">
           <Languages className="w-4 h-4" />
           Nivel de Idioma Mínimo
         </label>
@@ -104,7 +104,7 @@ export default function FilterSidebar({ filtro, setFiltro }) {
 
       {/* Curso */}
       <div className="mb-6">
-        <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-2">
+        <label className="flex items-center gap-2 text-l font-medium text-gray-700 mb-2">
           <BookOpen className="w-4 h-4" />
           Cursos
         </label>
@@ -126,7 +126,7 @@ export default function FilterSidebar({ filtro, setFiltro }) {
 
       {/* Búsqueda por asignaturas */}
       <div className="bg-red-50 p-5 rounded-2xl border border-red-100 mb-8">
-        <h3 className="font-bold text-red-800 mb-1">Búsqueda por asignaturas</h3>
+        <h3 className="font-bold text-red-800 mb-1" style={{ fontFamily: "Inter, sans-serif" }}>Búsqueda por asignaturas</h3>
         <p className="text-sm text-gray-600 mb-4">
           Selecciona las asignaturas que quieres convalidar
         </p>

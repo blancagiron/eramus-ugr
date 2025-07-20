@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Languages, Globe, BarChart2, Plus, Trash2 } from "lucide-react";
+import { Languages, Globe, BarChart2, Plus, Trash2, ChevronDown } from "lucide-react";
 
 const IDIOMAS_COMUNES = [
   "Inglés", "Francés", "Alemán", "Italiano", "Portugués", "Chino", "Japonés"
@@ -34,14 +34,14 @@ export default function Idiomas({
   };
 
   return (
-    <div className="bg-white shadow rounded-xl p-6 space-y-4">
-      <h2 className="text-2xl font-semibold text-black flex items-center gap-2" style={{ fontFamily: "Inter, sans-serif" }}>
+    <div className="bg-white rounded-2xl shadow-lg p-6 space-y-6">
+      <h2 className="text-2xl font-semibold text-gray-800 flex items-center gap-3" style={{ fontFamily: "Inter, sans-serif" }}>
         <Globe className="w-6 h-6 text-red-500" />
         Idiomas
       </h2>
 
       {editando && (
-        <div className="space-y-3">
+        <div className="space-y-4">
           {/* Cambiar entre común y personalizado */}
           <div className="flex items-center gap-2">
             <input
@@ -54,7 +54,7 @@ export default function Idiomas({
               }}
               className="accent-red-500"
             />
-            <label htmlFor="custom" className="text-sm font-medium text-gray-600">
+            <label htmlFor="custom" className="text-sm font-medium text-gray-700">
               Escribir idioma personalizado
             </label>
           </div>
@@ -65,38 +65,44 @@ export default function Idiomas({
               <input
                 type="text"
                 placeholder="Idioma personalizado"
-                className="border px-3 py-2 rounded w-full md:w-1/2"
+                className="w-full md:w-1/2 p-3 border border-gray-200 rounded-xl bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent transition-all"
                 value={nuevoIdioma.idioma}
                 onChange={e => setNuevoIdioma({ ...nuevoIdioma, idioma: e.target.value })}
               />
             ) : (
-              <select
-                className="border px-3 py-2 rounded w-full md:w-1/2"
-                value={nuevoIdioma.idioma}
-                onChange={e => setNuevoIdioma({ ...nuevoIdioma, idioma: e.target.value })}
-              >
-                <option value="">Selecciona un idioma</option>
-                {IDIOMAS_COMUNES.map(idioma => (
-                  <option key={idioma} value={idioma}>{idioma}</option>
-                ))}
-              </select>
+              <div className="relative w-full md:w-1/2">
+                <select
+                  className="w-full p-3 border border-gray-200 rounded-xl bg-white text-gray-700 appearance-none cursor-pointer hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent transition-all"
+                  value={nuevoIdioma.idioma}
+                  onChange={e => setNuevoIdioma({ ...nuevoIdioma, idioma: e.target.value })}
+                >
+                  <option value="">Selecciona un idioma</option>
+                  {IDIOMAS_COMUNES.map(idioma => (
+                    <option key={idioma} value={idioma}>{idioma}</option>
+                  ))}
+                </select>
+                <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-500 pointer-events-none" />
+              </div>
             )}
 
             {/* Nivel */}
-            <select
-              className="border px-3 py-2 rounded w-full md:w-1/4"
-              value={nuevoIdioma.nivel}
-              onChange={e => setNuevoIdioma({ ...nuevoIdioma, nivel: e.target.value })}
-            >
-              <option value="">Nivel</option>
-              {NIVELES_VALIDOS.map(nivel => (
-                <option key={nivel} value={nivel}>{nivel}</option>
-              ))}
-            </select>
+            <div className="relative w-full md:w-1/4">
+              <select
+                className="w-full p-3 border border-gray-200 rounded-xl bg-white text-gray-700 appearance-none cursor-pointer hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent transition-all"
+                value={nuevoIdioma.nivel}
+                onChange={e => setNuevoIdioma({ ...nuevoIdioma, nivel: e.target.value })}
+              >
+                <option value="">Nivel</option>
+                {NIVELES_VALIDOS.map(nivel => (
+                  <option key={nivel} value={nivel}>{nivel}</option>
+                ))}
+              </select>
+              <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-500 pointer-events-none" />
+            </div>
 
             <button
               onClick={handleAñadir}
-              className="flex items-center gap-2 bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded transition"
+              className="flex items-center gap-2 bg-red-600 hover:bg-red-700 text-white font-semibold px-4 py-3 rounded-xl transition-colors duration-200 shadow-md hover:shadow-lg"
             >
               <Plus className="w-4 h-4" />
               Añadir
@@ -108,13 +114,13 @@ export default function Idiomas({
       )}
 
       {/* Lista de idiomas */}
-      <ul className="space-y-2">
+      <div className="space-y-3">
         {idiomas.map((idioma, i) => (
-          <li
+          <div
             key={i}
-            className="flex justify-between items-center bg-gray-50 border px-4 py-2 rounded shadow-sm"
+            className="flex justify-between items-center bg-gray-50 border border-gray-200 px-4 py-3 rounded-xl shadow-sm"
           >
-            <span className="text-gray-800 text-sm flex items-center gap-2">
+            <span className="text-gray-800 text-l flex items-center gap-2">
               <Languages className="w-4 h-4 text-gray-500" />
               <strong>{idioma.idioma}</strong>
               <BarChart2 className="w-4 h-4 text-gray-400" />
@@ -123,15 +129,15 @@ export default function Idiomas({
             {editando && (
               <button
                 onClick={() => eliminarIdioma(i)}
-                className="text-red-500 hover:text-red-700 text-sm flex items-center gap-1"
+                className="text-red-500 hover:text-red-700 text-sm flex items-center gap-1 transition-colors duration-200"
               >
                 <Trash2 className="w-4 h-4" />
                 Eliminar
               </button>
             )}
-          </li>
+          </div>
         ))}
-      </ul>
+      </div>
     </div>
   );
 }
