@@ -1,14 +1,19 @@
 def crear_destino(data):
     return {
-        "codigo": data["codigo"],
+        "codigo": data["codigo"],  # Código único del destino
         "nombre_uni": data["nombre_uni"],
         "pais": data["pais"],
         "requisitos_idioma": data["requisitos_idioma"],
         "plazas": data["plazas"],
         "meses": data["meses"],
-        "asignaturas": data.get("asignaturas", []),
         "web": data.get("web", ""),
-        "lat": data.get("lat", None),
-        "lng": data.get("lng", None),
-        "observaciones": data.get("observaciones", "")
+        "lat": data.get("lat"),
+        "lng": data.get("lng"),
+        "descripcion_uni": data.get("descripcion_uni", ""),
+        "descripcion_ciudad": data.get("descripcion_ciudad", ""),
+        "info_contacto": {
+            "email": data.get("info_contacto", {}).get("email", ""),
+            "telefono": data.get("info_contacto", {}).get("telefono", "")
+        },
+        "asignaturas": data.get("asignaturas", [])  # Lista de dicts con código, nombre, créditos
     }
