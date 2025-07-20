@@ -1,6 +1,6 @@
 import { Routes, Route, Link } from "react-router-dom";
 import Perfil from "./components/perfil/Perfil";
-import Destinos from "./components/Destinos";
+import Destinos from "./components/destinos/Destinos";
 import LandingPage from "./components/LandingPage";
 import Privacidad from "./components/Privacidad";
 import Legal from "./components/Legal";

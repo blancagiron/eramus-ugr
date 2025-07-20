@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import AsignaturaSelector from "./AsignaturaSelector";
-
+import { BookOpen} from "lucide-react";
 function sonIguales(arr1, arr2) {
   if (arr1.length !== arr2.length) return false;
   const s1 = [...arr1].sort();
@@ -32,7 +32,10 @@ export default function AsignaturasSuperadas({ editando, asignaturasBD, seleccio
 
   return (
     <div className="bg-white shadow rounded-xl p-6 space-y-4">
-      <h2 className="text-xl font-bold text-blue-700">Asignaturas superadas</h2>
+      <h2 className="text-2xl font-semibold text-black flex items-center gap-2" style={{ fontFamily: "Inter, sans-serif" }}>
+        <BookOpen className="w-6 h-6 text-red-500" /> {/* Ícono de libro */}
+        Asignaturas superadas
+      </h2>
 
       {editando ? (
         asignaturasBD.length === 0 ? (
@@ -42,7 +45,7 @@ export default function AsignaturasSuperadas({ editando, asignaturasBD, seleccio
             {/* Asignaturas seleccionadas actuales */}
             {seleccionTemp.length > 0 && (
               <div>
-                <h3 className="text-sm font-semibold text-gray-600 mb-1">Asignaturas seleccionadas</h3>
+                <h3 className="text-xl font-medium text-gray-600 mb-3" >Asignaturas seleccionadas</h3>
                 <div className="flex flex-wrap gap-2 mb-2">
                   {asignaturasBD
                     .filter(a => seleccionTemp.includes(a.codigo))
@@ -87,7 +90,7 @@ export default function AsignaturasSuperadas({ editando, asignaturasBD, seleccio
 
           return (
             <div key={curso}>
-              <h3 className="text-sm font-semibold text-gray-600 mb-1">Curso {curso}</h3>
+              <h3 className="text-m font-semibold text-gray-600 mb-1">Curso {curso}</h3>
               <div className="flex flex-wrap gap-2">
                 {asignaturasCurso.map(a => (
                   <span

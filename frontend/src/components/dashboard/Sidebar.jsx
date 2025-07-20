@@ -2,7 +2,7 @@ import { NavLink, useNavigate, useLocation } from "react-router-dom";
 import { LogOut, User, Home, MapPin, Search, Folder, FileText } from "lucide-react";
 import logo from "../../assets/logo-tfg-final-v2.svg";
 
-export default function Sidebar({ children }) {
+export default function Sidebar({ children, siempreVisible = false, visible = true }) {
   const navigate = useNavigate();
   const location = useLocation();
   const usuario = JSON.parse(localStorage.getItem("usuario"));
@@ -13,7 +13,6 @@ export default function Sidebar({ children }) {
     navigate("/auth");
   };
 
-  // Dashboard dinámico según rol
   const dashboardPath = rol === "tutor" ? "/dashboard/tutor" : "/dashboard/estudiante";
 
   const links = [
@@ -25,17 +24,20 @@ export default function Sidebar({ children }) {
     { label: "Mis acuerdos", icon: <FileText size={18} />, to: "/acuerdos" },
   ];
 
+  // Si no es visible y no es modo "siempre visible", no renderizamos el sidebar
+  if (!siempreVisible && !visible) {
+    return <main className="flex-1 bg-stone-100">{children}</main>;
+  }
+
   return (
     <div className="flex min-h-screen w-full">
-      <aside className="w-64 bg-white border-r shadow-md flex flex-col justify-between py-6">
+      <aside className="w-64 bg-white border-r shadow-md flex flex-col py-6">
         <div>
-          {/* Logo */}
           <div className="flex justify-center mb-8 px-4">
-            <img src={logo} alt="Logo Erasmus" className="h-28" /> {/* Cambiado de h-20 a h-28 */}
+            <img src={logo} alt="Logo Erasmus" className="h-28" />
           </div>
 
-          {/* Menú de navegación */}
-          <nav className="space-y-2 px-4" style={{fontFamily: "Inter, sans-serif"}}>
+          <nav className="space-y-2 px-4" style={{ fontFamily: "Inter, sans-serif" }}>
             {links.map(({ label, icon, to }) => (
               <NavLink
                 key={label}
@@ -44,7 +46,7 @@ export default function Sidebar({ children }) {
                   `flex items-center gap-3 px-4 py-2 w-full rounded-full transition-all text-m ${
                     isActive || location.pathname.startsWith(to)
                       ? "bg-red-600 text-white font-semibold hover:text-black"
-                      : "text-gray-700  hover:text-red-700"
+                      : "text-gray-700 hover:text-red-700"
                   }`
                 }
               >
@@ -55,8 +57,7 @@ export default function Sidebar({ children }) {
           </nav>
         </div>
 
-        {/* Botón logout */}
-        <div className="px-4">
+        <div className="px-4 mt-80">
           <button
             onClick={cerrarSesion}
             className="flex items-center gap-2 text-gray-600 text-m hover:text-red-600 transition"
@@ -67,7 +68,7 @@ export default function Sidebar({ children }) {
         </div>
       </aside>
 
-      <main className="flex-1 bg-stone-100 p-6">{children}</main>
+      <main className="flex-1 bg-stone-100">{children}</main>
     </div>
   );
 }

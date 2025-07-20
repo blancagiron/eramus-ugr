@@ -14,8 +14,9 @@ def crear_usuario(data):
         "grado": data["grado"],
         "codigo_grado": data["codigo_grado"],
         "creditos_superados": 0,
-        "estado_proceso": "sin_destino",
+        "estado_proceso": "sin destino",
         "destino_confirmado": None,
         "fecha_registro": data.get("fecha_registro", date.today().isoformat()),
-        "destinos_asignados": [] 
+        "destinos_asignados": [],
+        "foto_perfil": None
     }

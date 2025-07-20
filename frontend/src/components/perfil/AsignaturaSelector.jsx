@@ -50,7 +50,7 @@ export default function AsignaturaSelector({ asignaturas, seleccionadas, onChang
       )}
       {filtrar.length > 0 && porCurso.map(({ curso, asignaturas }) => (
         <div key={curso} className="space-y-2">
-          <h3 className="font-semibold text-sm text-gray-600">Curso {curso}</h3>
+          <h3 className="font-semibold text-m text-gray-600">Curso {curso}</h3>
           <div className="flex flex-wrap gap-2">
             {asignaturas.map(asig => (
               <button

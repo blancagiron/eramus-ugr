@@ -29,13 +29,6 @@ export default function HeaderLanding() {
           FAQ
         </a>
         <a
-          href="/test-asignatura"
-          className="transition-colors text-xl text-white hover:text-black"
-        >
-          Test Asignatura
-
-        </a>
-        <a
           href="/auth"
           className="transition-colors  text-xl text-white hover:text-black"
         >

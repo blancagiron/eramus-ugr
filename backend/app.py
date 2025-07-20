@@ -1,5 +1,7 @@
 from flask import Flask
 from flask_cors import CORS
+from flask import send_from_directory
+
 from routes.usuarios import usuarios
 from routes.destinos import destinos
 from routes.equivalencias import equivalencias
@@ -8,9 +10,19 @@ from routes.preguntas import preguntas_api
 from routes.grados import grados_api
 from routes.asignaturas import asignaturas_api
 from routes.centros import centros_api
+import os
 
 app = Flask(__name__)
 CORS(app)
+
+UPLOAD_FOLDER = 'uploads/perfiles'
+os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+
+@app.route('/uploads/perfiles/<filename>')
+def obtener_foto(filename):
+    return send_from_directory(app.config['UPLOAD_FOLDER'], filename)
 
 app.register_blueprint(usuarios)
 app.register_blueprint(destinos)

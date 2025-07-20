@@ -1,7 +1,9 @@
-from flask import Blueprint, request, jsonify
+from flask import Blueprint, request, jsonify, current_app
 from db import db  # tu conexión a MongoDB
 from models.usuario import crear_usuario
+import os
 from utils.auth import hash_contraseña, verificar_contraseña
+from werkzeug.utils import secure_filename
 
 usuarios = Blueprint("usuarios", __name__)
 
@@ -52,3 +54,43 @@ def actualizar_usuario(email):
         update["idiomas"] = data["idiomas"]
     db.usuarios.update_one({"email": email}, {"$set": update})
     return jsonify({"mensaje": "Perfil actualizado"}), 200
+
+@usuarios.route('/usuarios/foto', methods=['POST'])
+def subir_foto_usuario():
+    if 'foto' not in request.files or 'email' not in request.form:
+        return jsonify({'error': 'Faltan datos'}), 400
+
+    foto = request.files['foto']
+    email = request.form['email']
+
+    if not (foto and foto.filename.lower().endswith(('.png', '.jpg', '.jpeg'))):
+        return jsonify({'error': 'Tipo de archivo no permitido'}), 400
+
+    filename = secure_filename(email) + ".jpg"
+    filepath = os.path.join(current_app.config['UPLOAD_FOLDER'], filename)
+    foto.save(filepath)
+
+ 
+    db.usuarios.update_one(
+        {"email": email},
+        {"$set": {"foto_perfil": filename}}
+    )
+
+    return jsonify({"mensaje": "Foto subida correctamente", "archivo": filename})
+
+@usuarios.route('/usuarios/foto', methods=['DELETE'])
+def eliminar_foto_usuario():
+    email = request.args.get("email")
+    if not email:
+        return jsonify({"error": "Falta el email"}), 400
+
+    filename = secure_filename(email) + ".jpg"
+    filepath = os.path.join(current_app.config['UPLOAD_FOLDER'], filename)
+
+    if os.path.exists(filepath):
+        os.remove(filepath)
+
+    # Quita la foto del campo del usuario
+    db.usuarios.update_one({"email": email}, {"$unset": {"foto_perfil": ""}})
+
+    return jsonify({"mensaje": "Foto eliminada correctamente"})

@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import FilterSidebar from "./FilterSidebar";
-import UniversityGrid from "./UniversityGrid";
-import Pagination from "./Pagination";
+import UniversityGrid from "../UniversityGrid";
+import Pagination from "../Pagination";
 
 export default function Destinos() {
   const [universidades, setUniversidades] = useState([]);
