@@ -1,3 +1,4 @@
+// ...importaciones
 import { useEffect, useState } from "react";
 import Sidebar from "../dashboard/Sidebar";
 import SidebarPerfil from "./SidebarPerfil";
@@ -10,6 +11,7 @@ import DashboardHeader from "../dashboard/DashboardHeader";
 export default function Perfil() {
   const usuario = JSON.parse(localStorage.getItem("usuario"));
   const email = usuario?.email;
+  const rol = usuario?.rol;
 
   const [perfil, setPerfil] = useState(null);
   const [asignaturasBD, setAsignaturasBD] = useState([]);
@@ -178,30 +180,34 @@ export default function Perfil() {
                 <InfoAcademica perfil={perfil} form={form} nombreCentro={nombreCentro} />
               </div>
 
-              <AsignaturasSuperadas
-                editando={editando}
-                asignaturasBD={asignaturasBD}
-                seleccionadas={form.asignaturas_superadas}
-                onChange={(seleccionadas) => {
-                  const total = asignaturasBD
-                    .filter(a => seleccionadas.includes(a.codigo))
-                    .reduce((sum, a) => sum + (a.creditos || 0), 0);
-                  setForm(prev => ({
-                    ...prev,
-                    asignaturas_superadas: seleccionadas,
-                    creditos_superados: total
-                  }));
-                }}
-              />
+              {rol === "estudiante" && (
+                <>
+                  <AsignaturasSuperadas
+                    editando={editando}
+                    asignaturasBD={asignaturasBD}
+                    seleccionadas={form.asignaturas_superadas}
+                    onChange={(seleccionadas) => {
+                      const total = asignaturasBD
+                        .filter(a => seleccionadas.includes(a.codigo))
+                        .reduce((sum, a) => sum + (a.creditos || 0), 0);
+                      setForm(prev => ({
+                        ...prev,
+                        asignaturas_superadas: seleccionadas,
+                        creditos_superados: total
+                      }));
+                    }}
+                  />
 
-              <Idiomas
-                idiomas={form.idiomas}
-                nuevoIdioma={nuevoIdioma}
-                setNuevoIdioma={setNuevoIdioma}
-                añadirIdioma={añadirIdioma}
-                eliminarIdioma={eliminarIdioma}
-                editando={editando}
-              />
+                  <Idiomas
+                    idiomas={form.idiomas}
+                    nuevoIdioma={nuevoIdioma}
+                    setNuevoIdioma={setNuevoIdioma}
+                    añadirIdioma={añadirIdioma}
+                    eliminarIdioma={eliminarIdioma}
+                    editando={editando}
+                  />
+                </>
+              )}
             </section>
           </div>
         </div>

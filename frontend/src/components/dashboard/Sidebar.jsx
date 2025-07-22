@@ -13,7 +13,12 @@ export default function Sidebar({ children, siempreVisible = false, visible = tr
     navigate("/auth");
   };
 
-  const dashboardPath = rol === "tutor" ? "/dashboard/tutor" : "/dashboard/estudiante";
+  const dashboardPath =
+    rol === "tutor"
+      ? "/dashboard/tutor"
+      : rol === "admin"
+      ? "/dashboard/admin"
+      : "/dashboard/estudiante";
 
   const links = [
     { label: "Mi Perfil", icon: <User size={18} />, to: "/perfil" },

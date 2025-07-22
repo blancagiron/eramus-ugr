@@ -16,7 +16,7 @@ export default function QuestionCard({ pregunta, respuesta }) {
     >
       <div className="flex-1">
         <h3
-          className={`font-semibold text-xl ${
+          className={`font-semibold text-l ${
             abierta ? "text-red-700" : "text-red-600"
           }`}
         >

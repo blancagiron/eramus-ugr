@@ -5,7 +5,8 @@ import {
   CheckCircle2,
   XCircle,
   UserRound,
-  Pencil
+  Pencil,
+  ShieldCheck
 } from "lucide-react";
 import estrella from "../../assets/landing/estrella_roja_pagina.svg";
 import { useState } from "react";
@@ -22,6 +23,7 @@ export default function SidebarPerfil({
 }) {
   const BASE_URL = "http://localhost:5000";
   const nombre = `${perfil.nombre || ""} ${perfil.apellidos || ""}`;
+  const rol = perfil.rol || "estudiante";
   const estado = perfil.estado_proceso || "desconocido";
 
   const [fotoRemovida, setFotoRemovida] = useState(false);
@@ -62,9 +64,8 @@ export default function SidebarPerfil({
 
   return (
     <aside className="w-full bg-white rounded-xl shadow-sm p-5 font-inter">
-      {/* Información del usuario */}
       <div className="flex flex-col items-center">
-        {/* Marco y foto */}
+        {/* Foto */}
         <div className="w-36 h-36 relative mb-3">
           <img src={estrella} alt="Marco de foto" className="w-full h-full object-contain" />
           <div className="absolute inset-0 flex items-center justify-center">
@@ -100,7 +101,7 @@ export default function SidebarPerfil({
           )}
         </div>
 
-        {/* Mensajes bajo la imagen */}
+        {/* Mensajes bajo imagen */}
         {editando && (
           <div className="flex flex-col items-center gap-1 mb-4">
             {file && (
@@ -128,17 +129,25 @@ export default function SidebarPerfil({
         )}
 
         {/* Nombre */}
-        <h2 className="text-center font-semibold text-lg flex items-center gap-2 mb-3 px-2">
-          <UserRound className="w-5 h-5 text-gray-700 flex-shrink-0" /> {/* Ajusté el tamaño del ícono también */}
+        <h2 className="text-center font-semibold text-lg flex items-center gap-2 mb-2 px-2">
+          <UserRound className="w-5 h-5 text-gray-700" />
           <span className="break-words" style={{ fontFamily: "Inter, sans-serif" }}>{nombre}</span>
         </h2>
 
-        {/* Estado del proceso */}
-        <div className={`text-l rounded-full px-3 py-1.5 mb-6 ${estadoClase}`}>
-          Estado: <span className="font-medium">{estadoTexto}</span>
+        {/* Rol */}
+        <div className="text-sm text-gray-600 mb-4 flex items-center gap-1">
+          <ShieldCheck className="w-4 h-4 text-gray-500" />
+          Rol: <span className="font-medium capitalize">{rol}</span>
         </div>
 
-        {/* Botones de acción */}
+        {/* Estado (solo para estudiantes) */}
+        {rol === "estudiante" && (
+          <div className={`text-l rounded-full px-3 py-1.5 mb-6 ${estadoClase}`}>
+            Estado: <span className="font-medium">{estadoTexto}</span>
+          </div>
+        )}
+
+        {/* Botones */}
         <div className="w-full space-y-2">
           {!editando ? (
             <button
