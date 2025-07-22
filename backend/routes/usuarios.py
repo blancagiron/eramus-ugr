@@ -10,12 +10,20 @@ usuarios = Blueprint("usuarios", __name__)
 @usuarios.route("/usuarios/registro", methods=["POST"])
 def registrar_usuario():
     data = request.json
+
     if db.usuarios.find_one({"email": data["email"]}):
         return jsonify({"error": "Ya existe un usuario con ese email"}), 409
+
+    rol = data.get("rol", "estudiante")
+
+    if rol == "tutor":
+        if data.get("codigo_tutor") != os.getenv("CODIGO_TUTOR"):
+            return jsonify({"error": "Código de tutor incorrecto"}), 403
 
     data["contraseña"] = hash_contraseña(data["contraseña"])
     nuevo_usuario = crear_usuario(data)
     db.usuarios.insert_one(nuevo_usuario)
+
     return jsonify({"mensaje": "Registro exitoso"}), 201
 
 @usuarios.route("/usuarios/login", methods=["POST"])
@@ -54,6 +62,11 @@ def actualizar_usuario(email):
         update["idiomas"] = data["idiomas"]
     db.usuarios.update_one({"email": email}, {"$set": update})
     return jsonify({"mensaje": "Perfil actualizado"}), 200
+
+@usuarios.route("/usuarios", methods=["GET"])
+def listar_usuarios():
+    docs = list(db.usuarios.find({}, {"_id": 0})) 
+    return jsonify(docs)
 
 @usuarios.route('/usuarios/foto', methods=['POST'])
 def subir_foto_usuario():
