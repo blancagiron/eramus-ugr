@@ -1,5 +1,16 @@
 import { NavLink, useNavigate, useLocation } from "react-router-dom";
-import { LogOut, User, Home, MapPin, Search, Folder, FileText } from "lucide-react";
+import {
+  LogOut,
+  User,
+  Home,
+  MapPin,
+  Search,
+  Folder,
+  FileText,
+  GraduationCap,
+  School,
+  Users
+} from "lucide-react";
 import logo from "../../assets/logo-tfg-final-v2.svg";
 
 export default function Sidebar({ children, siempreVisible = false, visible = true }) {
@@ -20,7 +31,8 @@ export default function Sidebar({ children, siempreVisible = false, visible = tr
       ? "/dashboard/admin"
       : "/dashboard/estudiante";
 
-  const links = [
+  // Enlaces por rol
+  const linksEstudiante = [
     { label: "Mi Perfil", icon: <User size={18} />, to: "/perfil" },
     { label: "Dashboard", icon: <Home size={18} />, to: dashboardPath },
     { label: "Destinos", icon: <MapPin size={18} />, to: "/destinos" },
@@ -29,7 +41,27 @@ export default function Sidebar({ children, siempreVisible = false, visible = tr
     { label: "Mis acuerdos", icon: <FileText size={18} />, to: "/acuerdos" },
   ];
 
-  // Si no es visible y no es modo "siempre visible", no renderizamos el sidebar
+  const linksTutor = [
+    { label: "Mi Perfil", icon: <User size={18} />, to: "/perfil" },
+    { label: "Dashboard", icon: <Home size={18} />, to: dashboardPath },
+    { label: "Destinos", icon: <MapPin size={18} />, to: "/destinos" },
+    { label: "Convalidaciones", icon: <Search size={18} />, to: "/convalidaciones" },
+    { label: "Documentación", icon: <Folder size={18} />, to: "/documentacion" },
+  ];
+
+  const linksAdmin = [
+    { label: "Mi Perfil", icon: <User size={18} />, to: "/perfil" },
+    { label: "Dashboard", icon: <Home size={18} />, to: dashboardPath },
+    { label: "Usuarios", icon: <Users size={18} />, to: "/admin/usuarios" },
+    { label: "Destinos", icon: <MapPin size={18} />, to: "/admin/destinos" },
+    { label: "Centros", icon: <School size={18} />, to: "/admin/centros" },
+    { label: "Grados", icon: <GraduationCap size={18} />, to: "/admin/grados" },
+   
+  ];
+
+  const links =
+    rol === "admin" ? linksAdmin : rol === "tutor" ? linksTutor : linksEstudiante;
+
   if (!siempreVisible && !visible) {
     return <main className="flex-1 bg-stone-100">{children}</main>;
   }

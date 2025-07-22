@@ -12,6 +12,8 @@ import EstudianteDashboard from "./components/dashboard/EstudianteDashboard";
 import AdminDashboard from "./components/dashboard/AdminDashboard";
 import TestAsignaturaSearch from "./TestAsignatura";
 import DestinoDetalle from "./components/destinos/DestinoDetalle";
+import GestionUsuarios from "./components/dashboard/admin/GestionUsuarios";
+
 function App() {
   return (
     <div className="min-h-screen w-full text-black">
@@ -25,6 +27,13 @@ function App() {
         <Route path="/auth" element={<Auth />} />
         <Route path="/test-asignatura" element={<TestAsignaturaSearch />} />
         <Route path="/destinos/:nombre_uni" element={<DestinoDetalle />} />
+        <Route path="/admin/usuarios" element={<PrivateRoute><GestionUsuarios /></PrivateRoute>} />
+{/* 
+        <Route path="/admin/destinos" element={<GestionDestinos />} />
+        <Route path="/admin/importar-destinos" element={<ImportarDestinos />} />
+        <Route path="/admin/centros" element={<GestionCentros />} />
+        <Route path="/admin/grados" element={<GestionGrados />} />
+        <Route path="/admin/permisos" element={<GestionPermisos />} /> */}
 
 
         {/* Rutas privadas */}
@@ -62,6 +71,8 @@ function App() {
             </PrivateRoute>
           }
         />
+
+
 
       </Routes>
     </div>

@@ -53,15 +53,27 @@ def obtener_usuario(email):
 @usuarios.route("/usuarios/<email>", methods=["PATCH"])
 def actualizar_usuario(email):
     data = request.json
-    update = {}
-    if "asignaturas_superadas" in data:
-        update["asignaturas_superadas"] = data["asignaturas_superadas"]
-    if "creditos_superados" in data:
-        update["creditos_superados"] = data["creditos_superados"]
-    if "idiomas" in data:
-        update["idiomas"] = data["idiomas"]
-    db.usuarios.update_one({"email": email}, {"$set": update})
-    return jsonify({"mensaje": "Perfil actualizado"}), 200
+    if not data:
+        return jsonify({"error": "Datos vacíos"}), 400
+
+    # Solo permitimos actualizar ciertos campos
+    campos_permitidos = {
+        "nombre", "apellidos", "rol", "codigo_centro", "grado", "codigo_grado",
+        "asignaturas_superadas", "creditos_superados", "idiomas", "destinos_asignados"
+    }
+
+    update_data = {k: v for k, v in data.items() if k in campos_permitidos}
+
+    if not update_data:
+        return jsonify({"error": "No hay campos válidos para actualizar"}), 400
+
+    resultado = db.usuarios.update_one({"email": email}, {"$set": update_data})
+
+    if resultado.matched_count == 0:
+        return jsonify({"error": "Usuario no encontrado"}), 404
+
+    return jsonify({"mensaje": "Usuario actualizado correctamente"}), 200
+
 
 @usuarios.route("/usuarios", methods=["GET"])
 def listar_usuarios():

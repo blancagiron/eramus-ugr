@@ -16,7 +16,7 @@ export default function TablaUsuarios() {
 
   const eliminar = async (email) => {
     if (!window.confirm("¿Eliminar este usuario?")) return;
-    await fetch(`http://localhost:5000/usuarios/${email}`, { method: "DELETE" });
+    await fetch(`http://localhost:5000/api/usuarios/${email}`, { method: "DELETE" });
     cargar();
   };
 
