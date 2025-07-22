@@ -15,5 +15,6 @@ def crear_destino(data):
             "email": data.get("info_contacto", {}).get("email", ""),
             "telefono": data.get("info_contacto", {}).get("telefono", "")
         },
-        "asignaturas": data.get("asignaturas", [])  # Lista de dicts con código, nombre, créditos
+        "asignaturas": data.get("asignaturas", []) , # Lista de dicts con código, nombre, créditos
+        "tutor_asignado": data.get("tutor_asignado", None)
     }
