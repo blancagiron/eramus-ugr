@@ -35,7 +35,7 @@ export default function TablaUsuarios() {
           </thead>
           <tbody>
             {usuarios.map((u) => (
-              <tr key={u.email} className="border-t hover:bg-gray-50">
+              <tr key={u.email} className="border-t hover:bg-gray-50 ">
                 <td className="p-3">{u.nombre} {u.apellidos}</td>
                 <td className="p-3">{u.email}</td>
                 <td className="p-3 capitalize">{u.rol}</td>
