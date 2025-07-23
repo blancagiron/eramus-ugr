@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 
-export default function EditarUsuarioModal({ usuario: inicial, onClose }) {
-  const [usuario, setUsuario] = useState(inicial);
+export default function EditarUsuarioModal({ usuario: inicial, onClose, esNuevo = false }) {
+  const [usuario, setUsuario] = useState(inicial || { rol: "admin" });
   const [grados, setGrados] = useState([]);
 
   useEffect(() => {
@@ -13,33 +13,44 @@ export default function EditarUsuarioModal({ usuario: inicial, onClose }) {
 
   const handleGuardar = async () => {
     try {
-      const res = await fetch(`http://localhost:5000/usuarios/${usuario.email}`, {
-        method: "PATCH",
+      const url = esNuevo
+        ? "http://localhost:5000/usuarios/registro"
+        : `http://localhost:5000/usuarios/${usuario.email}`;
+
+      const method = esNuevo ? "POST" : "PATCH";
+
+      const payload = esNuevo
+        ? { ...usuario, contraseña: usuario.contraseña || "temporal123" }
+        : usuario;
+
+      const res = await fetch(url, {
+        method,
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(usuario),
+        body: JSON.stringify(payload),
       });
 
       if (res.ok) {
         onClose();
       } else {
-        alert("Error al guardar los cambios");
+        const data = await res.json();
+        alert(data.error || "Error al guardar los cambios");
       }
     } catch (error) {
-      console.error("Error al actualizar usuario", error);
+      console.error("Error al guardar usuario", error);
       alert("Error de red al guardar");
     }
   };
 
   const handleGradoChange = (e) => {
     const codigo_grado = e.target.value;
-    const gradoSeleccionado = grados.find(g => g.codigo === codigo_grado);
+    const gradoSeleccionado = grados.find((g) => g.codigo === codigo_grado);
 
     if (gradoSeleccionado) {
-      setUsuario(prev => ({
+      setUsuario((prev) => ({
         ...prev,
         codigo_grado,
         grado: gradoSeleccionado.nombre,
-        codigo_centro: gradoSeleccionado.codigo_centro
+        codigo_centro: gradoSeleccionado.codigo_centro,
       }));
     }
   };
@@ -47,25 +58,55 @@ export default function EditarUsuarioModal({ usuario: inicial, onClose }) {
   return (
     <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
       <div className="bg-white p-6 rounded-xl w-full max-w-lg space-y-4 shadow-xl">
-        <h2 className="text-xl font-bold mb-4">Editar Usuario</h2>
+        <h2 className="text-xl font-bold mb-4">
+          {esNuevo ? "Nuevo Usuario" : "Editar Usuario"}
+        </h2>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {esNuevo && (
+            <>
+              <div className="md:col-span-2">
+                <label className="text-sm font-medium text-gray-700">Email</label>
+                <input
+                  type="email"
+                  value={usuario.email || ""}
+                  onChange={(e) => setUsuario({ ...usuario, email: e.target.value })}
+                  className="w-full border px-3 py-2 rounded-md"
+                  required
+                />
+              </div>
+              <div className="md:col-span-2">
+                <label className="text-sm font-medium text-gray-700">Contraseña</label>
+                <input
+                  type="password"
+                  value={usuario.contraseña || ""}
+                  onChange={(e) => setUsuario({ ...usuario, contraseña: e.target.value })}
+                  className="w-full border px-3 py-2 rounded-md"
+                  required
+                />
+              </div>
+            </>
+          )}
+
           <div>
             <label className="text-sm font-medium text-gray-700">Nombre</label>
             <input
-              value={usuario.nombre}
+              value={usuario.nombre || ""}
               onChange={(e) => setUsuario({ ...usuario, nombre: e.target.value })}
               className="w-full border px-3 py-2 rounded-md"
+              required
             />
           </div>
           <div>
             <label className="text-sm font-medium text-gray-700">Apellidos</label>
             <input
-              value={usuario.apellidos}
+              value={usuario.apellidos || ""}
               onChange={(e) => setUsuario({ ...usuario, apellidos: e.target.value })}
               className="w-full border px-3 py-2 rounded-md"
+              required
             />
           </div>
+
           <div>
             <label className="text-sm font-medium text-gray-700">Rol</label>
             <select
@@ -78,6 +119,7 @@ export default function EditarUsuarioModal({ usuario: inicial, onClose }) {
               <option value="admin">Admin</option>
             </select>
           </div>
+
           <div>
             <label className="text-sm font-medium text-gray-700">Centro</label>
             <input
@@ -87,6 +129,7 @@ export default function EditarUsuarioModal({ usuario: inicial, onClose }) {
               disabled={usuario.rol === "estudiante"}
             />
           </div>
+
           {usuario.rol === "estudiante" && (
             <div className="md:col-span-2">
               <label className="text-sm font-medium text-gray-700">Grado</label>
