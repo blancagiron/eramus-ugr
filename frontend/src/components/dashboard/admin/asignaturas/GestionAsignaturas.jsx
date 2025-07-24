@@ -15,6 +15,9 @@ export default function GestionAsignaturas() {
   const [editando, setEditando] = useState(null);
   const [mensaje, setMensaje] = useState("");
   const [pagina, setPagina] = useState(1);
+  const [confirmacion, setConfirmacion] = useState(null);
+  const [confirmacionLote, setConfirmacionLote] = useState(false);
+
   const porPagina = 5;
 
   const cargarCentros = () => {
@@ -47,12 +50,41 @@ export default function GestionAsignaturas() {
   }, []);
 
   useEffect(() => {
-    setPagina(1); // reiniciar paginación
+    setPagina(1);
     cargarAsignaturas();
   }, [filtroCentro, filtroGrado]);
 
-  const asignaturasMostradas = asignaturas.slice((pagina - 1) * porPagina, pagina * porPagina);
-  const totalPaginas = Math.ceil(asignaturas.length / porPagina);
+  const eliminar = async (codigo) => {
+    const res = await fetch(`http://localhost:5000/asignaturas/${codigo}`, { method: "DELETE" });
+    if (res.ok) {
+      setMensaje("Asignatura eliminada correctamente.");
+      cargarAsignaturas();
+    } else {
+      const data = await res.json();
+      setMensaje(data?.error || "Error al eliminar.");
+    }
+    setConfirmacion(null);
+  };
+
+  const eliminarLote = async () => {
+    const url = `http://localhost:5000/asignaturas?codigo_grado=${filtroGrado}&centro=${filtroCentro}`;
+    const res = await fetch(url, { method: "DELETE" });
+    const data = await res.json();
+    setMensaje(data.mensaje || "Asignaturas eliminadas.");
+    setConfirmacionLote(false);
+    cargarAsignaturas();
+  };
+
+  const asignaturasOrdenadas = [...asignaturas].sort((a, b) => {
+    if (a.curso !== b.curso) return a.curso - b.curso;
+    return a.nombre.localeCompare(b.nombre);
+  });
+
+  const totalPaginas = Math.ceil(asignaturasOrdenadas.length / porPagina);
+  const asignaturasMostradas = asignaturasOrdenadas.slice(
+    (pagina - 1) * porPagina,
+    pagina * porPagina
+  );
 
   return (
     <>
@@ -77,8 +109,8 @@ export default function GestionAsignaturas() {
                 className="border p-2 rounded"
               >
                 <option value="">Selecciona un centro</option>
-                {centros.map((c, i) => (
-                  <option key={i} value={c.codigo}>
+                {centros.map((c) => (
+                  <option key={c.codigo} value={c.codigo}>
                     {c.nombre} ({c.codigo})
                   </option>
                 ))}
@@ -93,12 +125,32 @@ export default function GestionAsignaturas() {
                 <option value="">Selecciona un grado</option>
                 {grados
                   .filter((g) => g.codigo_centro === filtroCentro)
-                  .map((g, i) => (
-                    <option key={i} value={g.codigo}>
+                  .map((g) => (
+                    <option key={g.codigo} value={g.codigo}>
                       {g.nombre} ({g.sigla})
                     </option>
                   ))}
               </select>
+            </div>
+
+            {/* Acciones */}
+            <div className="flex gap-4 mt-4">
+              <button
+                onClick={() => setEditando({})}
+                className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-md flex items-center gap-2"
+              >
+                <Plus className="w-4 h-4" />
+                Nueva asignatura
+              </button>
+
+              {filtroCentro && filtroGrado && asignaturas.length > 0 && (
+                <button
+                  onClick={() => setConfirmacionLote(true)}
+                  className="bg-gray-100 hover:bg-red-200 border border-red-400 text-red-700 px-4 py-2 rounded-md"
+                >
+                  Eliminar todas las asignaturas del grado seleccionado
+                </button>
+              )}
             </div>
 
             {/* Mensaje */}
@@ -111,7 +163,7 @@ export default function GestionAsignaturas() {
             {/* Tabla */}
             <div className="overflow-auto border rounded-xl shadow-sm mt-4">
               <table className="w-full table-auto text-sm">
-                <thead className="bg-gray-50 border-b text-left">
+                <thead className="bg-gray-50 border-b text-left text-base">
                   <tr>
                     <th className="p-4 font-semibold text-gray-700">Código</th>
                     <th className="p-4 font-semibold text-gray-700">Nombre</th>
@@ -121,8 +173,8 @@ export default function GestionAsignaturas() {
                   </tr>
                 </thead>
                 <tbody>
-                  {asignaturasMostradas.map((a, i) => (
-                    <tr key={i} className="border-t hover:bg-gray-50">
+                  {asignaturasMostradas.map((a) => (
+                    <tr key={a.codigo} className="border-t hover:bg-gray-50">
                       <td className="p-4">{a.codigo}</td>
                       <td className="p-4">{a.nombre}</td>
                       <td className="p-4">{a.creditos}</td>
@@ -130,6 +182,9 @@ export default function GestionAsignaturas() {
                       <td className="p-4 flex justify-center gap-3">
                         <button onClick={() => setEditando(a)} className="text-blue-600 hover:text-blue-800">
                           <Pencil className="w-5 h-5" />
+                        </button>
+                        <button onClick={() => setConfirmacion(a.codigo)} className="text-red-600 hover:text-red-800">
+                          <Trash2 className="w-5 h-5" />
                         </button>
                       </td>
                     </tr>
@@ -144,6 +199,28 @@ export default function GestionAsignaturas() {
 
             {/* Paginación */}
             <Pagination total={totalPaginas} actual={pagina} setActual={setPagina} />
+
+            {/* Confirmación individual */}
+            {confirmacion && (
+              <div className="bg-white shadow-xl border border-red-200 p-4 rounded-md mt-4 text-center space-y-4">
+                <p>¿Eliminar asignatura <strong>{confirmacion}</strong>?</p>
+                <div className="flex justify-center gap-4">
+                  <button onClick={() => eliminar(confirmacion)} className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700">Sí</button>
+                  <button onClick={() => setConfirmacion(null)} className="px-4 py-2 bg-gray-300 rounded-md hover:bg-gray-400">Cancelar</button>
+                </div>
+              </div>
+            )}
+
+            {/* Confirmación en lote */}
+            {confirmacionLote && (
+              <div className="bg-white shadow-xl border border-red-200 p-4 rounded-md mt-4 text-center space-y-4">
+                <p>¿Eliminar <strong>todas</strong> las asignaturas del grado seleccionado?</p>
+                <div className="flex justify-center gap-4">
+                  <button onClick={eliminarLote} className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700">Sí, eliminar todas</button>
+                  <button onClick={() => setConfirmacionLote(false)} className="px-4 py-2 bg-gray-300 rounded-md hover:bg-gray-400">Cancelar</button>
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Modal */}
