@@ -9,7 +9,8 @@ import {
   FileText,
   GraduationCap,
   School,
-  Users
+  Users,
+  BookOpen
 } from "lucide-react";
 import logo from "../../assets/logo-tfg-final-v2.svg";
 
@@ -56,6 +57,7 @@ export default function Sidebar({ children, siempreVisible = false, visible = tr
     { label: "Destinos", icon: <MapPin size={18} />, to: "/admin/destinos" },
     { label: "Centros", icon: <School size={18} />, to: "/admin/centros" },
     { label: "Grados", icon: <GraduationCap size={18} />, to: "/admin/grados" },
+    { label: "Asignaturas", icon: <BookOpen size={18} />, to: "/admin/asignaturas" },
    
   ];
 
@@ -94,7 +96,7 @@ export default function Sidebar({ children, siempreVisible = false, visible = tr
           </nav>
         </div>
 
-        <div className="px-4 mt-80">
+        <div className="px-4 mt-60">
           <button
             onClick={cerrarSesion}
             className="flex items-center gap-2 text-gray-600 text-m hover:text-red-600 transition"

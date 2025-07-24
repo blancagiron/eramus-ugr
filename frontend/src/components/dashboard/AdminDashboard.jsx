@@ -6,9 +6,9 @@ import {
   Users,
   MapPin,
   Upload,
-  Building2,
+  School,
   GraduationCap,
-  ShieldCheck,
+  BookOpen,
 } from "lucide-react";
 
 export default function AdminDashboard() {
@@ -20,31 +20,31 @@ export default function AdminDashboard() {
     {
       label: "Gestionar Usuarios",
       icon: <Users className="w-8 h-8" />,
-      color: "bg-gradient-to-br from-red-500 to-red-600",
+      color: "bg-gradient-to-br from-emerald-500 to-teal-600",
       ruta: "/admin/usuarios",
     },
     {
       label: "Gestionar Destinos",
       icon: <MapPin className="w-8 h-8" />,
-      color: "bg-gradient-to-br from-red-400 to-red-500",
+      color: "bg-gradient-to-br from-violet-500 to-purple-600",
       ruta: "/admin/destinos",
     },
     {
-      label: "Importar Destinos",
-      icon: <Upload className="w-8 h-8" />,
-      color: "bg-gradient-to-br from-blue-500 to-blue-600",
-      ruta: "/admin/importar-destinos",
+      label: "Gestionar Asignaturas",
+      icon: <BookOpen className="w-8 h-8" />,
+      color: "bg-gradient-to-br from-sky-500 to-blue-600",
+      ruta: "/admin/asignaturas",
     },
     {
       label: "Gestionar Centros",
-      icon: <Building2 className="w-8 h-8" />,
-      color: "bg-gradient-to-br from-gray-700 to-gray-800",
+      icon: <School className="w-8 h-8" />,
+      color: "bg-gradient-to-br from-slate-600 to-slate-700",
       ruta: "/admin/centros",
     },
     {
       label: "Gestionar Grados",
       icon: <GraduationCap className="w-8 h-8" />,
-      color: "bg-gradient-to-br from-orange-500 to-orange-600",
+      color: "bg-gradient-to-br from-amber-500 to-orange-500",
       ruta: "/admin/grados",
     },
   ];
