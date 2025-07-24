@@ -1,5 +1,5 @@
 from flask import Blueprint, request, jsonify, current_app
-from db import db  # tu conexión a MongoDB
+from db import db
 from models.usuario import crear_usuario
 import os
 from utils.auth import hash_contraseña, verificar_contraseña
@@ -13,6 +13,10 @@ def registrar_usuario():
 
     if db.usuarios.find_one({"email": data["email"]}):
         return jsonify({"error": "Ya existe un usuario con ese email"}), 409
+
+    # Validación opcional por nombre/apellidos duplicados
+    if db.usuarios.find_one({"nombre": data.get("nombre"), "apellidos": data.get("apellidos")}):
+        return jsonify({"error": "Ya existe un usuario con ese nombre y apellidos"}), 409
 
     rol = data.get("rol", "estudiante")
 
@@ -56,7 +60,6 @@ def actualizar_usuario(email):
     if not data:
         return jsonify({"error": "Datos vacíos"}), 400
 
-    # Solo permitimos actualizar ciertos campos
     campos_permitidos = {
         "nombre", "apellidos", "rol", "codigo_centro", "grado", "codigo_grado",
         "asignaturas_superadas", "creditos_superados", "idiomas", "destinos_asignados"
@@ -73,7 +76,6 @@ def actualizar_usuario(email):
         return jsonify({"error": "Usuario no encontrado"}), 404
 
     return jsonify({"mensaje": "Usuario actualizado correctamente"}), 200
-
 
 @usuarios.route("/usuarios", methods=["GET"])
 def listar_usuarios():
@@ -95,7 +97,6 @@ def subir_foto_usuario():
     filepath = os.path.join(current_app.config['UPLOAD_FOLDER'], filename)
     foto.save(filepath)
 
- 
     db.usuarios.update_one(
         {"email": email},
         {"$set": {"foto_perfil": filename}}
@@ -115,7 +116,6 @@ def eliminar_foto_usuario():
     if os.path.exists(filepath):
         os.remove(filepath)
 
-    # Quita la foto del campo del usuario
     db.usuarios.update_one({"email": email}, {"$unset": {"foto_perfil": ""}})
 
     return jsonify({"mensaje": "Foto eliminada correctamente"})
