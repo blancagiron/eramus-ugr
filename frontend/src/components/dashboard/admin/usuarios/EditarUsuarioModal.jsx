@@ -2,52 +2,44 @@ import { useState, useEffect } from "react";
 import { X } from "lucide-react";
 
 export default function EditarUsuarioModal({ usuario: inicial, onClose, esNuevo = false }) {
-  const [usuario, setUsuario] = useState(
-    esNuevo ? { rol: "admin" } : inicial || {}
-  );
+  const [usuario, setUsuario] = useState(esNuevo ? { rol: "admin" } : inicial || {});
   const [grados, setGrados] = useState([]);
+  const [todosLosDestinos, setTodosLosDestinos] = useState([]);
+  const [busquedaDestino, setBusquedaDestino] = useState("");
+  const [mensaje, setMensaje] = useState("");
+
+  useEffect(() => {
+    if (mensaje) {
+      const timeout = setTimeout(() => setMensaje(""), 3000);
+      return () => clearTimeout(timeout);
+    }
+  }, [mensaje]);
 
   useEffect(() => {
     fetch("http://localhost:5000/grados")
       .then((res) => res.json())
       .then(setGrados)
-      .catch((err) => console.error("Error al cargar grados", err));
-  }, []);
-
-  const handleGuardar = async () => {
-    try {
-      const url = esNuevo
-        ? "http://localhost:5000/usuarios/registro"
-        : `http://localhost:5000/usuarios/${usuario.email}`;
-
-      const method = esNuevo ? "POST" : "PATCH";
-
-      const payload = esNuevo
-        ? { ...usuario, contraseña: usuario.contraseña || "temporal123", rol: "admin" }
-        : usuario;
-
-      const res = await fetch(url, {
-        method,
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
+      .catch((error) => {
+        console.error("Error al cargar grados:", error);
+        setMensaje("Error al cargar los grados");
       });
 
-      if (res.ok) {
-        onClose();
-      } else {
-        const data = await res.json();
-        alert(data.error || "Error al guardar los cambios");
-      }
-    } catch (error) {
-      console.error("Error al guardar usuario", error);
-      alert("Error de red al guardar");
-    }
-  };
+    fetch("http://localhost:5000/api/destinos")
+      .then((res) => res.json())
+      .then(setTodosLosDestinos)
+      .catch((error) => {
+        console.error("Error al cargar destinos:", error);
+        setMensaje("Error al cargar los destinos");
+      });
+  }, []);
+
+  const destinosFiltrados = todosLosDestinos.filter((d) =>
+    `${d.nombre_uni} ${d.codigo}`.toLowerCase().includes(busquedaDestino.toLowerCase())
+  );
 
   const handleGradoChange = (e) => {
     const codigo_grado = e.target.value;
     const gradoSeleccionado = grados.find((g) => g.codigo === codigo_grado);
-
     if (gradoSeleccionado) {
       setUsuario((prev) => ({
         ...prev,
@@ -56,6 +48,64 @@ export default function EditarUsuarioModal({ usuario: inicial, onClose, esNuevo 
         codigo_centro: gradoSeleccionado.codigo_centro,
       }));
     }
+  };
+
+  const handleGuardar = async () => {
+    try {
+      const url = esNuevo
+        ? "http://localhost:5000/usuarios/registro"
+        : `http://localhost:5000/usuarios/${usuario.email}`;
+      const method = esNuevo ? "POST" : "PATCH";
+
+      const payload = { ...usuario };
+
+      if (esNuevo) {
+        payload.contraseña = usuario.contraseña || "temporal123";
+        payload.rol = "admin";
+      }
+
+      if (usuario.rol === "estudiante") {
+        const destino = usuario.destinos_asignados?.[0];
+        if (destino) {
+          payload.estado_proceso = "con destino";
+          payload.destino_confirmado = destino;
+          payload.destinos_asignados = [destino];
+        } else {
+          payload.estado_proceso = "sin destino";
+          payload.destino_confirmado = null;
+          payload.destinos_asignados = [];
+        }
+      } else if (usuario.rol === "tutor") {
+        delete payload.destino_confirmado;
+        delete payload.estado_proceso;
+      }
+
+      const res = await fetch(url, {
+        method,
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+
+      if (res.ok) {
+        setMensaje("Usuario guardado correctamente.");
+        setTimeout(() => onClose(), 1500);
+      } else {
+        const data = await res.json();
+        setMensaje(data.error || "Error al guardar los cambios");
+      }
+    } catch (error) {
+      console.error("Error al guardar usuario", error);
+      setMensaje("Error de red al guardar");
+    }
+  };
+
+  const eliminarDestino = () => {
+    setUsuario((prev) => ({
+      ...prev,
+      destinos_asignados: [],
+      destino_confirmado: null,
+      estado_proceso: "sin destino"
+    }));
   };
 
   return (
@@ -76,30 +126,36 @@ export default function EditarUsuarioModal({ usuario: inicial, onClose, esNuevo 
 
         {/* Content */}
         <div className="flex-1 overflow-auto px-8 py-6">
+          {mensaje && (
+            <div className="bg-yellow-50 border border-yellow-200 text-yellow-700 px-4 py-3 rounded-lg mb-6">
+              {mensaje}
+            </div>
+          )}
+
           <div className="space-y-6">
-            {/* Información de acceso */}
+            {/* Datos de acceso (solo para nuevos usuarios) */}
             {esNuevo && (
               <div>
-                <h3 className="text-lg font-medium text-gray-800 mb-4">Información de acceso</h3>
-                <div className="space-y-4">
+                <h3 className="text-lg font-medium text-gray-800 mb-4">Datos de acceso</h3>
+                <div className="grid grid-cols-1 gap-6">
                   <div>
                     <label className="block text-base font-medium text-gray-700 mb-2">Email</label>
                     <input
                       type="email"
-                      placeholder="usuario@ejemplo.com"
                       value={usuario.email || ""}
                       onChange={(e) => setUsuario({ ...usuario, email: e.target.value })}
+                      placeholder="usuario@ejemplo.com"
                       className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent"
                       required
                     />
                   </div>
                   <div>
-                    <label className="block text-base font-medium text-gray-700 mb-2">Contraseña</label>
+                    <label className="block text-base font-medium text-gray-700 mb-2">Contraseña temporal</label>
                     <input
                       type="password"
-                      placeholder="Contraseña temporal"
                       value={usuario.contraseña || ""}
                       onChange={(e) => setUsuario({ ...usuario, contraseña: e.target.value })}
+                      placeholder="Contraseña temporal"
                       className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent"
                       required
                     />
@@ -115,9 +171,9 @@ export default function EditarUsuarioModal({ usuario: inicial, onClose, esNuevo 
                 <div>
                   <label className="block text-base font-medium text-gray-700 mb-2">Nombre</label>
                   <input
-                    placeholder="Nombre"
                     value={usuario.nombre || ""}
                     onChange={(e) => setUsuario({ ...usuario, nombre: e.target.value })}
+                    placeholder="Nombre del usuario"
                     className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent"
                     required
                   />
@@ -125,9 +181,9 @@ export default function EditarUsuarioModal({ usuario: inicial, onClose, esNuevo 
                 <div>
                   <label className="block text-base font-medium text-gray-700 mb-2">Apellidos</label>
                   <input
-                    placeholder="Apellidos"
                     value={usuario.apellidos || ""}
                     onChange={(e) => setUsuario({ ...usuario, apellidos: e.target.value })}
+                    placeholder="Apellidos del usuario"
                     className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent"
                     required
                   />
@@ -135,12 +191,12 @@ export default function EditarUsuarioModal({ usuario: inicial, onClose, esNuevo 
               </div>
             </div>
 
-            {/* Información académica */}
+            {/* Rol y centro */}
             <div>
-              <h3 className="text-lg font-medium text-gray-800 mb-4">Información académica</h3>
+              <h3 className="text-lg font-medium text-gray-800 mb-4">Rol y asignación</h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {!esNuevo && (
-                  <div>
+                  <div className="md:col-span-2">
                     <label className="block text-base font-medium text-gray-700 mb-2">Rol</label>
                     <select
                       value={usuario.rol}
@@ -153,18 +209,16 @@ export default function EditarUsuarioModal({ usuario: inicial, onClose, esNuevo 
                     </select>
                   </div>
                 )}
-
-                <div>
-                  <label className="block text-base font-medium text-gray-700 mb-2">Centro</label>
+                <div className={usuario.rol === "estudiante" ? "md:col-span-2" : ""}>
+                  <label className="block text-base font-medium text-gray-700 mb-2">Código del centro</label>
                   <input
-                    placeholder="Código del centro"
                     value={usuario.codigo_centro || ""}
                     onChange={(e) => setUsuario({ ...usuario, codigo_centro: e.target.value })}
-                    className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent disabled:bg-gray-100 disabled:text-gray-500"
+                    placeholder="Código del centro"
+                    className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent"
                     disabled={usuario.rol === "estudiante"}
                   />
                 </div>
-
                 {usuario.rol === "estudiante" && (
                   <div className="md:col-span-2">
                     <label className="block text-base font-medium text-gray-700 mb-2">Grado</label>
@@ -184,6 +238,126 @@ export default function EditarUsuarioModal({ usuario: inicial, onClose, esNuevo 
                 )}
               </div>
             </div>
+
+            {/* Información específica para estudiantes */}
+            {usuario.rol === "estudiante" && (
+              <div>
+                <h3 className="text-lg font-medium text-gray-800 mb-4">Estado y destino</h3>
+                <div className="space-y-6">
+                  <div>
+                    <label className="block text-base font-medium text-gray-700 mb-2">Estado del proceso</label>
+                    <select
+                      value={usuario.estado_proceso || ""}
+                      onChange={(e) => setUsuario({ ...usuario, estado_proceso: e.target.value })}
+                      className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                    >
+                      <option value="sin destino">Sin destino</option>
+                      <option value="con destino">Con destino</option>
+                      <option value="renunciado">Ha renunciado</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="block text-base font-medium text-gray-700 mb-2">Destino asignado</label>
+                    <div className="space-y-3">
+                      <input
+                        type="text"
+                        placeholder="Buscar universidad..."
+                        value={busquedaDestino}
+                        onChange={(e) => setBusquedaDestino(e.target.value)}
+                        className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                      />
+                      <select
+                        value={usuario.destinos_asignados?.[0]?.codigo || ""}
+                        onChange={(e) => {
+                          const d = todosLosDestinos.find((dest) => dest.codigo === e.target.value);
+                          if (d) {
+                            const nuevo = { codigo: d.codigo, nombre_uni: d.nombre_uni };
+                            setUsuario((prev) => ({
+                              ...prev,
+                              destinos_asignados: [nuevo],
+                              destino_confirmado: nuevo,
+                              estado_proceso: "con destino",
+                            }));
+                          }
+                        }}
+                        className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                      >
+                        <option value="">Selecciona un destino</option>
+                        {destinosFiltrados.map((d) => (
+                          <option key={d.codigo} value={d.codigo}>
+                            {d.nombre_uni} ({d.codigo})
+                          </option>
+                        ))}
+                      </select>
+
+                      {usuario.destinos_asignados?.length > 0 && (
+                        <button
+                          onClick={eliminarDestino}
+                          className="px-4 py-2 bg-red-100 hover:bg-red-200 text-red-700 font-medium rounded-lg transition-colors duration-200"
+                        >
+                          Eliminar destino asignado
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Información específica para tutores */}
+            {usuario.rol === "tutor" && (
+              <div>
+                <h3 className="text-lg font-medium text-gray-800 mb-4">Destinos asignados</h3>
+                <div className="space-y-3">
+                  <div>
+                    <label className="block text-base font-medium text-gray-700 mb-2">Buscar destinos</label>
+                    <input
+                      type="text"
+                      placeholder="Buscar destinos..."
+                      value={busquedaDestino}
+                      onChange={(e) => setBusquedaDestino(e.target.value)}
+                      className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-base font-medium text-gray-700 mb-2">Destinos (mantén Ctrl presionado para seleccionar múltiples)</label>
+                    <select
+                      multiple
+                      value={(usuario.destinos_asignados || []).map((d) => d.codigo)}
+                      onChange={(e) => {
+                        const selected = Array.from(e.target.selectedOptions)
+                          .map((opt) => {
+                            const d = todosLosDestinos.find((d) => d.codigo === opt.value);
+                            return d ? { codigo: d.codigo, nombre_uni: d.nombre_uni } : null;
+                          })
+                          .filter(Boolean);
+                        setUsuario({ ...usuario, destinos_asignados: selected });
+                      }}
+                      className="w-full h-40 px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                    >
+                      {destinosFiltrados.map((d) => (
+                        <option key={d.codigo} value={d.codigo}>
+                          {d.nombre_uni} ({d.codigo})
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  {usuario.destinos_asignados?.length > 0 && (
+                    <div className="bg-stone-50 p-4 rounded-lg border border-gray-200">
+                      <p className="text-sm font-medium text-gray-700 mb-2">Destinos seleccionados:</p>
+                      <div className="space-y-1">
+                        {usuario.destinos_asignados.map((destino, index) => (
+                          <div key={index} className="text-sm text-gray-600">
+                            • {destino.nombre_uni} ({destino.codigo})
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
           </div>
         </div>
 

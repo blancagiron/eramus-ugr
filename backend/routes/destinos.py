@@ -6,7 +6,6 @@ from bson.objectid import ObjectId
 destinos = Blueprint("destinos", __name__)
 coleccion = db["destinos"]
 
-# GET - Listar todos los destinos
 @destinos.route("/api/destinos", methods=["GET"])
 def listar_destinos():
     docs = list(coleccion.find())
@@ -14,17 +13,14 @@ def listar_destinos():
         d["_id"] = str(d["_id"])
     return jsonify(docs)
 
-# POST - Crear un nuevo destino
 @destinos.route("/api/destinos", methods=["POST"])
 def crear_nuevo_destino():
     data = request.json
-
-    campos_obligatorios = ["codigo", "nombre_uni", "pais", "requisitos_idioma", "plazas", "meses"]
-    for campo in campos_obligatorios:
+    obligatorios = ["codigo", "nombre_uni", "pais", "requisitos_idioma", "plazas", "meses"]
+    for campo in obligatorios:
         if campo not in data:
             return jsonify({ "error": f"Falta el campo obligatorio '{campo}'" }), 400
 
-    # Validar si ya existe un destino con el mismo código
     if coleccion.find_one({ "codigo": data["codigo"] }):
         return jsonify({ "error": "Ya existe un destino con ese código" }), 409
 
@@ -41,10 +37,11 @@ def editar_destino(id):
     actualizacion = {}
 
     campos_simples = [
-        "codigo", "nombre_uni", "pais", "requisitos_idioma", 
-        "plazas", "meses", "web", "lat", "lng", 
-        "descripcion_uni", "descripcion_ciudad", 
-        "asignaturas", "tutor_asignado"
+        "codigo", "nombre_uni", "pais", "requisitos_idioma",
+        "plazas", "meses", "web", "lat", "lng",
+        "descripcion_uni", "descripcion_ciudad", "observaciones",
+        "asignaturas", "tutor_asignado", "ultimo_anio_reconocimiento",
+        "nota_minima", "cursos"
     ]
 
     for campo in campos_simples:

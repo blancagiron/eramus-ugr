@@ -124,7 +124,13 @@ export default function Auth() {
       const data = await res.json();
       if (res.ok) {
         localStorage.setItem("usuario", JSON.stringify(data));
-        navigate(data.rol === "tutor" ? "/dashboard/tutor" : "/dashboard/estudiante");
+        if (data.rol === "admin") {
+          navigate("/dashboard/admin");
+        } else if (data.rol === "tutor") {
+          navigate("/dashboard/tutor");
+        } else {
+          navigate("/dashboard/estudiante");
+        }
       } else {
         setMensaje(data.error || "Login fallido");
         setTipoMensaje("error");

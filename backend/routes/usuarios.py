@@ -14,7 +14,6 @@ def registrar_usuario():
     if db.usuarios.find_one({"email": data["email"]}):
         return jsonify({"error": "Ya existe un usuario con ese email"}), 409
 
-    # Validación opcional por nombre/apellidos duplicados
     if db.usuarios.find_one({"nombre": data.get("nombre"), "apellidos": data.get("apellidos")}):
         return jsonify({"error": "Ya existe un usuario con ese nombre y apellidos"}), 409
 
@@ -62,13 +61,27 @@ def actualizar_usuario(email):
 
     campos_permitidos = {
         "nombre", "apellidos", "rol", "codigo_centro", "grado", "codigo_grado",
-        "asignaturas_superadas", "creditos_superados", "idiomas", "destinos_asignados"
+        "asignaturas_superadas", "creditos_superados", "idiomas", "destinos_asignados",
+        "estado_proceso", "destino_confirmado"
     }
 
     update_data = {k: v for k, v in data.items() if k in campos_permitidos}
 
     if not update_data:
         return jsonify({"error": "No hay campos válidos para actualizar"}), 400
+
+    # Reglas especiales para estudiantes
+    if update_data.get("rol") == "estudiante":
+        asignados = update_data.get("destinos_asignados", [])
+        if isinstance(asignados, list) and len(asignados) > 1:
+            update_data["destinos_asignados"] = [asignados[0]]
+        if "destinos_asignados" in update_data:
+            if update_data["destinos_asignados"]:
+                update_data["destino_confirmado"] = update_data["destinos_asignados"][0]
+                update_data["estado_proceso"] = "con destino"
+            else:
+                update_data["destino_confirmado"] = None
+                update_data["estado_proceso"] = "sin destino"
 
     resultado = db.usuarios.update_one({"email": email}, {"$set": update_data})
 
