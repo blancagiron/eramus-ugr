@@ -15,4 +15,6 @@ def crear_usuario(data):
         "idiomas": data.get("idiomas", []),
         "destinos_asignados": data.get("destinos_asignados", []),
         "foto_perfil": data.get("foto_perfil", None),
+        "destinos_favoritos": data.get("destinos_favoritos", []),
+        "estado_proceso": data.get("estado_proceso", "Proceso no iniciado"),
     }

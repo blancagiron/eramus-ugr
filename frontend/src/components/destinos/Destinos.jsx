@@ -16,28 +16,56 @@ export default function Destinos() {
   });
   const [paginaActual, setPaginaActual] = useState(1);
   const [sidebarVisible, setSidebarVisible] = useState(false);
+  const [paisesDisponibles, setPaisesDisponibles] = useState([]);
+  const [idiomasDisponibles, setIdiomasDisponibles] = useState([]);
+  const [cursosDisponibles, setCursosDisponibles] = useState([]);
   const porPagina = 6;
 
   useEffect(() => {
     fetch("http://localhost:5000/api/destinos")
       .then((res) => res.json())
-      .then((data) => setUniversidades(data));
+      .then((data) => {
+        setUniversidades(data);
+
+        const paisesSet = new Set();
+        const idiomasSet = new Set();
+        const cursosSet = new Set();
+
+        data.forEach((uni) => {
+          if (uni.pais) paisesSet.add(uni.pais.trim());
+
+          if (uni.requisitos_idioma) {
+            uni.requisitos_idioma.split(",").forEach((idioma) => {
+              const limpio = idioma.trim().split(" ").pop(); // e.g., "B2 Inglés" -> "Inglés"
+              idiomasSet.add(limpio);
+            });
+          }
+
+          (uni.cursos || []).forEach((c) => cursosSet.add(c));
+        });
+
+        setPaisesDisponibles([...paisesSet].sort());
+        setIdiomasDisponibles([...idiomasSet].sort());
+        setCursosDisponibles([...cursosSet].sort((a, b) => a - b));
+      });
   }, []);
 
   const universidadesFiltradas = universidades.filter((uni) => {
-    const matchPais =
-      !filtro.pais || uni.pais.toLowerCase().includes(filtro.pais.toLowerCase());
-
+    const matchPais = !filtro.pais || uni.pais === filtro.pais;
     const matchIdioma =
-      !filtro.idioma || uni.requisitos_idioma.toLowerCase().includes(filtro.idioma.toLowerCase());
-
+      !filtro.idioma ||
+      (uni.requisitos_idioma || "").toLowerCase().includes(filtro.idioma.toLowerCase());
+    const matchCurso =
+      !filtro.curso || (uni.cursos || []).includes(parseInt(filtro.curso));
     const matchAsignaturas =
       filtro.asignaturas.length === 0 ||
-      filtro.asignaturas.every((asig) =>
-        uni.asignaturas.some((a) => a.nombre.toLowerCase().includes(asig.toLowerCase()))
+      filtro.asignaturas.every((codigo) =>
+        (uni.asignaturas || []).some(
+          (a) => a.codigo_ugr?.toLowerCase() === codigo.toLowerCase()
+        )
       );
 
-    return matchPais && matchIdioma && matchAsignaturas;
+    return matchPais && matchIdioma && matchCurso && matchAsignaturas;
   });
 
   const totalPaginas = Math.ceil(universidadesFiltradas.length / porPagina);
@@ -49,21 +77,23 @@ export default function Destinos() {
   return (
     <>
       <Hamburguesa onClick={() => setSidebarVisible((prev) => !prev)} />
-
       <Sidebar visible={sidebarVisible}>
         <div className="min-h-screen transition-all duration-300">
           <DashboardHeader
             titulo="Destinos Erasmus"
             subtitulo="Filtra y encuentra tu mejor opción"
           />
-
           <div className="lg:flex px-4 md:px-8 pt-6 max-w-screen-2xl mx-auto w-full gap-6">
-            {/* Filtros */}
             <div className="mb-6 lg:mb-0">
-              <FilterSidebar filtro={filtro} setFiltro={setFiltro} />
+              <FilterSidebar
+                filtro={filtro}
+                setFiltro={setFiltro}
+                paises={paisesDisponibles}
+                idiomas={idiomasDisponibles}
+                cursos={cursosDisponibles}
+              />
             </div>
 
-            {/* Contenido principal */}
             <main className="flex-1 px-2 sm:px-4 md:px-0 pb-10">
               {universidadesPaginadas.length > 0 ? (
                 <UniversityGrid universidades={universidadesPaginadas} />
@@ -73,7 +103,6 @@ export default function Destinos() {
                   <p className="text-sm">Prueba a cambiar los filtros o buscar otras asignaturas.</p>
                 </div>
               )}
-
               <Pagination
                 total={totalPaginas}
                 actual={paginaActual}

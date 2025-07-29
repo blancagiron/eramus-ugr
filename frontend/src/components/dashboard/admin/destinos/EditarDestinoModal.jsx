@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Plus, X } from "lucide-react";
+import { Plus, X, Trash2 } from "lucide-react";
 
 export default function EditarDestinoModal({ destino, onClose }) {
   const [datos, setDatos] = useState({
@@ -100,13 +100,13 @@ export default function EditarDestinoModal({ destino, onClose }) {
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-2xl w-full max-w-5xl shadow-lg overflow-hidden max-h-[90vh] flex flex-col">
+      <div className="bg-white rounded-2xl w-full max-w-6xl shadow-lg overflow-hidden max-h-[90vh] flex flex-col">
         {/* Header */}
         <div className="bg-stone-50 px-8 py-6 border-b border-gray-200 flex items-center justify-between">
           <h2 className="text-2xl font-semibold text-gray-800" style={{ fontFamily: "Inter, sans-serif" }}>
             {destino._id ? "Editar Destino" : "Nuevo Destino"}
           </h2>
-          <button 
+          <button
             onClick={onClose}
             className="p-2 hover:bg-gray-200 rounded-full transition-colors duration-200"
           >
@@ -122,7 +122,7 @@ export default function EditarDestinoModal({ destino, onClose }) {
             </div>
           )}
 
-          <div className="space-y-6">
+          <div className="space-y-8">
             {/* Información básica */}
             <div>
               <h3 className="text-lg font-medium text-gray-800 mb-4">Información básica</h3>
@@ -209,9 +209,9 @@ export default function EditarDestinoModal({ destino, onClose }) {
               <div className="flex flex-wrap gap-6">
                 {[1, 2, 3, 4].map(num => (
                   <label key={num} className="flex items-center gap-3 cursor-pointer">
-                    <input 
-                      type="checkbox" 
-                      checked={datos.cursos.includes(num)} 
+                    <input
+                      type="checkbox"
+                      checked={datos.cursos.includes(num)}
                       onChange={() => toggleCurso(num)}
                       className="w-4 h-4 text-red-600 bg-gray-50 border-gray-300 rounded focus:ring-red-500 focus:ring-2"
                     />
@@ -281,6 +281,103 @@ export default function EditarDestinoModal({ destino, onClose }) {
                 </div>
               </div>
             </div>
+            {/* Imágenes */}
+            <div>
+              <h3 className="text-lg font-medium text-gray-800 mb-4">Imágenes del destino</h3>
+
+              {/* Imagen principal */}
+              <div className="mb-6">
+                <label className="block text-base font-medium text-gray-700 mb-2">Imagen principal</label>
+                {datos.imagenes?.principal && (
+                  <div className="relative mb-2">
+                    <img
+                      src={datos.imagenes.principal}
+                      alt="Imagen principal"
+                      className="w-full h-48 object-cover rounded-xl"
+                    />
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setDatos((prev) => ({
+                          ...prev,
+                          imagenes: { ...prev.imagenes, principal: "" },
+                        }))
+                      }
+                      className="absolute top-2 right-2 bg-red-600 text-white p-1 rounded-full hover:bg-red-700"
+                      title="Eliminar imagen principal"
+                    >
+                      <X className="w-4 h-4" />
+                    </button>
+                  </div>
+                )}
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={async (e) => {
+                    const formData = new FormData();
+                    formData.append("imagen", e.target.files[0]);
+                    const res = await fetch("http://localhost:5000/api/destinos/subir-imagen", {
+                      method: "POST",
+                      body: formData,
+                    });
+                    const data = await res.json();
+                    if (data.url) {
+                      setDatos((prev) => ({
+                        ...prev,
+                        imagenes: { ...prev.imagenes, principal: data.url },
+                      }));
+                    }
+                  }}
+                  className="w-full"
+                />
+              </div>
+
+              {/* Imágenes secundarias */}
+              <div className="mb-6">
+                <label className="block text-base font-medium text-gray-700 mb-2">Imágenes secundarias</label>
+                <div className="grid grid-cols-2 gap-4 mb-2">
+                  {(datos.imagenes?.secundarias || []).map((img, i) => (
+                    <div key={i} className="relative">
+                      <img src={img} className="w-full h-32 object-cover rounded-xl" />
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const nuevas = datos.imagenes.secundarias.filter((_, idx) => idx !== i);
+                          setDatos((prev) => ({
+                            ...prev,
+                            imagenes: { ...prev.imagenes, secundarias: nuevas },
+                          }));
+                        }}
+                        className="absolute top-1 right-1 bg-red-600 text-white p-1 rounded-full hover:bg-red-700"
+                      >
+                        <X className="w-4 h-4" />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={async (e) => {
+                    const formData = new FormData();
+                    formData.append("imagen", e.target.files[0]);
+                    const res = await fetch("http://localhost:5000/api/destinos/subir-imagen", {
+                      method: "POST",
+                      body: formData,
+                    });
+                    const data = await res.json();
+                    if (data.url) {
+                      const actuales = datos.imagenes?.secundarias || [];
+                      setDatos((prev) => ({
+                        ...prev,
+                        imagenes: { ...prev.imagenes, secundarias: [...actuales, data.url] },
+                      }));
+                    }
+                  }}
+                  className="w-full"
+                />
+              </div>
+            </div>
 
             {/* Descripciones */}
             <div>
@@ -320,8 +417,8 @@ export default function EditarDestinoModal({ destino, onClose }) {
             <div>
               <div className="flex items-center justify-between mb-4">
                 <h3 className="text-lg font-medium text-gray-800">Equivalencias (UGR - Destino)</h3>
-                <button 
-                  onClick={añadirAsignatura} 
+                <button
+                  onClick={añadirAsignatura}
                   className="flex items-center gap-2 px-4 py-2 bg-red-500 hover:bg-red-600 text-white text-sm font-medium rounded-lg transition-colors duration-200"
                 >
                   <Plus className="w-4 h-4" />
@@ -332,8 +429,8 @@ export default function EditarDestinoModal({ destino, onClose }) {
               <div className="space-y-4">
                 {datos.asignaturas.map((a, i) => (
                   <div key={i} className="bg-stone-50 p-6 rounded-lg border border-gray-200">
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-                      <div>
+                    <div className="grid grid-cols-12 gap-4 mb-4">
+                      <div className="col-span-12 md:col-span-2">
                         <label className="block text-sm font-medium text-gray-700 mb-2">Código UGR</label>
                         <input
                           value={a.codigo_ugr}
@@ -342,7 +439,7 @@ export default function EditarDestinoModal({ destino, onClose }) {
                           className="w-full px-4 py-3 bg-white border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent"
                         />
                       </div>
-                      <div>
+                      <div className="col-span-12 md:col-span-4">
                         <label className="block text-sm font-medium text-gray-700 mb-2">Nombre UGR</label>
                         <input
                           value={a.nombre_ugr}
@@ -351,7 +448,7 @@ export default function EditarDestinoModal({ destino, onClose }) {
                           className="w-full px-4 py-3 bg-white border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent"
                         />
                       </div>
-                      <div>
+                      <div className="col-span-12 md:col-span-4">
                         <label className="block text-sm font-medium text-gray-700 mb-2">Nombre en destino</label>
                         <input
                           value={a.nombre_destino}
@@ -360,34 +457,67 @@ export default function EditarDestinoModal({ destino, onClose }) {
                           className="w-full px-4 py-3 bg-white border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent"
                         />
                       </div>
-                    </div>
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                      <div>
+                      <div className="col-span-6 md:col-span-1">
                         <label className="block text-sm font-medium text-gray-700 mb-2">Créditos</label>
                         <input
                           type="number"
+                          step="0.5"
                           value={a.creditos || ""}
                           onChange={(e) => actualizarAsignatura(i, "creditos", parseFloat(e.target.value) || 0)}
-                          placeholder="Créditos"
-                          className="w-full px-4 py-3 bg-white border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                          placeholder="6"
+                          className="w-full px-3 py-3 bg-white border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent text-center"
                         />
                       </div>
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">Último año reconocimiento</label>
-                        <input
-                          value={a.ultimo_anio_reconocimiento}
-                          onChange={(e) => actualizarAsignatura(i, "ultimo_anio_reconocimiento", e.target.value)}
-                          placeholder="Ej: 23/24"
-                          className="w-full px-4 py-3 bg-white border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent"
-                        />
-                      </div>
-                      <div className="flex items-end">
-                        <button 
-                          onClick={() => eliminarAsignatura(i)} 
-                          className="w-full px-4 py-3 bg-red-100 hover:bg-red-200 text-red-700 font-medium rounded-lg transition-colors duration-200"
+                      <div className="col-span-6 md:col-span-1 flex items-end">
+                        <button
+                          onClick={() => eliminarAsignatura(i)}
+                          className="w-full px-2 py-3 bg-red-100 hover:bg-red-200 text-red-700 font-medium rounded-lg transition-colors duration-200 text-sm"
                         >
                           Eliminar
                         </button>
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-12 gap-4">
+                      <div className="col-span-6 md:col-span-1">
+                        <label className="block text-sm font-medium text-gray-700 mb-2">Semestre</label>
+                        <input
+                          value={a.semestre || ""}
+                          onChange={(e) => actualizarAsignatura(i, "semestre", e.target.value)}
+                          placeholder="1 o 2"
+                          className="w-full px-3 py-3 bg-white border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent text-center"
+                        />
+                      </div>
+                      <div className="col-span-6 md:col-span-1">
+                        <label className="block text-sm font-medium text-gray-700 mb-2">Curso</label>
+                        <input
+                          value={a.curso || ""}
+                          onChange={(e) => actualizarAsignatura(i, "curso", e.target.value)}
+                          placeholder="Ej: 3º"
+                          className="w-full px-3 py-3 bg-white border border-gray-200 rounded-lg text-center"
+                        />
+                      </div>
+                      <div className="col-span-12 md:col-span-4">
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                          Último año de reconocimiento
+                        </label>
+                        <input
+                          type="text"
+                          value={a.ultimo_anio_reconocimiento || ""}
+                          onChange={(e) => actualizarAsignatura(i, "ultimo_anio_reconocimiento", e.target.value)}
+                          placeholder="Ej: 24/25"
+                          className="w-full px-4 py-3 bg-white border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                        />
+                      </div>
+
+                      <div className="col-span-12 md:col-span-11">
+                        <label className="block text-sm font-medium text-gray-700 mb-2">Guía docente (URL)</label>
+                        <input
+                          value={a.guia || ""}
+                          onChange={(e) => actualizarAsignatura(i, "guia", e.target.value)}
+                          placeholder="https://..."
+                          className="w-full px-4 py-3 bg-white border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                        />
                       </div>
                     </div>
                   </div>
@@ -404,14 +534,14 @@ export default function EditarDestinoModal({ destino, onClose }) {
 
         {/* Footer */}
         <div className="bg-stone-50 px-8 py-6 border-t border-gray-200 flex justify-end gap-4">
-          <button 
-            onClick={onClose} 
+          <button
+            onClick={onClose}
             className="px-6 py-3 bg-gray-200 hover:bg-gray-300 text-gray-700 font-medium rounded-lg transition-colors duration-200"
           >
             Cancelar
           </button>
-          <button 
-            onClick={guardar} 
+          <button
+            onClick={guardar}
             className="px-6 py-3 bg-red-500 hover:bg-red-700 text-white font-medium rounded-lg transition-colors duration-200"
           >
             Guardar destino

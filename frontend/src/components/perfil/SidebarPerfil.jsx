@@ -34,6 +34,7 @@ export default function SidebarPerfil({
       : null;
 
   const estados = {
+    "no iniciado": { texto: "No iniciado", estilo: "bg-gray-200 text-gray-700" },
     "sin destino": { texto: "Sin destino", estilo: "bg-gray-100 text-gray-600" },
     "destino_asignado": { texto: "Destino asignado", estilo: "bg-blue-100 text-blue-700" },
     "en revision": { texto: "En revisión", estilo: "bg-yellow-100 text-yellow-700" },

@@ -17,6 +17,7 @@ import GestionDestinos from "./components/dashboard/admin/destinos/GestionDestin
 import GestionCentros from "./components/dashboard/admin/centros/GestionCentros";
 import GestionGrados from "./components/dashboard/admin/grados/GestionGrados";
 import GestionAsignaturas from "./components/dashboard/admin/asignaturas/GestionAsignaturas";
+import TestAsignaturas from "./components/destinos/TestAsignaturas";
 function App() {
   return (
     <div className="min-h-screen w-full text-black">
@@ -36,6 +37,7 @@ function App() {
         <Route path="/admin/centros" element={<GestionCentros />} />
         <Route path="/admin/grados" element={<GestionGrados />} />
         <Route path="/admin/asignaturas" element={<GestionAsignaturas />} />
+        <Route path="/test-asignaturas" element={<TestAsignaturas />} />
       
 
         {/* Rutas privadas */}

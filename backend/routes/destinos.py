@@ -2,6 +2,8 @@ from flask import Blueprint, request, jsonify
 from db import db
 from models.destino import crear_destino
 from bson.objectid import ObjectId
+from routes.cloudinary_utils import subir_imagen
+
 
 destinos = Blueprint("destinos", __name__)
 coleccion = db["destinos"]
@@ -41,7 +43,7 @@ def editar_destino(id):
         "plazas", "meses", "web", "lat", "lng",
         "descripcion_uni", "descripcion_ciudad", "observaciones",
         "asignaturas", "tutor_asignado", "ultimo_anio_reconocimiento",
-        "nota_minima", "cursos"
+        "nota_minima", "cursos", "imagenes"
     ]
 
     for campo in campos_simples:
@@ -61,3 +63,12 @@ def editar_destino(id):
 def eliminar_destino(id):
     coleccion.delete_one({ "_id": ObjectId(id) })
     return jsonify({ "message": "Destino eliminado" })
+
+@destinos.route("/api/destinos/subir-imagen", methods=["POST"])
+def subir_imagen_destino():
+    if "imagen" not in request.files:
+        return jsonify({"error": "No se ha enviado ninguna imagen"}), 400
+
+    imagen = request.files["imagen"]
+    url = subir_imagen(imagen)
+    return jsonify({"url": url})

@@ -19,5 +19,9 @@ def crear_destino(data):
         "tutor_asignado": data.get("tutor_asignado", None),
         "nota_minima": data.get("nota_minima", None),
         "observaciones": data.get("observaciones", ""),
-        "cursos": data.get("cursos", [])
+        "cursos": data.get("cursos", []),
+         "imagenes": data.get("imagenes", {
+            "principal": "",
+            "secundarias": []
+        })
     }

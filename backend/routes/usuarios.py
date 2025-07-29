@@ -43,8 +43,12 @@ def login_usuario():
         "mensaje": "Inicio de sesión exitoso",
         "email": usuario["email"],
         "rol": usuario["rol"],
-        "nombre": usuario["nombre"]
+        "nombre": usuario["nombre"],
+        "codigo_grado": usuario.get("codigo_grado", ""),
+        "asignaturas_superadas": usuario.get("asignaturas_superadas", []),
+        "grado": usuario.get("grado", "")
     }), 200
+
 
 @usuarios.route("/usuarios/<email>", methods=["GET"])
 def obtener_usuario(email):
@@ -62,7 +66,7 @@ def actualizar_usuario(email):
     campos_permitidos = {
         "nombre", "apellidos", "rol", "codigo_centro", "grado", "codigo_grado",
         "asignaturas_superadas", "creditos_superados", "idiomas", "destinos_asignados",
-        "estado_proceso", "destino_confirmado"
+        "estado_proceso", "destino_confirmado", "destinos_favoritos"
     }
 
     update_data = {k: v for k, v in data.items() if k in campos_permitidos}
