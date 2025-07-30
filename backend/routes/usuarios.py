@@ -49,7 +49,6 @@ def login_usuario():
         "grado": usuario.get("grado", "")
     }), 200
 
-
 @usuarios.route("/usuarios/<email>", methods=["GET"])
 def obtener_usuario(email):
     user = db.usuarios.find_one({"email": email}, {"_id": 0})
@@ -74,18 +73,58 @@ def actualizar_usuario(email):
     if not update_data:
         return jsonify({"error": "No hay campos válidos para actualizar"}), 400
 
-    # Reglas especiales para estudiantes
+    # Estudiantes
     if update_data.get("rol") == "estudiante":
         asignados = update_data.get("destinos_asignados", [])
         if isinstance(asignados, list) and len(asignados) > 1:
             update_data["destinos_asignados"] = [asignados[0]]
         if "destinos_asignados" in update_data:
             if update_data["destinos_asignados"]:
-                update_data["destino_confirmado"] = update_data["destinos_asignados"][0]
+                destino_asignado = update_data["destinos_asignados"][0]
+                codigo_destino = destino_asignado["codigo"]
+
+                destino = db.destinos.find_one({"codigo": codigo_destino})
+                if not destino:
+                    return jsonify({"error": f"Destino {codigo_destino} no encontrado"}), 404
+
+                total_asignados = db.usuarios.count_documents({
+                    "rol": "estudiante",
+                    "destinos_asignados.codigo": codigo_destino
+                })
+
+                if total_asignados >= destino.get("plazas", 0):
+                    return jsonify({"error": f"No quedan plazas disponibles para {codigo_destino}"}), 400
+
+                update_data["destino_confirmado"] = destino_asignado
                 update_data["estado_proceso"] = "con destino"
             else:
                 update_data["destino_confirmado"] = None
                 update_data["estado_proceso"] = "sin destino"
+
+    # Tutores
+    elif update_data.get("rol") == "tutor":
+        usuario_existente = db.usuarios.find_one({"email": email})
+        anteriores = {d["codigo"] for d in usuario_existente.get("destinos_asignados", [])}
+        nuevos = {d["codigo"] for d in update_data.get("destinos_asignados", [])}
+
+        quitados = anteriores - nuevos
+        añadidos = nuevos - anteriores
+
+        for cod in quitados:
+            db.destinos.update_one({"codigo": cod}, {"$unset": {"tutor_asignado": ""}})
+
+        for cod in añadidos:
+            destino = db.destinos.find_one({"codigo": cod})
+            if not destino:
+                return jsonify({"error": f"Destino {cod} no encontrado"}), 404
+            if destino.get("codigo_centro_ugr") != usuario_existente.get("codigo_centro"):
+                return jsonify({"error": f"El destino {cod} no pertenece al centro del tutor"}), 400
+            db.destinos.update_one({"codigo": cod}, {"$set": {"tutor_asignado": email}})
+
+        # También procesar los eliminados que vienen explícitamente desde frontend
+        eliminados = data.get("eliminados", [])
+        for cod in eliminados:
+            db.destinos.update_one({"codigo": cod}, {"$unset": {"tutor_asignado": ""}})
 
     resultado = db.usuarios.update_one({"email": email}, {"$set": update_data})
 
@@ -96,7 +135,7 @@ def actualizar_usuario(email):
 
 @usuarios.route("/usuarios", methods=["GET"])
 def listar_usuarios():
-    docs = list(db.usuarios.find({}, {"_id": 0})) 
+    docs = list(db.usuarios.find({}, {"_id": 0}))
     return jsonify(docs)
 
 @usuarios.route('/usuarios/foto', methods=['POST'])

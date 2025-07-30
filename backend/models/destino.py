@@ -20,8 +20,10 @@ def crear_destino(data):
         "nota_minima": data.get("nota_minima", None),
         "observaciones": data.get("observaciones", ""),
         "cursos": data.get("cursos", []),
-         "imagenes": data.get("imagenes", {
+        "imagenes": data.get("imagenes", {
             "principal": "",
             "secundarias": []
-        })
+        }),
+        "codigo_centro_ugr": data.get("codigo_centro_ugr", ""),  
+        "codigo_grado_ugr": data.get("codigo_grado_ugr", [])  
     }

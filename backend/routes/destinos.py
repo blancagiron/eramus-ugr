@@ -10,7 +10,16 @@ coleccion = db["destinos"]
 
 @destinos.route("/api/destinos", methods=["GET"])
 def listar_destinos():
-    docs = list(coleccion.find())
+    centro = request.args.get("codigo_centro")
+    grado = request.args.get("codigo_grado")
+    filtro = {}
+
+    if centro:
+        filtro["codigo_centro_ugr"] = centro
+    if grado:
+        filtro["codigo_grado_ugr"] = grado  
+
+    docs = list(db.destinos.find(filtro))
     for d in docs:
         d["_id"] = str(d["_id"])
     return jsonify(docs)
@@ -18,7 +27,7 @@ def listar_destinos():
 @destinos.route("/api/destinos", methods=["POST"])
 def crear_nuevo_destino():
     data = request.json
-    obligatorios = ["codigo", "nombre_uni", "pais", "requisitos_idioma", "plazas", "meses"]
+    obligatorios = ["codigo", "nombre_uni", "pais", "requisitos_idioma", "plazas", "meses", "codigo_centro_ugr", "codigo_grado_ugr"]
     for campo in obligatorios:
         if campo not in data:
             return jsonify({ "error": f"Falta el campo obligatorio '{campo}'" }), 400
@@ -43,7 +52,7 @@ def editar_destino(id):
         "plazas", "meses", "web", "lat", "lng",
         "descripcion_uni", "descripcion_ciudad", "observaciones",
         "asignaturas", "tutor_asignado", "ultimo_anio_reconocimiento",
-        "nota_minima", "cursos", "imagenes"
+        "nota_minima", "cursos", "imagenes", "codigo_centro_ugr", "codigo_grado_ugr"
     ]
 
     for campo in campos_simples:
@@ -72,3 +81,12 @@ def subir_imagen_destino():
     imagen = request.files["imagen"]
     url = subir_imagen(imagen)
     return jsonify({"url": url})
+
+@destinos.route("/api/destinos/codigo/<codigo>", methods=["GET"])
+def obtener_destino_por_codigo(codigo):
+    destino = db.destinos.find_one({ "codigo": codigo })
+    if not destino:
+        return jsonify({ "error": "Destino no encontrado" }), 404
+
+    destino["_id"] = str(destino["_id"])
+    return jsonify(destino)
