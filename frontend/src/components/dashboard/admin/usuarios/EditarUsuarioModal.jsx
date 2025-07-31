@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { X } from "lucide-react";
+import { X, Search, Plus, Trash2, MapPin, Building, User, Mail, GraduationCap, Shield } from "lucide-react";
 
 export default function EditarUsuarioModal({ usuario: inicial, onClose, esNuevo = false }) {
   const [usuario, setUsuario] = useState(esNuevo ? { rol: "admin" } : inicial || {});
@@ -7,6 +7,8 @@ export default function EditarUsuarioModal({ usuario: inicial, onClose, esNuevo 
   const [todosLosDestinos, setTodosLosDestinos] = useState([]);
   const [busquedaDestino, setBusquedaDestino] = useState("");
   const [mensaje, setMensaje] = useState("");
+  const [asignadosPrevios, setAsignadosPrevios] = useState([]);
+  const [mostrarListaDestinos, setMostrarListaDestinos] = useState(false);
 
   useEffect(() => {
     if (mensaje) {
@@ -26,7 +28,21 @@ export default function EditarUsuarioModal({ usuario: inicial, onClose, esNuevo 
 
     fetch("http://localhost:5000/api/destinos")
       .then((res) => res.json())
-      .then(setTodosLosDestinos)
+      .then((datos) => {
+        const destinosConPlazas = datos.map((destino) => {
+          const total = destino.plazas || 0;
+          const ocupados = destino.estudiantes_asignados || 0;
+          return {
+            ...destino,
+            plazas_disponibles: total - ocupados
+          };
+        });
+        setTodosLosDestinos(destinosConPlazas);
+
+        if (usuario.rol === "tutor") {
+          setAsignadosPrevios((usuario.destinos_asignados || []).map((d) => d.codigo));
+        }
+      })
       .catch((error) => {
         console.error("Error al cargar destinos:", error);
         setMensaje("Error al cargar los destinos");
@@ -35,6 +51,16 @@ export default function EditarUsuarioModal({ usuario: inicial, onClose, esNuevo 
 
   const destinosFiltrados = todosLosDestinos.filter((d) =>
     `${d.nombre_uni} ${d.codigo}`.toLowerCase().includes(busquedaDestino.toLowerCase())
+  );
+
+  const destinosDisponibles = todosLosDestinos.filter((d) =>
+    (!d.tutor_asignado || d.tutor_asignado === usuario.email) &&
+    d.codigo_centro_ugr === usuario.codigo_centro
+  );
+
+  const destinosDisponiblesFiltrados = destinosDisponibles.filter((d) =>
+    `${d.nombre_uni} ${d.codigo}`.toLowerCase().includes(busquedaDestino.toLowerCase()) &&
+    !(usuario.destinos_asignados || []).some(asignado => asignado.codigo === d.codigo)
   );
 
   const handleGradoChange = (e) => {
@@ -48,6 +74,38 @@ export default function EditarUsuarioModal({ usuario: inicial, onClose, esNuevo 
         codigo_centro: gradoSeleccionado.codigo_centro,
       }));
     }
+  };
+
+  const agregarDestino = (destino) => {
+    const nuevoDestino = { codigo: destino.codigo, nombre_uni: destino.nombre_uni };
+
+    if (usuario.rol === "estudiante") {
+      setUsuario((prev) => ({
+        ...prev,
+        destinos_asignados: [nuevoDestino],
+        destino_confirmado: nuevoDestino,
+        estado_proceso: "con destino",
+      }));
+    } else {
+      setUsuario((prev) => ({
+        ...prev,
+        destinos_asignados: [...(prev.destinos_asignados || []), nuevoDestino]
+      }));
+    }
+
+    setBusquedaDestino("");
+    setMostrarListaDestinos(false);
+  };
+
+  const eliminarDestino = (codigo) => {
+    setUsuario((prev) => ({
+      ...prev,
+      destinos_asignados: (prev.destinos_asignados || []).filter((d) => d.codigo !== codigo),
+      ...(prev.rol === "estudiante" && {
+        destino_confirmado: null,
+        estado_proceso: "sin destino",
+      }),
+    }));
   };
 
   const handleGuardar = async () => {
@@ -75,9 +133,12 @@ export default function EditarUsuarioModal({ usuario: inicial, onClose, esNuevo 
           payload.destino_confirmado = null;
           payload.destinos_asignados = [];
         }
-      } else if (usuario.rol === "tutor") {
-        delete payload.destino_confirmado;
-        delete payload.estado_proceso;
+      }
+
+      if (usuario.rol === "tutor") {
+        const actuales = usuario.destinos_asignados?.map((d) => d.codigo) || [];
+        const eliminados = asignadosPrevios.filter((codigo) => !actuales.includes(codigo));
+        payload.eliminados = eliminados;
       }
 
       const res = await fetch(url, {
@@ -99,24 +160,15 @@ export default function EditarUsuarioModal({ usuario: inicial, onClose, esNuevo 
     }
   };
 
-  const eliminarDestino = () => {
-    setUsuario((prev) => ({
-      ...prev,
-      destinos_asignados: [],
-      destino_confirmado: null,
-      estado_proceso: "sin destino"
-    }));
-  };
-
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-2xl w-full max-w-2xl shadow-lg overflow-hidden max-h-[90vh] flex flex-col">
+      <div className="bg-white rounded-2xl w-full max-w-4xl shadow-lg overflow-hidden max-h-[90vh] flex flex-col">
         {/* Header */}
         <div className="bg-stone-50 px-8 py-6 border-b border-gray-200 flex items-center justify-between">
           <h2 className="text-2xl font-semibold text-gray-800" style={{ fontFamily: "Inter, sans-serif" }}>
             {esNuevo ? "Nuevo Administrador" : "Editar Usuario"}
           </h2>
-          <button 
+          <button
             onClick={onClose}
             className="p-2 hover:bg-gray-200 rounded-full transition-colors duration-200"
           >
@@ -133,70 +185,60 @@ export default function EditarUsuarioModal({ usuario: inicial, onClose, esNuevo 
           )}
 
           <div className="space-y-6">
-            {/* Datos de acceso (solo para nuevos usuarios) */}
-            {esNuevo && (
-              <div>
-                <h3 className="text-lg font-medium text-gray-800 mb-4">Datos de acceso</h3>
-                <div className="grid grid-cols-1 gap-6">
+            {/* Información básica del usuario */}
+            <div>
+              <h3 className="text-lg font-medium text-gray-800 mb-4 flex items-center">
+                <User className="w-5 h-5 mr-2" />
+                Información del usuario
+              </h3>
+
+              {esNuevo && (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                   <div>
                     <label className="block text-base font-medium text-gray-700 mb-2">Email</label>
                     <input
                       type="email"
+                      placeholder="Email del usuario"
                       value={usuario.email || ""}
                       onChange={(e) => setUsuario({ ...usuario, email: e.target.value })}
-                      placeholder="usuario@ejemplo.com"
                       className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent"
-                      required
                     />
                   </div>
                   <div>
                     <label className="block text-base font-medium text-gray-700 mb-2">Contraseña temporal</label>
                     <input
                       type="password"
+                      placeholder="Contraseña temporal"
                       value={usuario.contraseña || ""}
                       onChange={(e) => setUsuario({ ...usuario, contraseña: e.target.value })}
-                      placeholder="Contraseña temporal"
                       className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent"
-                      required
                     />
                   </div>
                 </div>
-              </div>
-            )}
+              )}
 
-            {/* Información personal */}
-            <div>
-              <h3 className="text-lg font-medium text-gray-800 mb-4">Información personal</h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                   <label className="block text-base font-medium text-gray-700 mb-2">Nombre</label>
                   <input
+                    placeholder="Nombre del usuario"
                     value={usuario.nombre || ""}
                     onChange={(e) => setUsuario({ ...usuario, nombre: e.target.value })}
-                    placeholder="Nombre del usuario"
                     className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent"
-                    required
                   />
                 </div>
                 <div>
                   <label className="block text-base font-medium text-gray-700 mb-2">Apellidos</label>
                   <input
+                    placeholder="Apellidos del usuario"
                     value={usuario.apellidos || ""}
                     onChange={(e) => setUsuario({ ...usuario, apellidos: e.target.value })}
-                    placeholder="Apellidos del usuario"
                     className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent"
-                    required
                   />
                 </div>
-              </div>
-            </div>
 
-            {/* Rol y centro */}
-            <div>
-              <h3 className="text-lg font-medium text-gray-800 mb-4">Rol y asignación</h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {!esNuevo && (
-                  <div className="md:col-span-2">
+                  <div>
                     <label className="block text-base font-medium text-gray-700 mb-2">Rol</label>
                     <select
                       value={usuario.rol}
@@ -209,18 +251,29 @@ export default function EditarUsuarioModal({ usuario: inicial, onClose, esNuevo 
                     </select>
                   </div>
                 )}
-                <div className={usuario.rol === "estudiante" ? "md:col-span-2" : ""}>
+
+                <div>
                   <label className="block text-base font-medium text-gray-700 mb-2">Código del centro</label>
                   <input
+                    placeholder="Código del centro"
                     value={usuario.codigo_centro || ""}
                     onChange={(e) => setUsuario({ ...usuario, codigo_centro: e.target.value })}
-                    placeholder="Código del centro"
-                    className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent"
                     disabled={usuario.rol === "estudiante"}
+                    className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent disabled:opacity-50"
                   />
                 </div>
-                {usuario.rol === "estudiante" && (
-                  <div className="md:col-span-2">
+              </div>
+            </div>
+
+            {/* Sección específica para estudiantes */}
+            {usuario.rol === "estudiante" && (
+              <div>
+                <h3 className="text-lg font-medium text-gray-800 mb-4 flex items-center">
+                  <GraduationCap className="w-5 h-5 mr-2" />
+                  Información académica
+                </h3>
+                <div className="space-y-6">
+                  <div>
                     <label className="block text-base font-medium text-gray-700 mb-2">Grado</label>
                     <select
                       value={usuario.codigo_grado || ""}
@@ -235,124 +288,182 @@ export default function EditarUsuarioModal({ usuario: inicial, onClose, esNuevo 
                       ))}
                     </select>
                   </div>
-                )}
-              </div>
-            </div>
-
-            {/* Información específica para estudiantes */}
-            {usuario.rol === "estudiante" && (
-              <div>
-                <h3 className="text-lg font-medium text-gray-800 mb-4">Estado y destino</h3>
-                <div className="space-y-6">
-                  <div>
-                    <label className="block text-base font-medium text-gray-700 mb-2">Estado del proceso</label>
-                    <select
-                      value={usuario.estado_proceso || ""}
-                      onChange={(e) => setUsuario({ ...usuario, estado_proceso: e.target.value })}
-                      className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent"
-                    >
-                      <option value="sin destino">Sin destino</option>
-                      <option value="con destino">Con destino</option>
-                      <option value="renunciado">Ha renunciado</option>
-                    </select>
-                  </div>
 
                   <div>
                     <label className="block text-base font-medium text-gray-700 mb-2">Destino asignado</label>
-                    <div className="space-y-3">
+                    <div className="relative">
+                      <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                        <Search className="h-5 w-5 text-gray-400" />
+                      </div>
                       <input
                         type="text"
                         placeholder="Buscar universidad..."
                         value={busquedaDestino}
-                        onChange={(e) => setBusquedaDestino(e.target.value)}
-                        className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent"
-                      />
-                      <select
-                        value={usuario.destinos_asignados?.[0]?.codigo || ""}
                         onChange={(e) => {
-                          const d = todosLosDestinos.find((dest) => dest.codigo === e.target.value);
-                          if (d) {
-                            const nuevo = { codigo: d.codigo, nombre_uni: d.nombre_uni };
-                            setUsuario((prev) => ({
-                              ...prev,
-                              destinos_asignados: [nuevo],
-                              destino_confirmado: nuevo,
-                              estado_proceso: "con destino",
-                            }));
-                          }
+                          setBusquedaDestino(e.target.value);
+                          setMostrarListaDestinos(e.target.value.length > 0);
                         }}
-                        className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent"
-                      >
-                        <option value="">Selecciona un destino</option>
-                        {destinosFiltrados.map((d) => (
-                          <option key={d.codigo} value={d.codigo}>
-                            {d.nombre_uni} ({d.codigo})
-                          </option>
-                        ))}
-                      </select>
-
-                      {usuario.destinos_asignados?.length > 0 && (
-                        <button
-                          onClick={eliminarDestino}
-                          className="px-4 py-2 bg-red-100 hover:bg-red-200 text-red-700 font-medium rounded-lg transition-colors duration-200"
-                        >
-                          Eliminar destino asignado
-                        </button>
-                      )}
+                        onFocus={() => setMostrarListaDestinos(busquedaDestino.length > 0)}
+                        className="w-full pl-12 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                      />
                     </div>
+
+                    {/* Lista desplegable de destinos para estudiantes */}
+                    {mostrarListaDestinos && destinosFiltrados.length > 0 && (
+                      <div className="mt-2 bg-white border border-gray-200 rounded-lg shadow-lg max-h-48 overflow-y-auto">
+                        {destinosFiltrados.slice(0, 10).map((destino) => {
+                          const sinPlazas = (destino.plazas_disponibles ?? destino.plazas ?? 0) - (destino.estudiantes_asignados ?? 0) <= 0;
+                          const isAsignado = usuario.destinos_asignados?.some((d) => d.codigo === destino.codigo);
+                          const plazasDisponibles = (destino.plazas ?? 0) - (destino.estudiantes_asignados ?? 0);
+
+                          return (
+                            <button
+                              key={destino.codigo}
+                              onClick={() => !sinPlazas && agregarDestino(destino)}
+                              className={`w-full text-left px-4 py-3 border-b border-gray-100 last:border-b-0 transition-colors flex items-center justify-between group ${sinPlazas && !isAsignado ? "opacity-50 cursor-not-allowed" : "hover:bg-red-50"
+                                }`}
+                              disabled={sinPlazas && !isAsignado}
+                              title={sinPlazas && !isAsignado ? "No hay plazas disponibles" : ""}
+                            >
+                              <div>
+                                <div className="font-medium text-gray-900">{destino.nombre_uni}</div>
+                                <div className="text-sm text-gray-500 flex items-center mt-1">
+                                  <Building className="w-3 h-3 mr-1" />
+                                  {destino.codigo} — Plazas: {plazasDisponibles}/{destino.plazas}
+                                </div>
+                              </div>
+                              {!sinPlazas && (
+                                <Plus className="w-5 h-5 text-red-600 opacity-0 group-hover:opacity-100 transition-opacity" />
+                              )}
+                            </button>
+                          );
+                        })}
+                      </div>
+                    )}
+
+                    {/* Destino asignado actual */}
+                    {usuario.destinos_asignados?.length > 0 && (
+                      <div className="mt-4">
+                        <div className="bg-red-50 p-4 rounded-lg border border-red-200">
+                          <div className="flex items-center justify-between">
+                            <div className="flex-1">
+                              <h4 className="font-semibold text-gray-900 text-sm">
+                                {usuario.destinos_asignados[0].nombre_uni}
+                              </h4>
+                              <div className="flex items-center text-xs text-gray-500 mt-1">
+                                <Building className="w-3 h-3 mr-1" />
+                                Código: {usuario.destinos_asignados[0].codigo}
+                              </div>
+                            </div>
+                            <button
+                              onClick={() => eliminarDestino(usuario.destinos_asignados[0].codigo)}
+                              className="ml-4 p-2 text-red-500 hover:bg-red-100 rounded-lg transition-colors group"
+                              title="Quitar destino"
+                            >
+                              <Trash2 className="w-4 h-4 group-hover:scale-110 transition-transform" />
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>
             )}
 
-            {/* Información específica para tutores */}
+            {/* Sección específica para tutores */}
             {usuario.rol === "tutor" && (
               <div>
-                <h3 className="text-lg font-medium text-gray-800 mb-4">Destinos asignados</h3>
-                <div className="space-y-3">
-                  <div>
-                    <label className="block text-base font-medium text-gray-700 mb-2">Buscar destinos</label>
+                <h3 className="text-lg font-medium text-gray-800 mb-4 flex items-center">
+                  <MapPin className="w-5 h-5 mr-2" />
+                  Gestión de destinos
+                </h3>
+
+                {/* Buscador de destinos */}
+                <div className="mb-6">
+                  <label className="block text-base font-medium text-gray-700 mb-2">
+                    Buscar y agregar destinos
+                  </label>
+                  <div className="relative">
+                    <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                      <Search className="h-5 w-5 text-gray-400" />
+                    </div>
                     <input
                       type="text"
-                      placeholder="Buscar destinos..."
+                      placeholder="Buscar destinos por nombre o código..."
                       value={busquedaDestino}
-                      onChange={(e) => setBusquedaDestino(e.target.value)}
-                      className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                      onChange={(e) => {
+                        setBusquedaDestino(e.target.value);
+                        setMostrarListaDestinos(e.target.value.length > 0);
+                      }}
+                      onFocus={() => setMostrarListaDestinos(busquedaDestino.length > 0)}
+                      className="w-full pl-12 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent"
                     />
                   </div>
-                  <div>
-                    <label className="block text-base font-medium text-gray-700 mb-2">Destinos (mantén Ctrl presionado para seleccionar múltiples)</label>
-                    <select
-                      multiple
-                      value={(usuario.destinos_asignados || []).map((d) => d.codigo)}
-                      onChange={(e) => {
-                        const selected = Array.from(e.target.selectedOptions)
-                          .map((opt) => {
-                            const d = todosLosDestinos.find((d) => d.codigo === opt.value);
-                            return d ? { codigo: d.codigo, nombre_uni: d.nombre_uni } : null;
-                          })
-                          .filter(Boolean);
-                        setUsuario({ ...usuario, destinos_asignados: selected });
-                      }}
-                      className="w-full h-40 px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent"
-                    >
-                      {destinosFiltrados.map((d) => (
-                        <option key={d.codigo} value={d.codigo}>
-                          {d.nombre_uni} ({d.codigo})
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                  {usuario.destinos_asignados?.length > 0 && (
-                    <div className="bg-stone-50 p-4 rounded-lg border border-gray-200">
-                      <p className="text-sm font-medium text-gray-700 mb-2">Destinos seleccionados:</p>
-                      <div className="space-y-1">
-                        {usuario.destinos_asignados.map((destino, index) => (
-                          <div key={index} className="text-sm text-gray-600">
-                            • {destino.nombre_uni} ({destino.codigo})
+
+                  {/* Lista desplegable de destinos disponibles */}
+                  {mostrarListaDestinos && destinosDisponiblesFiltrados.length > 0 && (
+                    <div className="mt-2 bg-white border border-gray-200 rounded-lg shadow-lg max-h-48 overflow-y-auto">
+                      {destinosDisponiblesFiltrados.slice(0, 10).map((destino) => (
+                        <button
+                          key={destino.codigo}
+                          onClick={() => agregarDestino(destino)}
+                          className="w-full text-left px-4 py-3 hover:bg-red-50 border-b border-gray-100 last:border-b-0 transition-colors flex items-center justify-between group"
+                        >
+                          <div>
+                            <div className="font-medium text-gray-900">{destino.nombre_uni}</div>
+                            <div className="text-sm text-gray-500 flex items-center mt-1">
+                              <Building className="w-3 h-3 mr-1" />
+                              {destino.codigo}
+                            </div>
                           </div>
-                        ))}
-                      </div>
+                          <Plus className="w-5 h-5 text-red-600 opacity-0 group-hover:opacity-100 transition-opacity" />
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                {/* Destinos asignados */}
+                <div>
+                  <label className="block text-base font-medium text-gray-700 mb-2">
+                    Destinos asignados ({usuario.destinos_asignados?.length || 0})
+                  </label>
+
+                  {usuario.destinos_asignados?.length > 0 ? (
+                    <div className="grid gap-3">
+                      {usuario.destinos_asignados.map((destino) => (
+                        <div
+                          key={destino.codigo}
+                          className="bg-gray-50 p-4 rounded-lg border border-gray-200 hover:border-gray-300 transition-colors"
+                        >
+                          <div className="flex items-center justify-between">
+                            <div className="flex-1">
+                              <h4 className="font-semibold text-gray-900 text-sm">
+                                {destino.nombre_uni}
+                              </h4>
+                              <div className="flex items-center text-xs text-gray-500 mt-1">
+                                <Building className="w-3 h-3 mr-1" />
+                                Código: {destino.codigo}
+                              </div>
+                            </div>
+                            <button
+                              onClick={() => eliminarDestino(destino.codigo)}
+                              className="ml-4 p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors group"
+                              title="Quitar destino"
+                            >
+                              <Trash2 className="w-4 h-4 group-hover:scale-110 transition-transform" />
+                            </button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="bg-gray-50 p-8 rounded-lg border-2 border-dashed border-gray-300 text-center">
+                      <MapPin className="w-12 h-12 text-gray-400 mx-auto mb-3" />
+                      <p className="text-gray-500 text-sm">
+                        No hay destinos asignados. Utiliza el buscador para agregar destinos.
+                      </p>
                     </div>
                   )}
                 </div>
@@ -363,14 +474,14 @@ export default function EditarUsuarioModal({ usuario: inicial, onClose, esNuevo 
 
         {/* Footer */}
         <div className="bg-stone-50 px-8 py-6 border-t border-gray-200 flex justify-end gap-4">
-          <button 
-            onClick={onClose} 
+          <button
+            onClick={onClose}
             className="px-6 py-3 bg-gray-200 hover:bg-gray-300 text-gray-700 font-medium rounded-lg transition-colors duration-200"
           >
             Cancelar
           </button>
-          <button 
-            onClick={handleGuardar} 
+          <button
+            onClick={handleGuardar}
             className="px-6 py-3 bg-red-500 hover:bg-red-700 text-white font-medium rounded-lg transition-colors duration-200"
           >
             Guardar usuario

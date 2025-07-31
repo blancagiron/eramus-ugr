@@ -15,7 +15,9 @@ export default function EditarDestinoModal({ destino, onClose }) {
     nota_minima: destino.nota_minima || "",
     web: destino.web || "",
     lat: destino.lat || "",
-    lng: destino.lng || ""
+    lng: destino.lng || "",
+    codigo_grado_ugr: destino.codigo_grado_ugr || "",
+    codigo_centro_ugr: destino.codigo_centro_ugr || ""
   });
 
   const [mensaje, setMensaje] = useState("");
@@ -200,6 +202,25 @@ export default function EditarDestinoModal({ destino, onClose }) {
                     className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent"
                   />
                 </div>
+                <div>
+                  <label className="block text-base font-medium text-gray-700 mb-2">Código del centro UGR</label>
+                  <input
+                    value={datos.codigo_centro_ugr}
+                    onChange={(e) => setDatos({ ...datos, codigo_centro_ugr: e.target.value })}
+                    placeholder="Ej: 015"
+                    className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-base font-medium text-gray-700 mb-2">Código del grado UGR</label>
+                  <input
+                    value={datos.codigo_grado_ugr}
+                    onChange={(e) => setDatos({ ...datos, codigo_grado_ugr: e.target.value })}
+                    placeholder="Ej: 296"
+                    className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                  />
+                </div>
               </div>
             </div>
 
@@ -282,100 +303,166 @@ export default function EditarDestinoModal({ destino, onClose }) {
               </div>
             </div>
             {/* Imágenes */}
+            {/* Imágenes */}
             <div>
-              <h3 className="text-lg font-medium text-gray-800 mb-4">Imágenes del destino</h3>
+              <h3 className="text-lg font-medium text-gray-800 mb-6">Imágenes del destino</h3>
 
-              {/* Imagen principal */}
-              <div className="mb-6">
-                <label className="block text-base font-medium text-gray-700 mb-2">Imagen principal</label>
-                {datos.imagenes?.principal && (
-                  <div className="relative mb-2">
-                    <img
-                      src={datos.imagenes.principal}
-                      alt="Imagen principal"
-                      className="w-full h-48 object-cover rounded-xl"
-                    />
-                    <button
-                      type="button"
-                      onClick={() =>
-                        setDatos((prev) => ({
-                          ...prev,
-                          imagenes: { ...prev.imagenes, principal: "" },
-                        }))
-                      }
-                      className="absolute top-2 right-2 bg-red-600 text-white p-1 rounded-full hover:bg-red-700"
-                      title="Eliminar imagen principal"
-                    >
-                      <X className="w-4 h-4" />
-                    </button>
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                {/* Imagen principal */}
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <label className="block text-base font-medium text-gray-700">Imagen principal</label>
+                    <span className="text-sm text-gray-500">Recomendado: 1200x800px</span>
                   </div>
-                )}
-                <input
-                  type="file"
-                  accept="image/*"
-                  onChange={async (e) => {
-                    const formData = new FormData();
-                    formData.append("imagen", e.target.files[0]);
-                    const res = await fetch("http://localhost:5000/api/destinos/subir-imagen", {
-                      method: "POST",
-                      body: formData,
-                    });
-                    const data = await res.json();
-                    if (data.url) {
-                      setDatos((prev) => ({
-                        ...prev,
-                        imagenes: { ...prev.imagenes, principal: data.url },
-                      }));
-                    }
-                  }}
-                  className="w-full"
-                />
-              </div>
 
-              {/* Imágenes secundarias */}
-              <div className="mb-6">
-                <label className="block text-base font-medium text-gray-700 mb-2">Imágenes secundarias</label>
-                <div className="grid grid-cols-2 gap-4 mb-2">
-                  {(datos.imagenes?.secundarias || []).map((img, i) => (
-                    <div key={i} className="relative">
-                      <img src={img} className="w-full h-32 object-cover rounded-xl" />
-                      <button
-                        type="button"
-                        onClick={() => {
-                          const nuevas = datos.imagenes.secundarias.filter((_, idx) => idx !== i);
-                          setDatos((prev) => ({
-                            ...prev,
-                            imagenes: { ...prev.imagenes, secundarias: nuevas },
-                          }));
-                        }}
-                        className="absolute top-1 right-1 bg-red-600 text-white p-1 rounded-full hover:bg-red-700"
-                      >
-                        <X className="w-4 h-4" />
-                      </button>
+                  <div className="border-2 border-dashed border-gray-300 rounded-xl p-4 bg-gray-50 hover:border-gray-400 transition-colors">
+                    {datos.imagenes?.principal ? (
+                      <div className="relative group">
+                        <img
+                          src={datos.imagenes.principal}
+                          alt="Imagen principal"
+                          className="w-full h-64 object-cover rounded-lg shadow-sm"
+                        />
+                        <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-40 rounded-lg transition-all duration-200 flex items-center justify-center">
+                          <button
+                            type="button"
+                            onClick={() =>
+                              setDatos((prev) => ({
+                                ...prev,
+                                imagenes: { ...prev.imagenes, principal: "" },
+                              }))
+                            }
+                            className="opacity-0 group-hover:opacity-100 bg-red-600 hover:bg-red-700 text-white p-3 rounded-full transition-all duration-200 shadow-lg"
+                            title="Eliminar imagen principal"
+                          >
+                            <Trash2 className="w-5 h-5" />
+                          </button>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="text-center py-12">
+                        <div className="w-16 h-16 mx-auto mb-4 bg-gray-200 rounded-full flex items-center justify-center">
+                          <Plus className="w-8 h-8 text-gray-400" />
+                        </div>
+                        <p className="text-gray-500 mb-2">Selecciona la imagen principal</p>
+                        <p className="text-sm text-gray-400">Esta será la imagen destacada del destino</p>
+                      </div>
+                    )}
+
+                    <div className="mt-4">
+                      <label className="cursor-pointer">
+                        <input
+                          type="file"
+                          accept="image/*"
+                          onChange={async (e) => {
+                            const formData = new FormData();
+                            formData.append("imagen", e.target.files[0]);
+                            const res = await fetch("http://localhost:5000/api/destinos/subir-imagen", {
+                              method: "POST",
+                              body: formData,
+                            });
+                            const data = await res.json();
+                            if (data.url) {
+                              setDatos((prev) => ({
+                                ...prev,
+                                imagenes: { ...prev.imagenes, principal: data.url },
+                              }));
+                            }
+                          }}
+                          className="hidden"
+                        />
+                        <div className="flex items-center justify-center gap-2 px-4 py-2 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors text-sm font-medium text-gray-700">
+                          <Plus className="w-4 h-4" />
+                          {datos.imagenes?.principal ? "Cambiar imagen" : "Seleccionar imagen"}
+                        </div>
+                      </label>
                     </div>
-                  ))}
+                  </div>
                 </div>
-                <input
-                  type="file"
-                  accept="image/*"
-                  onChange={async (e) => {
-                    const formData = new FormData();
-                    formData.append("imagen", e.target.files[0]);
-                    const res = await fetch("http://localhost:5000/api/destinos/subir-imagen", {
-                      method: "POST",
-                      body: formData,
-                    });
-                    const data = await res.json();
-                    if (data.url) {
-                      const actuales = datos.imagenes?.secundarias || [];
-                      setDatos((prev) => ({
-                        ...prev,
-                        imagenes: { ...prev.imagenes, secundarias: [...actuales, data.url] },
-                      }));
-                    }
-                  }}
-                  className="w-full"
-                />
+
+                {/* Imágenes secundarias */}
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <label className="block text-base font-medium text-gray-700">Imágenes adicionales</label>
+                    <span className="text-sm text-gray-500">Máximo 2 imágenes</span>
+                  </div>
+
+                  <div className="border-2 border-dashed border-gray-300 rounded-xl p-4 bg-gray-50">
+                    {(datos.imagenes?.secundarias || []).length > 0 ? (
+                      <div className="grid grid-cols-2 gap-3 mb-4">
+                        {(datos.imagenes?.secundarias || []).map((img, i) => (
+                          <div key={i} className="relative group">
+                            <img
+                              src={img}
+                              alt={`Imagen adicional ${i + 1}`}
+                              className="w-full h-24 object-cover rounded-lg shadow-sm"
+                            />
+                            <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-40 rounded-lg transition-all duration-200 flex items-center justify-center">
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  const nuevas = datos.imagenes.secundarias.filter((_, idx) => idx !== i);
+                                  setDatos((prev) => ({
+                                    ...prev,
+                                    imagenes: { ...prev.imagenes, secundarias: nuevas },
+                                  }));
+                                }}
+                                className="opacity-0 group-hover:opacity-100 bg-red-600 hover:bg-red-700 text-white p-2 rounded-full transition-all duration-200 shadow-lg"
+                                title="Eliminar imagen"
+                              >
+                                <X className="w-4 h-4" />
+                              </button>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="text-center py-8 mb-4">
+                        <div className="w-12 h-12 mx-auto mb-3 bg-gray-200 rounded-full flex items-center justify-center">
+                          <Plus className="w-6 h-6 text-gray-400" />
+                        </div>
+                        <p className="text-gray-500 text-sm mb-1">Sin imágenes adicionales</p>
+                        <p className="text-xs text-gray-400">Muestra más aspectos del destino</p>
+                      </div>
+                    )}
+
+                    {(datos.imagenes?.secundarias || []).length < 2 && (
+                      <label className="cursor-pointer block">
+                        <input
+                          type="file"
+                          accept="image/*"
+                          onChange={async (e) => {
+                            const formData = new FormData();
+                            formData.append("imagen", e.target.files[0]);
+                            const res = await fetch("http://localhost:5000/api/destinos/subir-imagen", {
+                              method: "POST",
+                              body: formData,
+                            });
+                            const data = await res.json();
+                            if (data.url) {
+                              const actuales = datos.imagenes?.secundarias || [];
+                              setDatos((prev) => ({
+                                ...prev,
+                                imagenes: { ...prev.imagenes, secundarias: [...actuales, data.url] },
+                              }));
+                            }
+                          }}
+                          className="hidden"
+                        />
+                        <div className="flex items-center justify-center gap-2 px-4 py-2 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors text-sm font-medium text-gray-700 w-full">
+                          <Plus className="w-4 h-4" />
+                          Añadir imagen adicional
+                        </div>
+                      </label>
+                    )}
+
+                    {(datos.imagenes?.secundarias || []).length >= 6 && (
+                      <div className="text-center py-2">
+                        <p className="text-sm text-gray-500">Límite de imágenes alcanzado (6/6)</p>
+                      </div>
+                    )}
+                  </div>
+                </div>
               </div>
             </div>
 

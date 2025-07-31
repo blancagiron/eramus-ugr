@@ -17,4 +17,6 @@ def crear_usuario(data):
         "foto_perfil": data.get("foto_perfil", None),
         "destinos_favoritos": data.get("destinos_favoritos", []),
         "estado_proceso": data.get("estado_proceso", "Proceso no iniciado"),
+        "verificado": False,
+        "token_verificacion": data.get("token_verificacion")
     }

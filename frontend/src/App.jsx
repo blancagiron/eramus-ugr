@@ -18,6 +18,10 @@ import GestionCentros from "./components/dashboard/admin/centros/GestionCentros"
 import GestionGrados from "./components/dashboard/admin/grados/GestionGrados";
 import GestionAsignaturas from "./components/dashboard/admin/asignaturas/GestionAsignaturas";
 import TestAsignaturas from "./components/destinos/TestAsignaturas";
+import DestinoNoAsignado from "./components/destinos/DestinoNoAsignado";
+import VerificarEmail from "./components/VerificarCorreo";
+
+import AcuerdoEditor from "./components/acuerdo/AcuerdoEditor";
 function App() {
   return (
     <div className="min-h-screen w-full text-black">
@@ -38,7 +42,8 @@ function App() {
         <Route path="/admin/grados" element={<GestionGrados />} />
         <Route path="/admin/asignaturas" element={<GestionAsignaturas />} />
         <Route path="/test-asignaturas" element={<TestAsignaturas />} />
-      
+        <Route path="/estudiante/destino-no-asignado" element={<DestinoNoAsignado />} />
+        <Route path="/verificar-email" element={<VerificarEmail />} />
 
         {/* Rutas privadas */}
         <Route
@@ -72,6 +77,15 @@ function App() {
           element={
             <PrivateRoute>
               <AdminDashboard />
+            </PrivateRoute>
+          }
+        />
+
+        <Route
+          path="/estudiante/acuerdo"
+          element={
+            <PrivateRoute>
+              <AcuerdoEditor />
             </PrivateRoute>
           }
         />

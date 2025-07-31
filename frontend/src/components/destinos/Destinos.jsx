@@ -22,7 +22,15 @@ export default function Destinos() {
   const porPagina = 6;
 
   useEffect(() => {
-    fetch("http://localhost:5000/api/destinos")
+    const usuario = JSON.parse(localStorage.getItem("usuario"));
+    const centro = usuario?.codigo_centro;
+    const grado = usuario?.codigo_grado;
+
+    const url = new URL("http://localhost:5000/api/destinos");
+    if (centro) url.searchParams.append("codigo_centro", centro);
+    if (grado) url.searchParams.append("codigo_grado", grado);
+
+    fetch(url)
       .then((res) => res.json())
       .then((data) => {
         setUniversidades(data);
@@ -115,3 +123,4 @@ export default function Destinos() {
     </>
   );
 }
+

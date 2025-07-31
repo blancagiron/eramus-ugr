@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import logo from '../../assets/logo-tfg-final-v2.svg';
 
 export default function RegistroForm({
   form,

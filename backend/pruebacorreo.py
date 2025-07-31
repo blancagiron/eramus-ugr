@@ -2,6 +2,7 @@ import smtplib
 from email.mime.text import MIMEText
 
 EMAIL_ORIGEN = "bgironricoy15@gmail.com"
+EMAIL_FROM = "Erasmus Verificaciones <bgironricoy15@gmail.com>"
 EMAIL_PASSWORD = "pxnpoqllfxndiqaj"  # sin espacios
 EMAIL_DESTINO = "blaanca.giroon@gmail.com"
 

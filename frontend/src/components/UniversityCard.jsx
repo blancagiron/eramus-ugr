@@ -130,7 +130,7 @@ export default function UniversityCard({ uni }) {
         <div className="flex gap-3 mt-auto pt-4 border-t border-gray-100">
           <Link
             to={`/destinos/${encodeURIComponent(uni.nombre_uni)}`}
-            className="flex-1 px-4 py-3 bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white rounded-xl font-semibold text-center transition-all duration-200 hover:scale-105 active:scale-95 shadow-lg hover:shadow-xl flex items-center justify-center gap-2"
+            className="flex-1 px-4 py-3 bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white hover:text-white rounded-xl font-semibold text-center transition-all duration-200 hover:scale-105 active:scale-95 shadow-lg hover:shadow-xl flex items-center justify-center gap-2"
           >
             <span>Ver detalles</span>
             <ExternalLink className="w-4 h-4" />

@@ -1,11 +1,35 @@
 from flask import Blueprint, request, jsonify, current_app
 from db import db
 from models.usuario import crear_usuario
+import secrets, uuid
+from utils.email import enviar_correo_verificacion
 import os
 from utils.auth import hash_contraseña, verificar_contraseña
 from werkzeug.utils import secure_filename
 
 usuarios = Blueprint("usuarios", __name__)
+
+# @usuarios.route("/usuarios/registro", methods=["POST"])
+# def registrar_usuario():
+#     data = request.json
+
+#     if db.usuarios.find_one({"email": data["email"]}):
+#         return jsonify({"error": "Ya existe un usuario con ese email"}), 409
+
+#     if db.usuarios.find_one({"nombre": data.get("nombre"), "apellidos": data.get("apellidos")}):
+#         return jsonify({"error": "Ya existe un usuario con ese nombre y apellidos"}), 409
+
+#     rol = data.get("rol", "estudiante")
+
+#     if rol == "tutor":
+#         if data.get("codigo_tutor") != os.getenv("CODIGO_TUTOR"):
+#             return jsonify({"error": "Código de tutor incorrecto"}), 403
+
+#     data["contraseña"] = hash_contraseña(data["contraseña"])
+#     nuevo_usuario = crear_usuario(data)
+#     db.usuarios.insert_one(nuevo_usuario)
+
+#     return jsonify({"mensaje": "Registro exitoso"}), 201
 
 @usuarios.route("/usuarios/registro", methods=["POST"])
 def registrar_usuario():
@@ -23,21 +47,57 @@ def registrar_usuario():
         if data.get("codigo_tutor") != os.getenv("CODIGO_TUTOR"):
             return jsonify({"error": "Código de tutor incorrecto"}), 403
 
+    # Seguridad
     data["contraseña"] = hash_contraseña(data["contraseña"])
+
+    token = str(uuid.uuid4())
+    data["verificado"] = False
+    data["token_verificacion"] = token
+
+    print("🔐 Token generado para verificación:", token)
+    print("📧 Email destino:", data["email"])
+
+    # Guardar usuario
     nuevo_usuario = crear_usuario(data)
     db.usuarios.insert_one(nuevo_usuario)
 
-    return jsonify({"mensaje": "Registro exitoso"}), 201
+    # Enviar correo
+    enviar_correo_verificacion(data["email"], token)
+
+    return jsonify({"mensaje": "Registro exitoso, revisa tu correo para verificar tu cuenta"}), 201
+# @usuarios.route("/usuarios/login", methods=["POST"])
+# def login_usuario():
+#     data = request.json
+#     usuario = db.usuarios.find_one({"email": data["email"]})
+#     if not usuario:
+#         return jsonify({"error": "Usuario no encontrado"}), 404
+
+#     if not verificar_contraseña(data["contraseña"], usuario["contraseña"]):
+#         return jsonify({"error": "Contraseña incorrecta"}), 401
+
+#     return jsonify({
+#         "mensaje": "Inicio de sesión exitoso",
+#         "email": usuario["email"],
+#         "rol": usuario["rol"],
+#         "nombre": usuario["nombre"],
+#         "codigo_grado": usuario.get("codigo_grado", ""),
+#         "asignaturas_superadas": usuario.get("asignaturas_superadas", []),
+#         "grado": usuario.get("grado", "")
+#     }), 200
 
 @usuarios.route("/usuarios/login", methods=["POST"])
 def login_usuario():
     data = request.json
     usuario = db.usuarios.find_one({"email": data["email"]})
+    
     if not usuario:
         return jsonify({"error": "Usuario no encontrado"}), 404
 
     if not verificar_contraseña(data["contraseña"], usuario["contraseña"]):
         return jsonify({"error": "Contraseña incorrecta"}), 401
+
+    if not usuario.get("verificado", False):
+        return jsonify({"error": "Cuenta no verificada. Por favor revisa tu correo para verificar tu cuenta."}), 403
 
     return jsonify({
         "mensaje": "Inicio de sesión exitoso",
@@ -48,6 +108,7 @@ def login_usuario():
         "asignaturas_superadas": usuario.get("asignaturas_superadas", []),
         "grado": usuario.get("grado", "")
     }), 200
+
 
 @usuarios.route("/usuarios/<email>", methods=["GET"])
 def obtener_usuario(email):
@@ -175,3 +236,19 @@ def eliminar_foto_usuario():
     db.usuarios.update_one({"email": email}, {"$unset": {"foto_perfil": ""}})
 
     return jsonify({"mensaje": "Foto eliminada correctamente"})
+
+@usuarios.route("/usuarios/verificar", methods=["POST"])
+def verificar_email():
+    token = request.json.get("token")
+    if not token:
+        return jsonify({"error": "Token faltante"}), 400
+
+    resultado = db.usuarios.update_one(
+        {"token_verificacion": token},
+        {"$set": {"verificado": True}, "$unset": {"token_verificacion": ""}}
+    )
+
+    if resultado.modified_count == 0:
+        return jsonify({"error": "Token inválido"}), 400
+
+    return jsonify({"mensaje": "Cuenta verificada correctamente"}), 200

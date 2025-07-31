@@ -1,22 +1,28 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Sidebar from "./Sidebar";
 import {
-  FileText,
-  MapPin,
-  Calendar,
-  CheckCircle,
-  Upload,
-  MessageCircle,
-  HandHelping,
-  BookOpen,
-  AlertCircle,
-  User
+  FileText, MapPin, Calendar, CheckCircle, Upload,
+  MessageCircle, HandHelping, BookOpen, AlertCircle, User
 } from "lucide-react";
 
 export default function EstudianteDashboard() {
   const navigate = useNavigate();
-  const user = JSON.parse(localStorage.getItem("usuario"));
+  const [user, setUser] = useState(null);
+
+  useEffect(() => {
+    const usuarioRaw = localStorage.getItem("usuario");
+    if (usuarioRaw) {
+      const u = JSON.parse(usuarioRaw);
+      fetch(`http://localhost:5000/usuarios/${u.email}`)
+        .then((res) => res.json())
+        .then(setUser);
+    }
+  }, []);
+
+  if (!user) {
+    return <p className="p-6 text-gray-600">Cargando tu información...</p>;
+  }
 
   const widgets = [
     {
@@ -37,7 +43,11 @@ export default function EstudianteDashboard() {
       label: "Mi Destino",
       icon: <MapPin className="w-8 h-8" />,
       color: "bg-gradient-to-br from-violet-500 to-purple-600",
-      ruta: "/estudiante/destino",
+      ruta:
+        user.estado_proceso === "con destino" && user.destino_confirmado?.nombre_uni
+          ? `/destinos/${encodeURIComponent(user.destino_confirmado.nombre_uni)}`
+          : "/estudiante/destino-no-asignado",
+
       descripcion: "Información de tu universidad destino"
     },
     {
@@ -45,7 +55,8 @@ export default function EstudianteDashboard() {
       icon: <HandHelping className="w-8 h-8" />,
       color: "bg-gradient-to-br from-rose-500 to-pink-600",
       descripcion: "Fechas importantes y plazos",
-      externalLink: "https://internacional.ugr.es/estudiantes/movilidad-saliente/grado-estudio/movilidad-internacional" // Enlace externo
+      externalLink:
+        "https://internacional.ugr.es/estudiantes/movilidad-saliente/grado-estudio/movilidad-internacional"
     },
     {
       label: "Documentación",
@@ -64,7 +75,7 @@ export default function EstudianteDashboard() {
     {
       label: "Mi Perfil",
       icon: <User className="w-8 h-8" />,
-      color: "bg-gradient-to-br from-indigo-500 to-purple-500",
+      color: "bg-gradient-to-br from-red-500 to-red-800",
       ruta: "/perfil",
       descripcion: "Actualizar información personal"
     }
@@ -75,7 +86,7 @@ export default function EstudianteDashboard() {
       <div className="min-h-screen p-6 max-w-7xl">
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-800 mb-2">
-            ¡Hola, {user?.nombre}!
+            ¡Hola, {user.nombre}!
           </h1>
           <p className="text-gray-600 text-lg">
             Gestiona tu proceso Erasmus desde aquí
@@ -86,19 +97,22 @@ export default function EstudianteDashboard() {
         <div className="mb-8 p-6 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl border border-blue-100">
           <div className="flex items-center gap-4 mb-4">
             <div className="w-3 h-3 bg-yellow-400 rounded-full animate-pulse"></div>
-            <h2 className="text-xl font-semibold text-gray-800">Estado Actual: Acuerdo Pendiente</h2>
+            <h2 className="text-xl font-semibold text-gray-800">
+              Estado Actual: {user.estado_proceso === "con destino" ? "Destino confirmado" : "Acuerdo Pendiente"}
+            </h2>
           </div>
-          <p className="text-gray-600 mb-3">
-            Tu próximo paso es corregir el acuerdo de estudios. 
-          </p>
-          <div className="text-sm text-gray-500">
-            <strong>Destino:</strong> Sapienza-Roma, Italia • <strong>Período:</strong> Sep 2025 - Feb 2026
-          </div>
+          {user.destino_confirmado ? (
+            <div className="text-sm text-gray-700">
+              <strong>Destino:</strong> {user.destino_confirmado.nombre_uni}
+            </div>
+          ) : (
+            <p className="text-gray-600">Aún no tienes un destino asignado.</p>
+          )}
         </div>
 
         {/* Grid de widgets */}
-        <div 
-          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6" 
+        <div
+          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
           style={{ fontFamily: "Inter, sans-serif" }}
         >
           {widgets.map(({ label, icon, color, ruta, descripcion, externalLink }) => (
@@ -131,8 +145,6 @@ export default function EstudianteDashboard() {
 
         {/* Accesos rápidos adicionales */}
         <div className="mt-8 grid grid-cols-1 md:grid-cols-2 gap-6">
-
-
           <div className="p-6 bg-white rounded-xl shadow-md border border-gray-100">
             <h3 className="text-lg font-semibold text-gray-800 mb-3 flex items-center gap-2">
               <CheckCircle className="w-5 h-5 text-green-500" />
@@ -145,7 +157,7 @@ export default function EstudianteDashboard() {
                   <span>60%</span>
                 </div>
                 <div className="w-full bg-gray-200 rounded-full h-2">
-                  <div className="bg-blue-600 h-2 rounded-full" style={{width: '60%'}}></div>
+                  <div className="bg-blue-600 h-2 rounded-full" style={{ width: '60%' }}></div>
                 </div>
               </div>
               <p className="text-xs text-gray-600">
