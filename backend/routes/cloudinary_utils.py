@@ -12,9 +12,9 @@ def subir_imagen(file, carpeta="destinos"):
     resultado = cloudinary.uploader.upload(
         file,
         folder=carpeta,
-        use_filename=True,
-        unique_filename=False,
-        overwrite=True,
+        use_filename=False,
+        unique_filename=True,
+        overwrite=False,
         resource_type="image"
     )
     return resultado.get("secure_url")

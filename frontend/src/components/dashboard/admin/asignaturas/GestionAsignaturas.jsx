@@ -14,6 +14,7 @@ export default function GestionAsignaturas() {
   const [filtroGrado, setFiltroGrado] = useState("");
   const [editando, setEditando] = useState(null);
   const [mensaje, setMensaje] = useState("");
+  const [sidebarVisible, setSidebarVisible] = useState(false);
   const [pagina, setPagina] = useState(1);
   const [confirmacion, setConfirmacion] = useState(null);
   const [confirmacionLote, setConfirmacionLote] = useState(false);
@@ -88,8 +89,8 @@ export default function GestionAsignaturas() {
 
   return (
     <>
-      <Hamburguesa onClick={() => {}} />
-      <Sidebar visible={true}>
+      <Hamburguesa onClick={() => setSidebarVisible(prev => !prev)} />
+      <Sidebar visible={sidebarVisible}>
         <div className="min-h-screen transition-all duration-300">
           <DashboardHeader
             titulo="Gestión de Asignaturas"

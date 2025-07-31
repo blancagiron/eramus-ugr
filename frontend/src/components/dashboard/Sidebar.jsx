@@ -1,4 +1,4 @@
-import { NavLink, useNavigate, useLocation } from "react-router-dom";
+import { NavLink, useNavigate, useLocation, Link } from "react-router-dom";
 import {
   LogOut,
   User,
@@ -73,7 +73,9 @@ export default function Sidebar({ children, siempreVisible = false, visible = tr
       <aside className="w-64 bg-white border-r shadow-md flex flex-col py-6">
         <div>
           <div className="flex justify-center mb-8 px-4">
-            <img src={logo} alt="Logo Erasmus" className="h-28" />
+            <Link to="/"> {/* Enlace al LandingPage */}
+              <img src={logo} alt="Logo Erasmus" className="h-28 cursor-pointer" />
+            </Link>
           </div>
 
           <nav className="space-y-2 px-4" style={{ fontFamily: "Inter, sans-serif" }}>

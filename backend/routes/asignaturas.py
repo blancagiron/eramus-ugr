@@ -26,9 +26,10 @@ def obtener_asignaturas():
 @asignaturas_api.route("/asignaturas", methods=["POST"])
 def insertar_asignatura():
     data = request.json
-    existente = db.asignaturas.find_one({"codigo": data["codigo"]})
+    # Verificar si ya existe una asignatura con el mismo código y código_grado
+    existente = db.asignaturas.find_one({"codigo": data["codigo"], "codigo_grado": data["codigo_grado"]})
     if existente:
-        return jsonify({ "error": "Ya existe una asignatura con ese código" }), 409
+        return jsonify({ "error": "Ya existe una asignatura con ese código y grado" }), 409
 
     nueva = crear_asignatura(data)
     db.asignaturas.insert_one(nueva)
@@ -40,7 +41,7 @@ def actualizar_asignatura(codigo):
     data = request.json
     update = {}
 
-    campos = ["nombre", "creditos", "curso", "grado", "codigo_grado", "centro"]
+    campos = ["nombre", "creditos", "curso", "grado", "codigo_grado", "centro", "tipo", "enlace", "semestre"]
     for campo in campos:
         if campo in data:
             update[campo] = data[campo]

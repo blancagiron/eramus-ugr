@@ -21,6 +21,7 @@ export default function EditarDestinoModal({ destino, onClose }) {
   });
 
   const [mensaje, setMensaje] = useState("");
+  const [grados, setGrados] = useState([]);
 
   useEffect(() => {
     if (mensaje) {
@@ -39,11 +40,18 @@ export default function EditarDestinoModal({ destino, onClose }) {
           nombre_ugr: "",
           nombre_destino: "",
           creditos: 0,
+          codigos_grado: [],
           ultimo_anio_reconocimiento: ""
         }
       ]
     }));
   };
+  useEffect(() => {
+    fetch("http://localhost:5000/grados")
+      .then((res) => res.json())
+      .then(setGrados);
+  }, []);
+
 
   const actualizarAsignatura = (index, campo, valor) => {
     const nuevas = [...datos.asignaturas];
@@ -544,6 +552,39 @@ export default function EditarDestinoModal({ destino, onClose }) {
                           className="w-full px-4 py-3 bg-white border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent"
                         />
                       </div>
+
+                      <div className="col-span-12 md:col-span-12">
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                          Grados en los que se reconoce
+                        </label>
+                        <div className="flex flex-wrap gap-2">
+                          {grados.map((g) => {
+                            const seleccionado = a.codigos_grado?.includes(g.codigo);
+                            return (
+                              <button
+                                key={g.codigo}
+                                type="button"
+                                onClick={() => {
+                                  const actual = a.codigos_grado || [];
+                                  const nuevo = seleccionado
+                                    ? actual.filter(c => c !== g.codigo)
+                                    : [...actual, g.codigo];
+                                  actualizarAsignatura(i, "codigos_grado", nuevo);
+                                }}
+                                className={`px-3 py-1 rounded-full text-sm font-medium border transition-colors ${seleccionado
+                                  ? "bg-red-100 text-red-700 border-red-300"
+                                  : "bg-gray-100 text-gray-600 border-gray-300 hover:bg-gray-200"
+                                  }`}
+                              >
+                                {g.nombre}
+                              </button>
+                            );
+                          })}
+                        </div>
+                        <p className="text-xs text-gray-500 mt-1">
+                          Pulsa para añadir o quitar grados. Se marcarán en rojo los seleccionados.
+                        </p>
+                      </div>
                       <div className="col-span-6 md:col-span-1">
                         <label className="block text-sm font-medium text-gray-700 mb-2">Créditos</label>
                         <input
@@ -555,14 +596,7 @@ export default function EditarDestinoModal({ destino, onClose }) {
                           className="w-full px-3 py-3 bg-white border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent text-center"
                         />
                       </div>
-                      <div className="col-span-6 md:col-span-1 flex items-end">
-                        <button
-                          onClick={() => eliminarAsignatura(i)}
-                          className="w-full px-2 py-3 bg-red-100 hover:bg-red-200 text-red-700 font-medium rounded-lg transition-colors duration-200 text-sm"
-                        >
-                          Eliminar
-                        </button>
-                      </div>
+
                     </div>
 
                     <div className="grid grid-cols-12 gap-4">
@@ -606,6 +640,15 @@ export default function EditarDestinoModal({ destino, onClose }) {
                           className="w-full px-4 py-3 bg-white border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent"
                         />
                       </div>
+                      <div className="col-span-12 md:col-span-12 flex justify-end">
+                        <button
+                          onClick={() => eliminarAsignatura(i)}
+                          className="px-5 py-2 bg-red-100 hover:bg-red-200 text-red-700 font-medium rounded-lg transition-colors duration-200 text-sm"
+                        >
+                          Eliminar asignatura
+                        </button>
+                      </div>
+
                     </div>
                   </div>
                 ))}

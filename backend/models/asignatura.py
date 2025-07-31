@@ -7,5 +7,7 @@ def crear_asignatura(data):
         "centro": data["centro"],
         "grado": data["grado"],
         "codigo_grado": data["codigo_grado"],
-        "enlace": data.get("enlace", "")  
+        "tipo": data.get("tipo", "OPT"),
+        "enlace": data.get("enlace", ""),
+        "semestre": data.get("semestre", 1),
     }

@@ -44,7 +44,7 @@ export default function VerificarEmail() {
         <p className={`text-lg ${exito ? "text-green-600" : "text-red-600"}`}>{mensaje}</p>
         {exito && (
           <p className="text-gray-600 mt-2 text-sm">
-            Redirigiendo al inicio de sesión...
+            Redirigiendo a la página principal...
           </p>
         )}
       </div>

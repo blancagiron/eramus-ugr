@@ -10,7 +10,8 @@ export default function EditarAsignaturaModal({ asignatura, onClose }) {
     curso: asignatura.curso || 1,
     grado: asignatura.grado || "",
     codigo_grado: asignatura.codigo_grado || "",
-    centro: asignatura.centro || ""
+    centro: asignatura.centro || "",
+    tipo: asignatura.tipo || "OPT"
   });
 
   const [mensaje, setMensaje] = useState("");
@@ -59,7 +60,7 @@ export default function EditarAsignaturaModal({ asignatura, onClose }) {
           <h2 className="text-2xl font-semibold text-gray-800" style={{ fontFamily: "Inter, sans-serif" }}>
             {asignatura._id ? "Editar Asignatura" : "Nueva Asignatura"}
           </h2>
-          <button 
+          <button
             onClick={onClose}
             className="p-2 hover:bg-gray-200 rounded-full transition-colors duration-200"
           >
@@ -85,42 +86,42 @@ export default function EditarAsignaturaModal({ asignatura, onClose }) {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                   <label className="block text-base font-medium text-gray-700 mb-2">Código</label>
-                  <input 
+                  <input
                     placeholder="Código de la asignatura"
-                    value={datos.codigo} 
-                    onChange={(e) => setDatos({ ...datos, codigo: e.target.value })} 
+                    value={datos.codigo}
+                    onChange={(e) => setDatos({ ...datos, codigo: e.target.value })}
                     className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent"
                     required
                   />
                 </div>
                 <div>
                   <label className="block text-base font-medium text-gray-700 mb-2">Nombre</label>
-                  <input 
+                  <input
                     placeholder="Nombre de la asignatura"
-                    value={datos.nombre} 
-                    onChange={(e) => setDatos({ ...datos, nombre: e.target.value })} 
+                    value={datos.nombre}
+                    onChange={(e) => setDatos({ ...datos, nombre: e.target.value })}
                     className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent"
                     required
                   />
                 </div>
                 <div>
                   <label className="block text-base font-medium text-gray-700 mb-2">Créditos</label>
-                  <input 
-                    type="number" 
+                  <input
+                    type="number"
                     placeholder="6"
-                    value={datos.creditos} 
-                    onChange={(e) => setDatos({ ...datos, creditos: parseFloat(e.target.value) || 0 })} 
+                    value={datos.creditos}
+                    onChange={(e) => setDatos({ ...datos, creditos: parseFloat(e.target.value) || 0 })}
                     className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent"
                     required
                   />
                 </div>
                 <div>
                   <label className="block text-base font-medium text-gray-700 mb-2">Curso</label>
-                  <input 
-                    type="number" 
+                  <input
+                    type="number"
                     placeholder="1"
-                    value={datos.curso} 
-                    onChange={(e) => setDatos({ ...datos, curso: parseInt(e.target.value) || 1 })} 
+                    value={datos.curso}
+                    onChange={(e) => setDatos({ ...datos, curso: parseInt(e.target.value) || 1 })}
                     className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent"
                     required
                   />
@@ -134,30 +135,42 @@ export default function EditarAsignaturaModal({ asignatura, onClose }) {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                   <label className="block text-base font-medium text-gray-700 mb-2">Sigla Grado</label>
-                  <input 
+                  <input
                     placeholder="Ej: GII, GITT"
-                    value={datos.grado} 
-                    onChange={(e) => setDatos({ ...datos, grado: e.target.value })} 
+                    value={datos.grado}
+                    onChange={(e) => setDatos({ ...datos, grado: e.target.value })}
                     className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent"
                   />
                 </div>
                 <div>
                   <label className="block text-base font-medium text-gray-700 mb-2">Código Grado</label>
-                  <input 
+                  <input
                     placeholder="Código del grado"
-                    value={datos.codigo_grado} 
-                    onChange={(e) => setDatos({ ...datos, codigo_grado: e.target.value })} 
+                    value={datos.codigo_grado}
+                    onChange={(e) => setDatos({ ...datos, codigo_grado: e.target.value })}
                     className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent"
                   />
                 </div>
                 <div className="md:col-span-2">
                   <label className="block text-base font-medium text-gray-700 mb-2">Código Centro</label>
-                  <input 
+                  <input
                     placeholder="Código del centro"
-                    value={datos.centro} 
-                    onChange={(e) => setDatos({ ...datos, centro: e.target.value })} 
+                    value={datos.centro}
+                    onChange={(e) => setDatos({ ...datos, centro: e.target.value })}
                     className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent"
                   />
+                </div>
+                <div>
+                  <label className="block text-base font-medium text-gray-700 mb-2">Tipo</label>
+                  <select
+                    value={datos.tipo}
+                    onChange={(e) => setDatos({ ...datos, tipo: e.target.value })}
+                    className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                  >
+                    <option value="FO">FO</option>
+                    <option value="FB">FB</option>
+                    <option value="OPT">OPT</option>
+                  </select>
                 </div>
               </div>
             </div>
@@ -166,14 +179,14 @@ export default function EditarAsignaturaModal({ asignatura, onClose }) {
 
         {/* Footer */}
         <div className="bg-stone-50 px-8 py-6 border-t border-gray-200 flex justify-end gap-4">
-          <button 
-            onClick={onClose} 
+          <button
+            onClick={onClose}
             className="px-6 py-3 bg-gray-200 hover:bg-gray-300 text-gray-700 font-medium rounded-lg transition-colors duration-200"
           >
             Cancelar
           </button>
-          <button 
-            onClick={guardar} 
+          <button
+            onClick={guardar}
             className="px-6 py-3 bg-red-500 hover:bg-red-700 text-white font-medium rounded-lg transition-colors duration-200"
           >
             Guardar asignatura
