@@ -82,16 +82,23 @@ export default function InfoAcademica({ perfil, form, nombreCentro, editando, se
       </div>
 
       {/* Destinos asignados (tutor/admin) */}
-      {(rol === "tutor" || rol === "admin")  && (
+      {(rol === "tutor" || rol === "admin") && (
         <div>
           <label className="flex items-center gap-2 text-l font-medium text-gray-700 mb-2 mt-4">
             <Map className="w-4 h-4" />
             Destinos asignados
           </label>
           <ul className="list-disc list-inside text-gray-700 text-base pl-2">
-            {perfil.destinos_asignados.map((d, i) => (
-              <li key={i}>{d}</li>
-            ))}
+            {Array.isArray(perfil.destinos_asignados) && perfil.destinos_asignados.length > 0 ? (
+              <ul className="list-disc list-inside text-gray-700 text-base pl-2">
+                {perfil.destinos_asignados.map((d, i) => (
+                  <li key={i}>{d.nombre_uni} ({d.codigo})</li>
+                ))}
+              </ul>
+            ) : (
+              <p className="text-gray-500 text-sm">Sin destinos asignados</p>
+            )}
+
           </ul>
         </div>
       )}

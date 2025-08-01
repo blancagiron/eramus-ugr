@@ -217,7 +217,7 @@ def generar_pdf_acuerdo(acuerdo):
     elements.append(tabla_mov)
     elements.append(Spacer(1, 20))
 
-    # ===== TABLA DE ASIGNATURAS - FORMATO MEJORADO =====
+    # ===== TABLA DE ASIGNATURAS - FORMATO MEJORADO CON CRÉDITOS DIVIDIDOS =====
     bloques = acuerdo.get("bloques", [])
 
     if not bloques:
@@ -229,7 +229,7 @@ def generar_pdf_acuerdo(acuerdo):
                 return text[:max_length-3] + "..."
             return text
 
-        # Estructura de la tabla siguiendo el formato de la imagen
+        # Estructura de la tabla siguiendo el formato de la imagen con créditos divididos
         # Primera fila: Headers principales
         header1 = [
             Paragraph("<b>Estudios a reconocer en la UNIVERSIDAD DE GRANADA</b><br/><font size=6>COLOQUE DEBAJO DEL NOMBRE DE CADA ASIGNATURA EL ENLACE A SU GUÍA DOCENTE EN LA UGR</font>", tiny_style),
@@ -250,7 +250,7 @@ def generar_pdf_acuerdo(acuerdo):
             Paragraph("<b>Créditos ECTS o locales</b>", tiny_style)
         ]
         
-        # Tercera fila: Sub-headers para créditos
+        # Tercera fila: Sub-headers para créditos divididos en ECTS y FO/FB/OP
         header3 = [
             "", "", "",
             Paragraph("<b>ECTS</b>", tiny_style),
@@ -260,53 +260,36 @@ def generar_pdf_acuerdo(acuerdo):
 
         table_data = [header1, header2, header3]
 
-        # Datos de asignaturas
-        # for b in bloques:
-        #     ugr = b.get("asignaturas_ugr", [{}])[0] if b.get("asignaturas_ugr") else {}
-        #     dest = b.get("asignaturas_destino", [{}])[0] if b.get("asignaturas_destino") else {}
+        # Datos de asignaturas con enlaces
+        for b in bloques:
+            ugr = b.get("asignaturas_ugr", [{}])[0] if b.get("asignaturas_ugr") else {}
+            dest = b.get("asignaturas_destino", [{}])[0] if b.get("asignaturas_destino") else {}
 
-        #     fila = [
-        #         Paragraph(truncate_text(ugr.get('nombre', '')), tiny_style),
-        #         Paragraph(str(ugr.get('curso', '')), tiny_style),
-        #         Paragraph(str(ugr.get('semestre', '')), tiny_style),
-        #         Paragraph(str(ugr.get('ects', '')), tiny_style),
-        #         Paragraph(str(ugr.get('tipo', '')), tiny_style),
-        #         Paragraph(truncate_text(dest.get('nombre', '')), tiny_style),
-        #         Paragraph(str(dest.get('curso', '')), tiny_style),
-        #         Paragraph(str(dest.get('ects', '')), tiny_style)
-        #     ]
-        #     table_data.append(fila)
+            ugr_nombre = ugr.get('nombre', '')
+            ugr_url = ugr.get('enlace') or ugr.get('guia')
+            if ugr_url:
+                ugr_nombre = f'<a href="{ugr_url}" color="blue">{truncate_text(ugr_nombre)}</a>'
+            else:
+                ugr_nombre = truncate_text(ugr_nombre)
 
-    for b in bloques:
-        ugr = b.get("asignaturas_ugr", [{}])[0] if b.get("asignaturas_ugr") else {}
-        dest = b.get("asignaturas_destino", [{}])[0] if b.get("asignaturas_destino") else {}
+            dest_nombre = dest.get('nombre', '')
+            dest_url = dest.get('guia')
+            if dest_url:
+                dest_nombre = f'<a href="{dest_url}" color="blue">{truncate_text(dest_nombre)}</a>'
+            else:
+                dest_nombre = truncate_text(dest_nombre)
 
-        # Crear enlaces si existen
-        ugr_nombre = ugr.get('nombre', '')
-        ugr_url = ugr.get('enlace') or ugr.get('guia')
-        if ugr_url:
-            ugr_nombre = f'<a href="{ugr_url}" color="blue">{truncate_text(ugr_nombre)}</a>'
-        else:
-            ugr_nombre = truncate_text(ugr_nombre)
-
-        dest_nombre = dest.get('nombre', '')
-        dest_url = dest.get('guia')
-        if dest_url:
-            dest_nombre = f'<a href="{dest_url}" color="blue">{truncate_text(dest_nombre)}</a>'
-        else:
-            dest_nombre = truncate_text(dest_nombre)
-
-        fila = [
-            Paragraph(ugr_nombre, tiny_style),
-            Paragraph(str(ugr.get('curso', '')), tiny_style),
-            Paragraph(str(ugr.get('semestre', '')), tiny_style),
-            Paragraph(str(ugr.get('ects', '')), tiny_style),
-            Paragraph(str(ugr.get('tipo', '')), tiny_style),
-            Paragraph(dest_nombre, tiny_style),
-            Paragraph(str(dest.get('curso', '')), tiny_style),
-            Paragraph(str(dest.get('ects', '')), tiny_style)
-        ]
-        table_data.append(fila)
+            fila = [
+                Paragraph(ugr_nombre, tiny_style),
+                Paragraph(str(ugr.get('curso', '')), tiny_style),
+                Paragraph(str(ugr.get('semestre', '')), tiny_style),
+                Paragraph(str(ugr.get('ects', '')), tiny_style),
+                Paragraph(str(ugr.get('tipo', '')), tiny_style),
+                Paragraph(dest_nombre, tiny_style),
+                Paragraph(str(dest.get('curso', '')), tiny_style),
+                Paragraph(str(dest.get('ects', '')), tiny_style)
+            ]
+            table_data.append(fila)
 
         # Fila de totales
         try:
@@ -328,8 +311,7 @@ def generar_pdf_acuerdo(acuerdo):
         ]
         table_data.append(fila_total)
 
-        # Anchos de columna optimizados
-        page_width = A4[0] - 4*cm
+        # Anchos de columna optimizados (igual que el primer código)
         col_widths = [
             page_width * 0.22,  # Nombre asignatura UGR
             page_width * 0.08,  # Curso UGR  
@@ -352,19 +334,19 @@ def generar_pdf_acuerdo(acuerdo):
             ("SPAN", (0, 0), (4, 0)),  # Header UGR
             ("SPAN", (5, 0), (7, 0)),  # Header Destino
             
-            # Span para "Créditos" que se subdivide en ECTS y FO/FB/OP
-            ("SPAN", (3, 1), (4, 1)),  # "Créditos" abarca columnas 3 y 4
-            
             # Spans para campos que no tienen sub-división
             ("SPAN", (0, 1), (0, 2)),  # Nombre asignatura UGR
             ("SPAN", (1, 1), (1, 2)),  # Curso UGR
             ("SPAN", (2, 1), (2, 2)),  # Semestre UGR
+            # IMPORTANTE: "Créditos" en fila 2 abarca columnas 3 y 4
+            ("SPAN", (3, 1), (4, 1)),  # "Créditos" header abarca ECTS y FO/FB/OP
             ("SPAN", (5, 1), (5, 2)),  # Nombre asignatura Destino
             ("SPAN", (6, 1), (6, 2)),  # Curso Destino
             ("SPAN", (7, 1), (7, 2)),  # ECTS Destino
             
             # Spans para totales
             ("SPAN", (0, -1), (2, -1)),  # Total UGR label
+            ("SPAN", (3, -1), (4, -1)),  # Total UGR value (span sobre ECTS y FO/FB/OP)
             ("SPAN", (5, -1), (6, -1)),  # Total Destino label
             
             # Fondos grises
