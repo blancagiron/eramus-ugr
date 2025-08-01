@@ -36,8 +36,37 @@ def insertar_asignatura():
     return jsonify({ "mensaje": "Asignatura creada correctamente" }), 201
 
 # PATCH - Editar asignatura por código
+# @asignaturas_api.route("/asignaturas/<codigo>", methods=["PATCH"])
+# def actualizar_asignatura(codigo):
+#     data = request.json
+#     update = {}
+
+#     campos = ["nombre", "creditos", "curso", "grado", "codigo_grado", "centro", "tipo", "enlace", "semestre"]
+#     for campo in campos:
+#         if campo in data:
+#             update[campo] = data[campo]
+
+#     resultado = db.asignaturas.update_one({ "codigo": codigo }, { "$set": update })
+
+#     if resultado.matched_count == 0:
+#         return jsonify({ "error": "Asignatura no encontrada" }), 404
+
+#     return jsonify({ "mensaje": "Asignatura actualizada correctamente" })
+
+# # DELETE - Eliminar asignatura por código
+# @asignaturas_api.route("/asignaturas/<codigo>", methods=["DELETE"])
+# def eliminar_asignatura(codigo):
+#     resultado = db.asignaturas.delete_one({ "codigo": codigo })
+#     if resultado.deleted_count == 0:
+#         return jsonify({ "error": "Asignatura no encontrada" }), 404
+#     return jsonify({ "mensaje": "Asignatura eliminada correctamente" })
+# PATCH - Editar asignatura por código y código_grado
 @asignaturas_api.route("/asignaturas/<codigo>", methods=["PATCH"])
 def actualizar_asignatura(codigo):
+    codigo_grado = request.args.get("codigo_grado")
+    if not codigo_grado:
+        return jsonify({ "error": "Se requiere el parámetro 'codigo_grado'" }), 400
+
     data = request.json
     update = {}
 
@@ -46,17 +75,25 @@ def actualizar_asignatura(codigo):
         if campo in data:
             update[campo] = data[campo]
 
-    resultado = db.asignaturas.update_one({ "codigo": codigo }, { "$set": update })
+    resultado = db.asignaturas.update_one(
+        { "codigo": codigo, "codigo_grado": codigo_grado },
+        { "$set": update }
+    )
 
     if resultado.matched_count == 0:
         return jsonify({ "error": "Asignatura no encontrada" }), 404
 
     return jsonify({ "mensaje": "Asignatura actualizada correctamente" })
 
-# DELETE - Eliminar asignatura por código
+
+# DELETE - Eliminar asignatura por código y código_grado
 @asignaturas_api.route("/asignaturas/<codigo>", methods=["DELETE"])
 def eliminar_asignatura(codigo):
-    resultado = db.asignaturas.delete_one({ "codigo": codigo })
+    codigo_grado = request.args.get("codigo_grado")
+    if not codigo_grado:
+        return jsonify({ "error": "Se requiere el parámetro 'codigo_grado'" }), 400
+
+    resultado = db.asignaturas.delete_one({ "codigo": codigo, "codigo_grado": codigo_grado })
     if resultado.deleted_count == 0:
         return jsonify({ "error": "Asignatura no encontrada" }), 404
     return jsonify({ "mensaje": "Asignatura eliminada correctamente" })

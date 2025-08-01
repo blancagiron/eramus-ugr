@@ -37,12 +37,23 @@ export default function RegistroForm({
             />
           </div>
           <div>
-            <label className="block text-xl font-medium text-gray-700 mb-2">Apellidos</label>
+            <label className="block text-xl font-medium text-gray-700 mb-2">Primer Apellido</label>
             <input
-              name="apellidos"
-              value={form.apellidos}
+              name="primer_apellido"
+              value={form.primer_apellido}
               onChange={actualizarCampo}
-              placeholder="Escribe tus apellidos"
+              placeholder="Ej: García"
+              className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg"
+              required
+            />
+          </div>
+          <div>
+            <label className="block text-xl font-medium text-gray-700 mb-2">Segundo Apellido</label>
+            <input
+              name="segundo_apellido"
+              value={form.segundo_apellido}
+              onChange={actualizarCampo}
+              placeholder="Ej: Pérez"
               className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg"
               required
             />
@@ -154,9 +165,8 @@ export default function RegistroForm({
           </button>
 
           {mensaje && (
-            <p className={`text-sm text-center ${
-              tipoMensaje === "exito" ? "text-green-600" : "text-red-600"
-            }`}>
+            <p className={`text-sm text-center ${tipoMensaje === "exito" ? "text-green-600" : "text-red-600"
+              }`}>
               {mensaje}
             </p>
           )}

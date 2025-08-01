@@ -11,7 +11,9 @@ export default function EditarAsignaturaModal({ asignatura, onClose }) {
     grado: asignatura.grado || "",
     codigo_grado: asignatura.codigo_grado || "",
     centro: asignatura.centro || "",
-    tipo: asignatura.tipo || "OPT"
+    tipo: asignatura.tipo || "OPT",
+    enlace: asignatura.enlace || "",
+    semestre: asignatura.semestre || 1
   });
 
   const [mensaje, setMensaje] = useState("");
@@ -28,7 +30,8 @@ export default function EditarAsignaturaModal({ asignatura, onClose }) {
 
     const url = esNueva
       ? "http://localhost:5000/asignaturas"
-      : `http://localhost:5000/asignaturas/${datos.codigo}`;
+      : `http://localhost:5000/asignaturas/${datos.codigo}?codigo_grado=${encodeURIComponent(datos.codigo_grado)}`;
+
 
     const metodo = esNueva ? "POST" : "PATCH";
 
@@ -126,6 +129,15 @@ export default function EditarAsignaturaModal({ asignatura, onClose }) {
                     required
                   />
                 </div>
+                <div className="md:col-span-2">
+                  <label className="block text-base font-medium text-gray-700 mb-2">Semestre</label>
+                  <input
+                    placeholder="Ej: 1, 2, Anual..."
+                    value={datos.semestre || ""}
+                    onChange={(e) => setDatos({ ...datos, semestre: e.target.value })}
+                    className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                  />
+                </div>
               </div>
             </div>
 
@@ -151,7 +163,7 @@ export default function EditarAsignaturaModal({ asignatura, onClose }) {
                     className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent"
                   />
                 </div>
-                <div className="md:col-span-2">
+                <div>
                   <label className="block text-base font-medium text-gray-700 mb-2">Código Centro</label>
                   <input
                     placeholder="Código del centro"
@@ -171,6 +183,15 @@ export default function EditarAsignaturaModal({ asignatura, onClose }) {
                     <option value="FB">FB</option>
                     <option value="OPT">OPT</option>
                   </select>
+                </div>
+                <div className="md:col-span-2">
+                  <label className="block text-base font-medium text-gray-700 mb-2">Enlace</label>
+                  <input
+                    placeholder="URL de la guía docente"
+                    value={datos.enlace}
+                    onChange={(e) => setDatos({ ...datos, enlace: e.target.value })}
+                    className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                  />
                 </div>
               </div>
             </div>

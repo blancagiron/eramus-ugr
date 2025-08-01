@@ -38,7 +38,11 @@ def registrar_usuario():
     if db.usuarios.find_one({"email": data["email"]}):
         return jsonify({"error": "Ya existe un usuario con ese email"}), 409
 
-    if db.usuarios.find_one({"nombre": data.get("nombre"), "apellidos": data.get("apellidos")}):
+    if db.usuarios.find_one({
+    "nombre": data.get("nombre"),
+    "primer_apellido": data.get("primer_apellido"),
+    "segundo_apellido": data.get("segundo_apellido")
+    }):       
         return jsonify({"error": "Ya existe un usuario con ese nombre y apellidos"}), 409
 
     rol = data.get("rol", "estudiante")
@@ -124,7 +128,7 @@ def actualizar_usuario(email):
         return jsonify({"error": "Datos vacíos"}), 400
 
     campos_permitidos = {
-        "nombre", "apellidos", "rol", "codigo_centro", "grado", "codigo_grado",
+        "nombre", "primer_apellido", "segundo_apellido",  "rol", "codigo_centro", "grado", "codigo_grado",
         "asignaturas_superadas", "creditos_superados", "idiomas", "destinos_asignados",
         "estado_proceso", "destino_confirmado", "destinos_favoritos"
     }

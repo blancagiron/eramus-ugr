@@ -19,7 +19,7 @@ export default function GestionAsignaturas() {
   const [confirmacion, setConfirmacion] = useState(null);
   const [confirmacionLote, setConfirmacionLote] = useState(false);
 
-  const porPagina = 5;
+  const porPagina = 10;
 
   const cargarCentros = () => {
     fetch("http://localhost:5000/api/centros")
@@ -56,7 +56,16 @@ export default function GestionAsignaturas() {
   }, [filtroCentro, filtroGrado]);
 
   const eliminar = async (codigo) => {
-    const res = await fetch(`http://localhost:5000/asignaturas/${codigo}`, { method: "DELETE" });
+    const grado = asignaturas.find(a => a.codigo === codigo)?.codigo_grado;
+    if (!grado) {
+      setMensaje("No se pudo determinar el grado.");
+      return;
+    }
+
+    const res = await fetch(`http://localhost:5000/asignaturas/${codigo}?codigo_grado=${grado}`, {
+      method: "DELETE"
+    });
+
     if (res.ok) {
       setMensaje("Asignatura eliminada correctamente.");
       cargarAsignaturas();
@@ -64,6 +73,7 @@ export default function GestionAsignaturas() {
       const data = await res.json();
       setMensaje(data?.error || "Error al eliminar.");
     }
+
     setConfirmacion(null);
   };
 

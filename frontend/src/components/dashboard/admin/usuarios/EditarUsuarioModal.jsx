@@ -2,7 +2,11 @@ import { useState, useEffect } from "react";
 import { X, Search, Plus, Trash2, MapPin, Building, User, Mail, GraduationCap, Shield } from "lucide-react";
 
 export default function EditarUsuarioModal({ usuario: inicial, onClose, esNuevo = false }) {
-  const [usuario, setUsuario] = useState(esNuevo ? { rol: "admin" } : inicial || {});
+  const [usuario, setUsuario] =  useState(
+    esNuevo
+      ? { rol: "admin", primer_apellido: "", segundo_apellido: "" }
+      : inicial || {}
+  );
   const [grados, setGrados] = useState([]);
   const [todosLosDestinos, setTodosLosDestinos] = useState([]);
   const [busquedaDestino, setBusquedaDestino] = useState("");
@@ -16,6 +20,8 @@ export default function EditarUsuarioModal({ usuario: inicial, onClose, esNuevo 
       return () => clearTimeout(timeout);
     }
   }, [mensaje]);
+
+  
 
   useEffect(() => {
     fetch("http://localhost:5000/grados")
@@ -228,11 +234,20 @@ export default function EditarUsuarioModal({ usuario: inicial, onClose, esNuevo 
                   />
                 </div>
                 <div>
-                  <label className="block text-base font-medium text-gray-700 mb-2">Apellidos</label>
+                  <label className="block text-base font-medium text-gray-700 mb-2">Primer Apellido</label>
                   <input
-                    placeholder="Apellidos del usuario"
-                    value={usuario.apellidos || ""}
-                    onChange={(e) => setUsuario({ ...usuario, apellidos: e.target.value })}
+                    placeholder="Primer apellido"
+                    value={usuario.primer_apellido || ""}
+                    onChange={(e) => setUsuario({ ...usuario, primer_apellido: e.target.value })}
+                    className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                  />
+                </div>
+                <div>
+                  <label className="block text-base font-medium text-gray-700 mb-2">Segundo Apellido</label>
+                  <input
+                    placeholder="Segundo apellido"
+                    value={usuario.segundo_apellido || ""}
+                    onChange={(e) => setUsuario({ ...usuario, segundo_apellido: e.target.value })}
                     className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent"
                   />
                 </div>

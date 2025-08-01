@@ -78,7 +78,9 @@ export default function GestionUsuarios() {
                 <tbody>
                   {usuariosMostrados.map((u) => (
                     <tr key={u.email} className="border-t hover:bg-gray-50">
-                      <td className="p-4">{u.nombre} {u.apellidos}</td>
+                      <td className="p-4">
+                        {u.nombre} {u.primer_apellido} {u.segundo_apellido}
+                      </td>
                       <td className="p-4">{u.email}</td>
                       <td className="p-4 capitalize">{u.rol}</td>
                       <td className="p-4 flex justify-center gap-3">

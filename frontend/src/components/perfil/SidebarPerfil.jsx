@@ -22,7 +22,8 @@ export default function SidebarPerfil({
   setQuitarFotoFlag,
 }) {
   const BASE_URL = "http://localhost:5000";
-  const nombre = `${perfil.nombre || ""} ${perfil.apellidos || ""}`;
+  const nombre = `${perfil.nombre || ""} ${perfil.primer_apellido || ""} ${perfil.segundo_apellido || ""}`.trim();
+
   const rol = perfil.rol || "estudiante";
   const estado = perfil.estado_proceso || "desconocido";
 

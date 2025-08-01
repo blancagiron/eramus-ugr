@@ -72,7 +72,9 @@ export default function AcuerdoEditor() {
       datos_personales: {
         ...datosPersonales,
         nombre: usuario.nombre,
-        apellidos: usuario.apellidos,
+        primer_apellido: usuario.primer_apellido,
+        segundo_apellido: usuario.segundo_apellido,
+        grado: usuario.grado,
         email: usuario.email,
       },
       datos_movilidad: {
@@ -106,8 +108,10 @@ export default function AcuerdoEditor() {
       datos_personales: {
         ...datosPersonales,
         nombre: usuario.nombre,
-        apellidos: usuario.apellidos,
         email: usuario.email,
+        primer_apellido: usuario.primer_apellido,
+        segundo_apellido: usuario.segundo_apellido,
+        grado: usuario.grado,
       },
       datos_movilidad: {
         ...datosMovilidad,
@@ -141,14 +145,17 @@ export default function AcuerdoEditor() {
       datos_personales: {
         ...datosPersonales,
         nombre: usuario.nombre,
-        apellidos: usuario.apellidos,
+        primer_apellido: usuario.primer_apellido,
+        segundo_apellido: usuario.segundo_apellido,
         email: usuario.email,
+        grado: usuario.grado,
       },
       datos_movilidad: {
         ...datosMovilidad,
         nombre_universidad: destino?.nombre_uni || "",
         codigo_universidad: destino?.codigo || "",
         pais: destino?.pais || "",
+        periodo_estudios: datosMovilidad.periodo_estudios || "",
       },
       bloques,
       estado,
@@ -259,20 +266,6 @@ export default function AcuerdoEditor() {
           <InfoModal open={mostrarInfo} onClose={() => setMostrarInfo(false)} />
 
           <div className="max-w-6xl mx-auto px-6 py-6 space-y-6">
-            {/* Mostrar versiones */}
-            {versiones.length > 0 && (
-              <div className="bg-blue-50 border border-blue-200 p-4 rounded">
-                <strong>Versiones anteriores:</strong>{" "}
-                {versiones.map((v, idx) => (
-                  <span key={idx} className="inline-block mr-2 text-sm text-gray-700">
-                    v{v.version || 1}
-                  </span>
-                ))}
-              </div>
-            )}
-
-            {/* ... resto de componentes de datos personales, movilidad, asignaturas, bloques ... */}
-            {/* DATOS PERSONALES */}
             <section className="bg-white p-6 border rounded-xl shadow-sm space-y-4">
               <h2 className="text-lg font-semibold text-gray-700">Datos Personales</h2>
               <p className="text-sm text-gray-500">
@@ -280,23 +273,21 @@ export default function AcuerdoEditor() {
               </p>
               <div className="grid grid-cols-2 gap-4">
                 <input className="input" disabled value={usuario.nombre} />
-                <input className="input" disabled value={usuario.apellidos} />
+                <input className="input" disabled value={usuario.primer_apellido} />
+                <input className="input" disabled value={usuario.segundo_apellido} />
                 <input className="input" disabled value={usuario.email} />
+                <input className="input" disabled value={usuario.grado} />
                 <input
                   className="input"
                   placeholder="DNI / NIF"
                   value={datosPersonales.dni || ""}
                   onChange={(e) =>
-                    setDatosPersonales({
-                      ...datosPersonales,
-                      dni: e.target.value,
-                    })
+                    setDatosPersonales({ ...datosPersonales, dni: e.target.value })
                   }
                 />
               </div>
             </section>
 
-            {/* DATOS DE MOVILIDAD */}
             <section className="bg-white p-6 border rounded-xl shadow-sm space-y-4">
               <h2 className="text-lg font-semibold text-gray-700">Datos de Movilidad</h2>
               <p className="text-sm text-gray-500">
@@ -308,23 +299,31 @@ export default function AcuerdoEditor() {
                   placeholder="Curso académico"
                   value={datosMovilidad.curso_academico || ""}
                   onChange={(e) =>
-                    setDatosMovilidad({
-                      ...datosMovilidad,
-                      curso_academico: e.target.value,
-                    })
+                    setDatosMovilidad({ ...datosMovilidad, curso_academico: e.target.value })
                   }
                 />
-                <input
-                  className="input"
-                  placeholder="Programa (ERASMUS+ o Programa Propio)"
-                  value={datosMovilidad.programa || ""}
-                  onChange={(e) =>
-                    setDatosMovilidad({
-                      ...datosMovilidad,
-                      programa: e.target.value,
-                    })
-                  }
-                />
+                <div className="flex items-center gap-4">
+                  <label className="flex items-center gap-2">
+                    <input
+                      type="radio"
+                      name="programa"
+                      value="ERASMUS+"
+                      checked={datosMovilidad.programa === "ERASMUS+"}
+                      onChange={(e) => setDatosMovilidad({ ...datosMovilidad, programa: e.target.value })}
+                    />
+                    ERASMUS+
+                  </label>
+                  <label className="flex items-center gap-2">
+                    <input
+                      type="radio"
+                      name="programa"
+                      value="Programa Propio"
+                      checked={datosMovilidad.programa === "Programa Propio"}
+                      onChange={(e) => setDatosMovilidad({ ...datosMovilidad, programa: e.target.value })}
+                    />
+                    Programa Propio
+                  </label>
+                </div>
                 <input className="input" disabled value={destino?.nombre_uni || ""} />
                 <input className="input" disabled value={destino?.codigo || ""} />
                 <input className="input" disabled value={destino?.pais || ""} />
@@ -332,10 +331,7 @@ export default function AcuerdoEditor() {
                   className="input"
                   value={datosMovilidad.periodo_estudios || ""}
                   onChange={(e) =>
-                    setDatosMovilidad({
-                      ...datosMovilidad,
-                      periodo_estudios: e.target.value,
-                    })
+                    setDatosMovilidad({ ...datosMovilidad, periodo_estudios: e.target.value })
                   }
                 >
                   <option value="">-- Periodo de estudios --</option>
@@ -347,34 +343,19 @@ export default function AcuerdoEditor() {
                   className="input"
                   placeholder="Responsable académico"
                   value={datosMovilidad.responsable || ""}
-                  onChange={(e) =>
-                    setDatosMovilidad({
-                      ...datosMovilidad,
-                      responsable: e.target.value,
-                    })
-                  }
+                  onChange={(e) => setDatosMovilidad({ ...datosMovilidad, responsable: e.target.value })}
                 />
                 <input
                   className="input"
                   placeholder="Tutor Docente"
                   value={datosMovilidad.tutor || ""}
-                  onChange={(e) =>
-                    setDatosMovilidad({
-                      ...datosMovilidad,
-                      tutor: e.target.value,
-                    })
-                  }
+                  onChange={(e) => setDatosMovilidad({ ...datosMovilidad, tutor: e.target.value })}
                 />
                 <input
                   className="input"
                   placeholder="Email Tutor Docente"
                   value={datosMovilidad.email_tutor || ""}
-                  onChange={(e) =>
-                    setDatosMovilidad({
-                      ...datosMovilidad,
-                      email_tutor: e.target.value,
-                    })
-                  }
+                  onChange={(e) => setDatosMovilidad({ ...datosMovilidad, email_tutor: e.target.value })}
                 />
               </div>
             </section>

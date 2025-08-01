@@ -80,10 +80,10 @@ def generar_pdf_acuerdo(acuerdo):
     label_width = page_width * 0.2
     data_width = page_width * 0.3
 
-    # Separar apellidos si existen
-    apellidos = dp.get("apellidos", "").split() if dp.get("apellidos", "") else ["", ""]
-    primer_apellido = apellidos[0] if len(apellidos) > 0 else ""
-    segundo_apellido = apellidos[1] if len(apellidos) > 1 else ""
+   # Obtener apellidos desde campos individuales
+    primer_apellido = dp.get("primer_apellido", "")
+    segundo_apellido = dp.get("segundo_apellido", "")
+    grado = dp.get("grado", "")
 
     # Tabla de datos personales con el formato original
     user_table_data = [
@@ -96,7 +96,7 @@ def generar_pdf_acuerdo(acuerdo):
          Paragraph("<b>DNI / NIF</b>", tiny_style), 
          Paragraph(truncate_field(dp.get("dni", "")), tiny_style)],
         [Paragraph("<b>Grado en la UGR</b>", tiny_style), 
-         Paragraph(truncate_field(dp.get("grado", ""), 35), tiny_style), 
+         Paragraph(truncate_field(grado), tiny_style), 
          Paragraph("<b>Correo electrónico</b>", tiny_style), 
          Paragraph(truncate_field(dp.get("email", email), 35), tiny_style)]
     ]
@@ -114,90 +114,132 @@ def generar_pdf_acuerdo(acuerdo):
     elements.append(tabla_user)
     elements.append(Spacer(1, 20))
 
-    # ===== DATOS DE MOVILIDAD =====
+    # ===== DATOS DE MOVILIDAD - FORMATO MEJORADO =====
     elements.append(Paragraph("Datos movilidad", subtitle_style))
     dm = acuerdo.get("datos_movilidad", {})
 
-    # Construir datos de la tabla con spans apropiados
-    movilidad_data = [
-        [Paragraph("<b>Programa</b>", tiny_style), 
-         Paragraph(truncate_field(f"ERASMUS +/Programa Propio: {dm.get('programa', '')}", 60), tiny_style), 
-         Paragraph("<b>Curso Académico</b>", tiny_style), 
-         Paragraph(truncate_field(dm.get("curso_academico", "")), tiny_style)],
-        
-        [Paragraph("<b>Universidad de destino</b>", tiny_style), 
-         Paragraph(truncate_field(dm.get("nombre_universidad", ""), 70), tiny_style), 
-         "", ""],
-        
-        [Paragraph("<b>Código univer. destino</b>", tiny_style), 
-         Paragraph(truncate_field(dm.get("codigo_universidad", acuerdo.get("destino_codigo", ""))), tiny_style), 
-         Paragraph("<b>País</b>", tiny_style), 
-         Paragraph(truncate_field(dm.get("pais", "")), tiny_style)],
-        
-        [Paragraph("<b>Periodo de estudios</b>", tiny_style), 
-         Paragraph(truncate_field(f"Curso completo / 1er cuatrimestre / 2º cuatrimestre: {dm.get('periodo_estudios', '')}", 70), tiny_style), 
-         "", ""],
-        
-        [Paragraph("<b>Responsable Académico</b>", tiny_style), 
-         Paragraph(truncate_field(dm.get("responsable", ""), 70), tiny_style), 
-         "", ""],
-        
-        [Paragraph("<b>Tutor Docente</b>", tiny_style), 
-         Paragraph(truncate_field(dm.get("tutor", ""), 70), tiny_style), 
-         "", ""],
-        
-        [Paragraph("<b>Email Tutor Docente</b>", tiny_style), 
-         Paragraph(truncate_field(dm.get("email_tutor", ""), 70), tiny_style), 
-         "", ""]
+    # Tabla de movilidad con formato similar a la imagen
+    page_width = A4[0] - 4*cm
+    
+    # Primera fila: Programa, vacío, Curso Académico
+    fila1 = [
+        Paragraph("<b>Programa</b>", small_style),
+        Paragraph(truncate_field(dm.get('programa', 'ERASMUS+'), 40), small_style),
+        Paragraph("<b>Curso Académico</b>", small_style),
+        Paragraph(truncate_field(dm.get("curso_academico", "2023/24")), small_style)
     ]
     
-    # Anchos de columna adaptables
-    col1_width = page_width * 0.25  # Etiquetas
-    col2_width = page_width * 0.45  # Datos principales
-    col3_width = page_width * 0.15  # Etiquetas secundarias
-    col4_width = page_width * 0.15  # Datos secundarios
+    # Segunda fila: Universidad de destino (span completo)
+    fila2 = [
+        Paragraph("<b>Universidad de destino</b>", small_style),
+        Paragraph(truncate_field(dm.get("nombre_universidad", ""), 80), small_style),
+        "",
+        ""
+    ]
     
-    tabla_mov = Table(movilidad_data, colWidths=[col1_width, col2_width, col3_width, col4_width])
+    # Tercera fila: Código universidad, vacío, País
+    fila3 = [
+        Paragraph("<b>Código univer. destino</b>", small_style),
+        Paragraph(truncate_field(dm.get("codigo_universidad", acuerdo.get("destino_codigo", "P COIMBRA05"))), small_style),
+        Paragraph("<b>País</b>", small_style),
+        Paragraph(truncate_field(dm.get("pais", "Portugal")), small_style)
+    ]
+    
+    # Cuarta fila: Periodo de estudios (span completo)
+    fila4 = [
+        Paragraph("<b>Periodo de estudios</b>", small_style),
+        Paragraph(truncate_field(dm.get('periodo_estudios', '1er cuatrimestre'), 80), small_style),
+        "",
+        ""
+    ]
+    
+    # Quinta fila: Responsable Académico (span completo)
+    fila5 = [
+        Paragraph("<b>Responsable Académico</b>", small_style),
+        Paragraph(truncate_field(dm.get("responsable", "María"), 80), small_style),
+        "",
+        ""
+    ]
+    
+    # Sexta fila: Tutor Docente (span completo)
+    fila6 = [
+        Paragraph("<b>Tutor Docente</b>", small_style),
+        Paragraph(truncate_field(dm.get("tutor", "Juana"), 80), small_style),
+        "",
+        ""
+    ]
+    
+    # Séptima fila: Email Tutor Docente (span completo)
+    fila7 = [
+        Paragraph("<b>Email Tutor Docente</b>", small_style),
+        Paragraph(truncate_field(dm.get("email_tutor", ""), 80), small_style),
+        "",
+        ""
+    ]
+
+    movilidad_data = [fila1, fila2, fila3, fila4, fila5, fila6, fila7]
+    
+    # Anchos: 25%, 35%, 20%, 20%
+    col_widths = [
+        page_width * 0.25,
+        page_width * 0.35, 
+        page_width * 0.20,
+        page_width * 0.20
+    ]
+    
+    tabla_mov = Table(movilidad_data, colWidths=col_widths)
     tabla_mov.setStyle(TableStyle([
-        ("BOX", (0, 0), (-1, -1), 0.5, colors.black),
-        ("INNERGRID", (0, 0), (-1, -1), 0.25, colors.black),
-        ("BACKGROUND", (0, 0), (0, -1), colors.lightgrey),
-        ("BACKGROUND", (2, 0), (2, -1), colors.lightgrey),
-        ("VALIGN", (0, 0), (-1, -1), "TOP"),
-        ("ALIGN", (0, 0), (-1, -1), "LEFT"),
-        ("FONTSIZE", (0, 0), (-1, -1), 8),
+        ("BOX", (0, 0), (-1, -1), 1, colors.black),
+        ("INNERGRID", (0, 0), (-1, -1), 0.5, colors.black),
         
-        # Combinar celdas para campos largos
+        # Fondo gris para etiquetas
+        ("BACKGROUND", (0, 0), (0, 0), colors.lightgrey),  # Programa
+        ("BACKGROUND", (2, 0), (2, 0), colors.lightgrey),  # Curso Académico
+        ("BACKGROUND", (0, 1), (0, 1), colors.lightgrey),  # Universidad destino
+        ("BACKGROUND", (0, 2), (0, 2), colors.lightgrey),  # Código universidad
+        ("BACKGROUND", (2, 2), (2, 2), colors.lightgrey),  # País
+        ("BACKGROUND", (0, 3), (0, 3), colors.lightgrey),  # Periodo estudios
+        ("BACKGROUND", (0, 4), (0, 4), colors.lightgrey),  # Responsable
+        ("BACKGROUND", (0, 5), (0, 5), colors.lightgrey),  # Tutor
+        ("BACKGROUND", (0, 6), (0, 6), colors.lightgrey),  # Email tutor
+        
+        # Spans para campos largos
         ("SPAN", (1, 1), (3, 1)),  # Universidad de destino
-        ("SPAN", (1, 3), (3, 3)),  # Periodo de estudios  
+        ("SPAN", (1, 3), (3, 3)),  # Periodo de estudios
         ("SPAN", (1, 4), (3, 4)),  # Responsable Académico
         ("SPAN", (1, 5), (3, 5)),  # Tutor Docente
         ("SPAN", (1, 6), (3, 6)),  # Email Tutor Docente
+        
+        ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
+        ("ALIGN", (0, 0), (-1, -1), "CENTER"),
+        ("FONTSIZE", (0, 0), (-1, -1), 9),
     ]))
     elements.append(tabla_mov)
     elements.append(Spacer(1, 20))
 
-    # ===== TABLA DE ASIGNATURAS =====
+    # ===== TABLA DE ASIGNATURAS - FORMATO MEJORADO =====
     bloques = acuerdo.get("bloques", [])
 
     if not bloques:
         elements.append(Paragraph("No hay asignaturas añadidas.", normal))
     else:
         # Función para truncar texto si es muy largo
-        def truncate_text(text, max_length=50):
+        def truncate_text(text, max_length=35):
             if len(text) > max_length:
                 return text[:max_length-3] + "..."
             return text
 
-        # Cabeceras principales
-        header_ugr = Paragraph("<b>Estudios a reconocer en la UNIVERSIDAD DE GRANADA</b><br/><font size=6>COLOQUE DEBAJO DEL NOMBRE DE CADA ASIGNATURA EL ENLACE A SU GUÍA DOCENTE EN LA UGR</font>", small_style)
-        header_dest = Paragraph("<b>Estudios a realizar en la UNIVERSIDAD DE DESTINO</b><br/><font size=6>COLOQUE DEBAJO DEL NOMBRE DE CADA ASIGNATURA EL ENLACE A SU GUÍA DOCENTE EN LA UNIVERSIDAD DE DESTINO</font>", small_style)
+        # Estructura de la tabla siguiendo el formato de la imagen
+        # Primera fila: Headers principales
+        header1 = [
+            Paragraph("<b>Estudios a reconocer en la UNIVERSIDAD DE GRANADA</b><br/><font size=6>COLOQUE DEBAJO DEL NOMBRE DE CADA ASIGNATURA EL ENLACE A SU GUÍA DOCENTE EN LA UGR</font>", tiny_style),
+            "", "", "", "",
+            Paragraph("<b>Estudios a realizar en la UNIVERSIDAD DE DESTINO</b><br/><font size=6>COLOQUE DEBAJO DEL NOMBRE DE CADA ASIGNATURA EL ENLACE A SU GUÍA DOCENTE EN LA UNIVERSIDAD DE DESTINO</font>", tiny_style),
+            "", ""
+        ]
         
-        # Primera fila: cabeceras principales
-        headers_main = [header_ugr, "", "", "", "", header_dest, "", ""]
-        
-        # Segunda fila: subcabeceras nivel 1
-        headers_sub1 = [
+        # Segunda fila: Headers secundarios
+        header2 = [
             Paragraph("<b>Nombre de la Asignatura</b>", tiny_style),
             Paragraph("<b>Curso</b>", tiny_style),
             Paragraph("<b>Semestre (1º o 2º)</b>", tiny_style),
@@ -208,40 +250,63 @@ def generar_pdf_acuerdo(acuerdo):
             Paragraph("<b>Créditos ECTS o locales</b>", tiny_style)
         ]
         
-        # Tercera fila: subcabeceras nivel 2 (solo para créditos UGR)
-        headers_sub2 = [
-            "",
-            "",
-            "",
+        # Tercera fila: Sub-headers para créditos
+        header3 = [
+            "", "", "",
             Paragraph("<b>ECTS</b>", tiny_style),
-            Paragraph("<b>FO/F<br/>B/OP<br/>T*</b>", tiny_style),
-            "",
-            "",
-            ""
+            Paragraph("<b>FO/FB/OP/T*</b>", tiny_style),
+            "", "", ""
         ]
 
-        table_data = [headers_main, headers_sub1, headers_sub2]
+        table_data = [header1, header2, header3]
 
-        # Datos por bloque
-        for b in bloques:
-            ugr = b.get("asignaturas_ugr", [{}])[0] if b.get("asignaturas_ugr") else {}
-            dest = b.get("asignaturas_destino", [{}])[0] if b.get("asignaturas_destino") else {}
+        # Datos de asignaturas
+        # for b in bloques:
+        #     ugr = b.get("asignaturas_ugr", [{}])[0] if b.get("asignaturas_ugr") else {}
+        #     dest = b.get("asignaturas_destino", [{}])[0] if b.get("asignaturas_destino") else {}
 
-            # Truncar nombres largos y crear párrafos pequeños
-            nombre_ugr = truncate_text(ugr.get('nombre', ''), 40)
-            nombre_dest = truncate_text(dest.get('nombre', ''), 40)
-            
-            fila = [
-                Paragraph(nombre_ugr, tiny_style),
-                Paragraph(str(ugr.get('curso', '')), tiny_style),
-                Paragraph(str(ugr.get('semestre', '')), tiny_style),
-                Paragraph(str(ugr.get('ects', '')), tiny_style),
-                Paragraph(str(ugr.get('tipo', '')), tiny_style),
-                Paragraph(nombre_dest, tiny_style),
-                Paragraph(str(dest.get('curso', '')), tiny_style),
-                Paragraph(str(dest.get('ects', '')), tiny_style)
-            ]
-            table_data.append(fila)
+        #     fila = [
+        #         Paragraph(truncate_text(ugr.get('nombre', '')), tiny_style),
+        #         Paragraph(str(ugr.get('curso', '')), tiny_style),
+        #         Paragraph(str(ugr.get('semestre', '')), tiny_style),
+        #         Paragraph(str(ugr.get('ects', '')), tiny_style),
+        #         Paragraph(str(ugr.get('tipo', '')), tiny_style),
+        #         Paragraph(truncate_text(dest.get('nombre', '')), tiny_style),
+        #         Paragraph(str(dest.get('curso', '')), tiny_style),
+        #         Paragraph(str(dest.get('ects', '')), tiny_style)
+        #     ]
+        #     table_data.append(fila)
+
+    for b in bloques:
+        ugr = b.get("asignaturas_ugr", [{}])[0] if b.get("asignaturas_ugr") else {}
+        dest = b.get("asignaturas_destino", [{}])[0] if b.get("asignaturas_destino") else {}
+
+        # Crear enlaces si existen
+        ugr_nombre = ugr.get('nombre', '')
+        ugr_url = ugr.get('enlace') or ugr.get('guia')
+        if ugr_url:
+            ugr_nombre = f'<a href="{ugr_url}" color="blue">{truncate_text(ugr_nombre)}</a>'
+        else:
+            ugr_nombre = truncate_text(ugr_nombre)
+
+        dest_nombre = dest.get('nombre', '')
+        dest_url = dest.get('guia')
+        if dest_url:
+            dest_nombre = f'<a href="{dest_url}" color="blue">{truncate_text(dest_nombre)}</a>'
+        else:
+            dest_nombre = truncate_text(dest_nombre)
+
+        fila = [
+            Paragraph(ugr_nombre, tiny_style),
+            Paragraph(str(ugr.get('curso', '')), tiny_style),
+            Paragraph(str(ugr.get('semestre', '')), tiny_style),
+            Paragraph(str(ugr.get('ects', '')), tiny_style),
+            Paragraph(str(ugr.get('tipo', '')), tiny_style),
+            Paragraph(dest_nombre, tiny_style),
+            Paragraph(str(dest.get('curso', '')), tiny_style),
+            Paragraph(str(dest.get('ects', '')), tiny_style)
+        ]
+        table_data.append(fila)
 
         # Fila de totales
         try:
@@ -263,32 +328,34 @@ def generar_pdf_acuerdo(acuerdo):
         ]
         table_data.append(fila_total)
 
-        # Calcular anchos de columna dinámicamente
-        page_width = A4[0] - 4*cm  # Ancho disponible menos márgenes
+        # Anchos de columna optimizados
+        page_width = A4[0] - 4*cm
         col_widths = [
-            page_width * 0.25,  # Nombre asignatura UGR
-            page_width * 0.08,  # Curso UGR
-            page_width * 0.08,  # Semestre UGR
+            page_width * 0.22,  # Nombre asignatura UGR
+            page_width * 0.08,  # Curso UGR  
+            page_width * 0.10,  # Semestre UGR
             page_width * 0.08,  # ECTS UGR
-            page_width * 0.08,  # Tipo UGR
-            page_width * 0.25,  # Nombre asignatura Destino
+            page_width * 0.10,  # Tipo UGR
+            page_width * 0.22,  # Nombre asignatura Destino
             page_width * 0.08,  # Curso Destino
-            page_width * 0.10   # ECTS Destino
+            page_width * 0.12   # ECTS Destino
         ]
 
-        # Crear tabla
         tabla_asignaturas = Table(table_data, colWidths=col_widths)
 
         tabla_asignaturas.setStyle(TableStyle([
-            # Bordes
-            ("BOX", (0, 0), (-1, -1), 0.5, colors.black),
-            ("INNERGRID", (0, 0), (-1, -1), 0.25, colors.black),
+            # Bordes más gruesos como en la imagen
+            ("BOX", (0, 0), (-1, -1), 1, colors.black),
+            ("INNERGRID", (0, 0), (-1, -1), 0.5, colors.black),
             
-            # Cabeceras principales (primera fila)
-            ("SPAN", (0, 0), (4, 0)),  # UGR
-            ("SPAN", (5, 0), (7, 0)),  # Destino
+            # Spans para headers principales
+            ("SPAN", (0, 0), (4, 0)),  # Header UGR
+            ("SPAN", (5, 0), (7, 0)),  # Header Destino
             
-            # Spans para subcabeceras
+            # Span para "Créditos" que se subdivide en ECTS y FO/FB/OP
+            ("SPAN", (3, 1), (4, 1)),  # "Créditos" abarca columnas 3 y 4
+            
+            # Spans para campos que no tienen sub-división
             ("SPAN", (0, 1), (0, 2)),  # Nombre asignatura UGR
             ("SPAN", (1, 1), (1, 2)),  # Curso UGR
             ("SPAN", (2, 1), (2, 2)),  # Semestre UGR
@@ -296,11 +363,11 @@ def generar_pdf_acuerdo(acuerdo):
             ("SPAN", (6, 1), (6, 2)),  # Curso Destino
             ("SPAN", (7, 1), (7, 2)),  # ECTS Destino
             
-            # Span para totales
-            ("SPAN", (0, -1), (2, -1)),  # Total UGR
-            ("SPAN", (5, -1), (6, -1)),  # Total Destino
+            # Spans para totales
+            ("SPAN", (0, -1), (2, -1)),  # Total UGR label
+            ("SPAN", (5, -1), (6, -1)),  # Total Destino label
             
-            # Fondos
+            # Fondos grises
             ("BACKGROUND", (0, 0), (-1, 2), colors.lightgrey),
             ("BACKGROUND", (0, -1), (-1, -1), colors.lightgrey),
             
@@ -309,8 +376,8 @@ def generar_pdf_acuerdo(acuerdo):
             ("ALIGN", (0, -1), (-1, -1), "CENTER"),
             ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
             
-            # Tamaño de fuente pequeño para que quepa todo
-            ("FONTSIZE", (0, 0), (-1, -1), 7),
+            # Tamaño de fuente
+            ("FONTSIZE", (0, 0), (-1, -1), 8),
         ]))
 
         elements.append(tabla_asignaturas)
@@ -373,7 +440,7 @@ def generar_pdf_acuerdo(acuerdo):
          Paragraph("La persona interesada tiene derecho a solicitar el acceso, rectificación, supresión, oposición y limitación de sus datos, como se explica en la información adicional", tiny_style)],
         
         [Paragraph("<b>Información Adicional</b>", tiny_style), 
-         Paragraph("La información adicional y detallada se encuentra disponible en el siguiente enlace: https://secretariageneral.ugr.es/pages/proteccion_datos/leyendas-informativas/_img/informacionadicionalmovilidad/", tiny_style)]
+         Paragraph('La información adicional y detallada se encuentra disponible en el siguiente enlace: <a href="https://secretariageneral.ugr.es/pages/proteccion_datos/leyendas-informativas/_img/informacionadicionalmovilidad/" color="blue">https://secretariageneral.ugr.es/pages/proteccion_datos/leyendas-informativas/_img/informacionadicionalmovilidad/</a>', tiny_style)]
     ]
     
     tabla_proteccion = Table(proteccion_data, colWidths=[label_width_pd, data_width_pd])

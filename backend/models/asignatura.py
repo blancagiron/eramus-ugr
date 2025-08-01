@@ -10,4 +10,5 @@ def crear_asignatura(data):
         "tipo": data.get("tipo", "OPT"),
         "enlace": data.get("enlace", ""),
         "semestre": data.get("semestre", 1),
+        "enlace": data.get("enlace", "")
     }
