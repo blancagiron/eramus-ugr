@@ -16,6 +16,8 @@ export default function AcuerdoEditor() {
   const [cargando, setCargando] = useState(true);
   const [sidebarVisible, setSidebarVisible] = useState(false);
   const [mostrarInfo, setMostrarInfo] = useState(false);
+  const [mensajeValidacion, setMensajeValidacion] = useState("");
+  const [nombreTutorDocente, setNombreTutorDocente] = useState("");
 
   const navigate = useNavigate();
 
@@ -52,13 +54,37 @@ export default function AcuerdoEditor() {
           .then((res) => res.json())
           .then(setVersiones);
 
+        // if (user.destino_confirmado?.codigo) {
+        //   fetch(`http://localhost:5000/api/destinos/codigo/${encodeURIComponent(user.destino_confirmado.codigo)}`)
+        //     .then((res) => res.json())
+        //     .then(setDestino)
+        //     .finally(() => setCargando(false));
+        // } else {
+        //   setCargando(false);
+        // }
         if (user.destino_confirmado?.codigo) {
           fetch(`http://localhost:5000/api/destinos/codigo/${encodeURIComponent(user.destino_confirmado.codigo)}`)
             .then((res) => res.json())
-            .then(setDestino)
+            .then((dest) => {
+              setDestino(dest);
+
+              if (dest.tutor_asignado) {
+                fetch(`http://localhost:5000/usuarios/email/${encodeURIComponent(dest.tutor_asignado)}`)
+                  .then((res) => res.json())
+                  .then((tutor) => {
+                    if (tutor?.nombre && tutor?.primer_apellido) {
+                      const nombreCompleto = `${tutor.nombre} ${tutor.primer_apellido} ${tutor.segundo_apellido || ""}`.trim();
+                      setNombreTutorDocente(nombreCompleto);
+                      setDatosMovilidad((prev) => ({
+                        ...prev,
+                        email_tutor: tutor.email,
+                      }));
+                    }
+                  })
+                  .catch((err) => console.error("Error obteniendo tutor docente:", err));
+              }
+            })
             .finally(() => setCargando(false));
-        } else {
-          setCargando(false);
         }
       });
   }, []);
@@ -156,10 +182,13 @@ export default function AcuerdoEditor() {
         codigo_universidad: destino?.codigo || "",
         pais: destino?.pais || "",
         periodo_estudios: datosMovilidad.periodo_estudios || "",
+        tutor: nombreTutorDocente || "", // ← nombre completo del tutor
+        email_tutor: destino?.tutor_asignado || "", // ← email del tutor
       },
       bloques,
       estado,
     };
+
 
     try {
       const endpoint = nuevaVersion || !acuerdo?.version
@@ -345,18 +374,16 @@ export default function AcuerdoEditor() {
                   value={datosMovilidad.responsable || ""}
                   onChange={(e) => setDatosMovilidad({ ...datosMovilidad, responsable: e.target.value })}
                 />
-                <input
+
+                {/* <input
                   className="input"
-                  placeholder="Tutor Docente"
-                  value={datosMovilidad.tutor || ""}
-                  onChange={(e) => setDatosMovilidad({ ...datosMovilidad, tutor: e.target.value })}
-                />
-                <input
-                  className="input"
-                  placeholder="Email Tutor Docente"
+                  placeholder="Nombre del tutor"
                   value={datosMovilidad.email_tutor || ""}
                   onChange={(e) => setDatosMovilidad({ ...datosMovilidad, email_tutor: e.target.value })}
-                />
+                /> */}
+                <input className="input" disabled value={nombreTutorDocente || "Tutor todavía no asignado"} />
+
+                <input className="input" disabled value={destino.tutor_asignado || "Tutor todavía no asignado"} />
               </div>
             </section>
 

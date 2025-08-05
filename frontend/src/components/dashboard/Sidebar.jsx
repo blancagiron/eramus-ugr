@@ -37,17 +37,14 @@ export default function Sidebar({ children, siempreVisible = false, visible = tr
     { label: "Mi Perfil", icon: <User size={18} />, to: "/perfil" },
     { label: "Dashboard", icon: <Home size={18} />, to: dashboardPath },
     { label: "Destinos", icon: <MapPin size={18} />, to: "/destinos" },
-    { label: "Convalidaciones", icon: <Search size={18} />, to: "/convalidaciones" },
     { label: "Documentación", icon: <Folder size={18} />, to: "/documentacion" },
-    { label: "Mis acuerdos", icon: <FileText size={18} />, to: "/acuerdos" },
+    { label: "Mi acuerdo", icon: <FileText size={18} />, to: "/acuerdos" },
   ];
 
   const linksTutor = [
     { label: "Mi Perfil", icon: <User size={18} />, to: "/perfil" },
     { label: "Dashboard", icon: <Home size={18} />, to: dashboardPath },
     { label: "Destinos", icon: <MapPin size={18} />, to: "/destinos" },
-    { label: "Convalidaciones", icon: <Search size={18} />, to: "/convalidaciones" },
-    { label: "Documentación", icon: <Folder size={18} />, to: "/documentacion" },
   ];
 
   const linksAdmin = [

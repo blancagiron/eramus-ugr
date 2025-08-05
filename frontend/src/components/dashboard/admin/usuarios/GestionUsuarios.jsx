@@ -65,7 +65,7 @@ export default function GestionUsuarios() {
               </button>
             </div>
 
-            <div className="overflow-auto border rounded-xl shadow-sm">
+            <div className="overflow-auto border rounded-xl shadow-sm bg-white">
               <table className="w-full table-auto text-base">
                 <thead className="bg-gray-50 border-b text-left text-base" style={{ fontFamily: "Inter, sans-serif" }}>
                   <tr>

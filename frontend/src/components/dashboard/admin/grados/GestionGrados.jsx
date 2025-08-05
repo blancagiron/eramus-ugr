@@ -54,7 +54,7 @@ export default function GestionGrados() {
               Crear nuevo grado
             </button>
 
-            <div className="overflow-auto border rounded-xl shadow-sm">
+            <div className="overflow-auto border rounded-xl shadow-sm bg-white">
               <table className="w-full table-auto text-base">
                 <thead className="bg-gray-50 border-b text-left" style={{ fontFamily: "Inter, sans-serif" }}>
                   <tr>

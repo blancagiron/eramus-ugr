@@ -172,7 +172,7 @@ export default function GestionAsignaturas() {
             )}
 
             {/* Tabla */}
-            <div className="overflow-auto border rounded-xl shadow-sm mt-4">
+            <div className="overflow-auto border rounded-xl shadow-sm mt-4 bg-white">
               <table className="w-full table-auto text-sm">
                 <thead className="bg-gray-50 border-b text-left text-base">
                   <tr>

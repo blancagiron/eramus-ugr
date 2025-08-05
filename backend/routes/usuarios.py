@@ -256,3 +256,12 @@ def verificar_email():
         return jsonify({"error": "Token inválido"}), 400
 
     return jsonify({"mensaje": "Cuenta verificada correctamente"}), 200
+
+@usuarios.route("/usuarios/email/<path:email>")
+def obtener_usuario_por_email(email):
+    usuario = db.usuarios.find_one({"email": email})
+    if usuario:
+        usuario["_id"] = str(usuario["_id"])
+        return jsonify(usuario)
+    else:
+        return jsonify({}), 404

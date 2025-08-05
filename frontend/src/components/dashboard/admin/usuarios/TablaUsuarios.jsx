@@ -23,7 +23,7 @@ export default function TablaUsuarios() {
   return (
     <>
       <h2 className="text-xl font-semibold mb-4">Usuarios registrados</h2>
-      <div className="overflow-auto rounded-lg border">
+      <div className="overflow-auto rounded-lg border bg-white">
         <table className="w-full text-left text-sm">
           <thead className="bg-gray-100 text-gray-700">
             <tr>
