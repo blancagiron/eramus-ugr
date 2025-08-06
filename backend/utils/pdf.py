@@ -217,7 +217,7 @@ def generar_pdf_acuerdo(acuerdo):
     elements.append(tabla_mov)
     elements.append(Spacer(1, 20))
 
-    # ===== TABLA DE ASIGNATURAS - FORMATO MEJORADO CON CRÉDITOS DIVIDIDOS =====
+    # ===== TABLA DE ASIGNATURAS - MEJORADA CON SPANS DINÁMICOS =====
     bloques = acuerdo.get("bloques", [])
 
     if not bloques:
@@ -229,7 +229,7 @@ def generar_pdf_acuerdo(acuerdo):
                 return text[:max_length-3] + "..."
             return text
 
-        # Estructura de la tabla siguiendo el formato de la imagen con créditos divididos
+        # Estructura de la tabla corregida
         # Primera fila: Headers principales
         header1 = [
             Paragraph("<b>Estudios a reconocer en la UNIVERSIDAD DE GRANADA</b><br/><font size=6>COLOQUE DEBAJO DEL NOMBRE DE CADA ASIGNATURA EL ENLACE A SU GUÍA DOCENTE EN LA UGR</font>", tiny_style),
@@ -238,80 +238,153 @@ def generar_pdf_acuerdo(acuerdo):
             "", ""
         ]
         
-        # Segunda fila: Headers secundarios
+        # Segunda fila: Headers secundarios - CORREGIDA
         header2 = [
             Paragraph("<b>Nombre de la Asignatura</b>", tiny_style),
             Paragraph("<b>Curso</b>", tiny_style),
             Paragraph("<b>Semestre (1º o 2º)</b>", tiny_style),
-            Paragraph("<b>Créditos</b>", tiny_style),
-            "",
+            Paragraph("<b>Créditos</b>", tiny_style),  # Este se dividirá en la fila 3
+            "",  # Espacio para la segunda columna de créditos
             Paragraph("<b>Name of Subject</b>", tiny_style),
             Paragraph("<b>Course</b>", tiny_style),
             Paragraph("<b>Créditos ECTS o locales</b>", tiny_style)
         ]
         
-        # Tercera fila: Sub-headers para créditos divididos en ECTS y FO/FB/OP
+        # Tercera fila: Sub-headers solo para la columna de créditos de UGR
         header3 = [
-            "", "", "",
+            "", "", "",  # Nombres, curso y semestre no se dividen
             Paragraph("<b>ECTS</b>", tiny_style),
             Paragraph("<b>FO/FB/OP/T*</b>", tiny_style),
-            "", "", ""
+            "", "", ""  # Las columnas de destino no se dividen
         ]
 
         table_data = [header1, header2, header3]
 
-        # Datos de asignaturas con enlaces
-        for b in bloques:
-            ugr = b.get("asignaturas_ugr", [{}])[0] if b.get("asignaturas_ugr") else {}
-            dest = b.get("asignaturas_destino", [{}])[0] if b.get("asignaturas_destino") else {}
+        # ===== PROCESAMIENTO MEJORADO DE BLOQUES CON SPANS =====
+        def procesar_bloque(bloque):
+            asignaturas_ugr = bloque.get("asignaturas_ugr", [])
+            asignaturas_destino = bloque.get("asignaturas_destino", [])
+            
+            max_filas = max(len(asignaturas_ugr), len(asignaturas_destino))
+            
+            filas_bloque = []
+            spans_necesarios = []  # Lista para almacenar los spans que necesitamos aplicar
+            
+            for i in range(max_filas):
+                ugr = asignaturas_ugr[i] if i < len(asignaturas_ugr) else {}
+                dest = asignaturas_destino[i] if i < len(asignaturas_destino) else {}
+                
+                # Procesar UGR
+                ugr_nombre = ugr.get('nombre', '') if ugr else ''
+                if ugr_nombre:
+                    ugr_url = ugr.get('enlace') or ugr.get('guia')
+                    if ugr_url:
+                        ugr_nombre = f'<a href="{ugr_url}" color="blue">{truncate_text(ugr_nombre)}</a>'
+                    else:
+                        ugr_nombre = truncate_text(ugr_nombre)
 
-            ugr_nombre = ugr.get('nombre', '')
-            ugr_url = ugr.get('enlace') or ugr.get('guia')
-            if ugr_url:
-                ugr_nombre = f'<a href="{ugr_url}" color="blue">{truncate_text(ugr_nombre)}</a>'
-            else:
-                ugr_nombre = truncate_text(ugr_nombre)
+                # Procesar destino
+                dest_nombre = dest.get('nombre', '') if dest else ''
+                if dest_nombre:
+                    dest_url = dest.get('guia')
+                    if dest_url:
+                        dest_nombre = f'<a href="{dest_url}" color="blue">{truncate_text(dest_nombre)}</a>'
+                    else:
+                        dest_nombre = truncate_text(dest_nombre)
 
-            dest_nombre = dest.get('nombre', '')
-            dest_url = dest.get('guia')
-            if dest_url:
-                dest_nombre = f'<a href="{dest_url}" color="blue">{truncate_text(dest_nombre)}</a>'
-            else:
-                dest_nombre = truncate_text(dest_nombre)
+                fila = [
+                    Paragraph(ugr_nombre, tiny_style),
+                    Paragraph(str(ugr.get('curso', '')) if ugr else "", tiny_style),
+                    Paragraph(str(ugr.get('semestre', '')) if ugr else "", tiny_style),
+                    Paragraph(str(ugr.get('ects', '')) if ugr else "", tiny_style),
+                    Paragraph(str(ugr.get('tipo', '')) if ugr else "", tiny_style),
+                    Paragraph(dest_nombre, tiny_style),
+                    Paragraph(str(dest.get('curso', '')) if dest else "", tiny_style),
+                    Paragraph(str(dest.get('ects', '')) if dest else "", tiny_style)
+                ]
+                
+                filas_bloque.append(fila)
+            
+            # Determinar si necesitamos spans para las celdas de UGR
+            # Si hay menos asignaturas UGR que de destino, necesitamos spans
+            if len(asignaturas_ugr) < len(asignaturas_destino):
+                for i in range(len(asignaturas_ugr)):
+                    # Calcular cuántas filas debe ocupar cada asignatura UGR
+                    filas_por_ugr = len(asignaturas_destino) // len(asignaturas_ugr)
+                    filas_extra = len(asignaturas_destino) % len(asignaturas_ugr)
+                    
+                    # Si esta asignatura UGR debe ocupar más de una fila
+                    if i < filas_extra:
+                        filas_a_ocupar = filas_por_ugr + 1
+                    else:
+                        filas_a_ocupar = filas_por_ugr
+                    
+                    if filas_a_ocupar > 1:
+                        fila_inicio = sum([
+                            (len(asignaturas_destino) // len(asignaturas_ugr) + (1 if j < filas_extra else 0))
+                            for j in range(i)
+                        ])
+                        fila_fin = fila_inicio + filas_a_ocupar - 1
+                        
+                        # Añadir spans para las columnas UGR (0-4)
+                        for col in range(5):  # Columnas 0,1,2,3,4
+                            spans_necesarios.append((col, fila_inicio, col, fila_fin))
+            
+            return filas_bloque, spans_necesarios
 
-            fila = [
-                Paragraph(ugr_nombre, tiny_style),
-                Paragraph(str(ugr.get('curso', '')), tiny_style),
-                Paragraph(str(ugr.get('semestre', '')), tiny_style),
-                Paragraph(str(ugr.get('ects', '')), tiny_style),
-                Paragraph(str(ugr.get('tipo', '')), tiny_style),
-                Paragraph(dest_nombre, tiny_style),
-                Paragraph(str(dest.get('curso', '')), tiny_style),
-                Paragraph(str(dest.get('ects', '')), tiny_style)
-            ]
-            table_data.append(fila)
-
-        # Fila de totales
-        try:
-            total_ugr = sum(float(b["asignaturas_ugr"][0].get("ects", 0)) for b in bloques if b.get("asignaturas_ugr") and b["asignaturas_ugr"][0].get("ects"))
-            total_dest = sum(float(b["asignaturas_destino"][0].get("ects", 0)) for b in bloques if b.get("asignaturas_destino") and b["asignaturas_destino"][0].get("ects"))
-        except (ValueError, TypeError):
-            total_ugr = 0
-            total_dest = 0
+        # Procesar todos los bloques y recopilar spans
+        filas_bloques = []
+        todos_los_spans = []
         
+        for bloque in bloques:
+            filas_del_bloque, spans_del_bloque = procesar_bloque(bloque)
+            
+            # Ajustar los índices de las filas de los spans según la posición en la tabla
+            fila_offset = len(table_data) + len(filas_bloques)
+            spans_ajustados = []
+            for col_start, row_start, col_end, row_end in spans_del_bloque:
+                spans_ajustados.append((col_start, row_start + fila_offset, col_end, row_end + fila_offset))
+            
+            filas_bloques.extend(filas_del_bloque)
+            todos_los_spans.extend(spans_ajustados)
+
+        table_data.extend(filas_bloques)
+
+        # ===== CÁLCULO DE TOTALES MEJORADO =====
+        total_ugr_ects = 0
+        total_dest_ects = 0
+        
+        for bloque in bloques:
+            # Sumar créditos de UGR (evitar duplicados si hay múltiples asignaturas UGR)
+            for ugr in bloque.get("asignaturas_ugr", []):
+                try:
+                    ects = float(ugr.get("ects", 0))
+                    total_ugr_ects += ects
+                except (ValueError, TypeError):
+                    pass
+            
+            # Sumar créditos de destino
+            for dest in bloque.get("asignaturas_destino", []):
+                try:
+                    ects = float(dest.get("ects", 0))
+                    total_dest_ects += ects
+                except (ValueError, TypeError):
+                    pass
+        
+        # Fila de totales
         fila_total = [
             Paragraph("<b>TOTAL CRÉDITOS</b>", tiny_style), 
             "", 
             "", 
-            Paragraph(f"<b>{total_ugr}</b>", tiny_style), 
+            Paragraph(f"<b>{total_ugr_ects}</b>", tiny_style), 
             "", 
             Paragraph("<b>TOTAL CRÉDITOS</b>", tiny_style), 
             "", 
-            Paragraph(f"<b>{total_dest}</b>", tiny_style)
+            Paragraph(f"<b>{total_dest_ects}</b>", tiny_style)
         ]
         table_data.append(fila_total)
 
-        # Anchos de columna optimizados (igual que el primer código)
+        # Anchos de columna optimizados
         col_widths = [
             page_width * 0.22,  # Nombre asignatura UGR
             page_width * 0.08,  # Curso UGR  
@@ -325,28 +398,30 @@ def generar_pdf_acuerdo(acuerdo):
 
         tabla_asignaturas = Table(table_data, colWidths=col_widths)
 
+        # ===== ESTILO CORREGIDO CON SPANS DINÁMICOS =====
         tabla_asignaturas.setStyle(TableStyle([
-            # Bordes más gruesos como en la imagen
+            # Bordes
             ("BOX", (0, 0), (-1, -1), 1, colors.black),
             ("INNERGRID", (0, 0), (-1, -1), 0.5, colors.black),
             
-            # Spans para headers principales
-            ("SPAN", (0, 0), (4, 0)),  # Header UGR
-            ("SPAN", (5, 0), (7, 0)),  # Header Destino
+            # Spans para headers principales (fila 0)
+            ("SPAN", (0, 0), (4, 0)),  # Header UGR completo
+            ("SPAN", (5, 0), (7, 0)),  # Header Destino completo
             
-            # Spans para campos que no tienen sub-división
-            ("SPAN", (0, 1), (0, 2)),  # Nombre asignatura UGR
-            ("SPAN", (1, 1), (1, 2)),  # Curso UGR
-            ("SPAN", (2, 1), (2, 2)),  # Semestre UGR
-            # IMPORTANTE: "Créditos" en fila 2 abarca columnas 3 y 4
-            ("SPAN", (3, 1), (4, 1)),  # "Créditos" header abarca ECTS y FO/FB/OP
-            ("SPAN", (5, 1), (5, 2)),  # Nombre asignatura Destino
-            ("SPAN", (6, 1), (6, 2)),  # Curso Destino
-            ("SPAN", (7, 1), (7, 2)),  # ECTS Destino
+            # Spans corregidos para fila 1 - solo las columnas que NO se dividen
+            ("SPAN", (0, 1), (0, 2)),  # Nombre asignatura UGR (1 fila -> 2 filas)
+            ("SPAN", (1, 1), (1, 2)),  # Curso UGR (1 fila -> 2 filas)  
+            ("SPAN", (2, 1), (2, 2)),  # Semestre UGR (1 fila -> 2 filas)
+            # IMPORTANTE: Créditos UGR en fila 1 abarca las dos columnas (3,4) pero NO se extiende a fila 2
+            ("SPAN", (3, 1), (4, 1)),  # "Créditos" header solo en fila 1
+            # Las columnas de destino tampoco se dividen
+            ("SPAN", (5, 1), (5, 2)),  # Nombre asignatura Destino (1 fila -> 2 filas)
+            ("SPAN", (6, 1), (6, 2)),  # Curso Destino (1 fila -> 2 filas)
+            ("SPAN", (7, 1), (7, 2)),  # ECTS Destino (1 fila -> 2 filas)
             
-            # Spans para totales
+            # Spans para totales (última fila)
             ("SPAN", (0, -1), (2, -1)),  # Total UGR label
-            ("SPAN", (3, -1), (4, -1)),  # Total UGR value (span sobre ECTS y FO/FB/OP)
+            ("SPAN", (3, -1), (4, -1)),  # Total UGR value
             ("SPAN", (5, -1), (6, -1)),  # Total Destino label
             
             # Fondos grises
@@ -361,6 +436,12 @@ def generar_pdf_acuerdo(acuerdo):
             # Tamaño de fuente
             ("FONTSIZE", (0, 0), (-1, -1), 8),
         ]))
+        
+        # Añadir los spans dinámicos para los bloques personalizados
+        for col_start, row_start, col_end, row_end in todos_los_spans:
+            tabla_asignaturas.setStyle(TableStyle([
+                ("SPAN", (col_start, row_start), (col_end, row_end)),
+            ]))
 
         elements.append(tabla_asignaturas)
         elements.append(Spacer(1, 20))
