@@ -24,6 +24,21 @@ def listar_destinos():
         d["_id"] = str(d["_id"])
     return jsonify(docs)
 
+# @destinos.route("/api/destinos", methods=["POST"])
+# def crear_nuevo_destino():
+#     data = request.json
+#     obligatorios = ["codigo", "nombre_uni", "pais", "requisitos_idioma", "plazas", "meses", "codigo_centro_ugr", "codigo_grado_ugr"]
+#     for campo in obligatorios:
+#         if campo not in data:
+#             return jsonify({ "error": f"Falta el campo obligatorio '{campo}'" }), 400
+
+#     if coleccion.find_one({ "codigo": data["codigo"] }):
+#         return jsonify({ "error": "Ya existe un destino con ese código" }), 409
+
+#     destino = crear_destino(data)
+#     resultado = coleccion.insert_one(destino)
+#     return jsonify({ "message": "Destino creado", "id": str(resultado.inserted_id) })
+
 @destinos.route("/api/destinos", methods=["POST"])
 def crear_nuevo_destino():
     data = request.json
@@ -32,12 +47,17 @@ def crear_nuevo_destino():
         if campo not in data:
             return jsonify({ "error": f"Falta el campo obligatorio '{campo}'" }), 400
 
-    if coleccion.find_one({ "codigo": data["codigo"] }):
-        return jsonify({ "error": "Ya existe un destino con ese código" }), 409
+    # Permitir mismo codigo si cambia el grado
+    if coleccion.find_one({
+        "codigo": data["codigo"],
+        "codigo_grado_ugr": data["codigo_grado_ugr"]
+    }):
+        return jsonify({ "error": "Ya existe un destino con ese código para este grado" }), 409
 
     destino = crear_destino(data)
     resultado = coleccion.insert_one(destino)
     return jsonify({ "message": "Destino creado", "id": str(resultado.inserted_id) })
+
 
 @destinos.route("/api/destinos/<id>", methods=["PATCH"])
 def editar_destino(id):

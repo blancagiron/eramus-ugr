@@ -1,30 +1,102 @@
 import { useParams, useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import DashboardHeader from "../dashboard/DashboardHeader";
-import { ExternalLink, ArrowLeft, MapPin, Clock, Users, Globe } from "lucide-react";
+import { ExternalLink, ArrowLeft, MapPin, Clock, Users, Globe, ThumbsUp, ThumbsDown, Star } from "lucide-react";
 
 export default function DestinoDetalle() {
   const { nombre_uni } = useParams();
   const navigate = useNavigate();
   const [destino, setDestino] = useState(null);
   const [tab, setTab] = useState("universidad");
+  const [experiencias, setExperiencias] = useState([]);
+  const [user, setUser] = useState(null);
+  const [experienciasAgrupadas, setExperienciasAgrupadas] = useState({});
+  const [indicesExperiencias, setIndicesExperiencias] = useState({}); // índice actual por código Erasmus
 
+  // Cargar usuario
+  useEffect(() => {
+    const usuarioRaw = localStorage.getItem("usuario");
+    if (usuarioRaw) {
+      const u = JSON.parse(usuarioRaw);
+      fetch(`http://localhost:5000/usuarios/${u.email}`)
+        .then(res => res.json())
+        .then(setUser);
+    }
+  }, []);
+
+  // Calcular medias y preparar índices
+  useEffect(() => {
+    if (experiencias.length > 0) {
+      const agrupadas = experiencias.reduce((acc, exp) => {
+        const key = exp.codigo_erasmus;
+        if (!acc[key]) {
+          acc[key] = {
+            experiencias: [],
+            medias: {
+              puntuacion_general: 0,
+              valoracion_profesorado: 0,
+              facilidad_materia: 0,
+              coste_vida: 0,
+              alojamiento: 0,
+              seguridad: 0,
+              ocio: 0
+            }
+          };
+        }
+        acc[key].experiencias.push(exp);
+        acc[key].medias.puntuacion_general += exp.puntuacion_general || 0;
+        acc[key].medias.valoracion_profesorado += exp.valoracion_profesorado || 0;
+        acc[key].medias.facilidad_materia += exp.facilidad_materia || 0;
+        acc[key].medias.coste_vida += exp.coste_vida || 0;
+        acc[key].medias.alojamiento += exp.alojamiento || 0;
+        acc[key].medias.seguridad += exp.seguridad || 0;
+        acc[key].medias.ocio += exp.ocio || 0;
+        return acc;
+      }, {});
+
+      for (const key in agrupadas) {
+        const total = agrupadas[key].experiencias.length;
+        for (const campo in agrupadas[key].medias) {
+          agrupadas[key].medias[campo] = (agrupadas[key].medias[campo] / total).toFixed(1);
+        }
+      }
+
+      setExperienciasAgrupadas(agrupadas);
+
+      // Inicializar índices de navegación
+      const nuevosIndices = {};
+      Object.keys(agrupadas).forEach(k => (nuevosIndices[k] = 0));
+      setIndicesExperiencias(nuevosIndices);
+    }
+  }, [experiencias]);
+
+  // Cargar destino
   useEffect(() => {
     fetch("http://localhost:5000/api/destinos")
-      .then((res) => res.json())
-      .then((data) => {
+      .then(res => res.json())
+      .then(data => {
         const match = data.find(
-          (d) =>
-            d.nombre_uni.toLowerCase() ===
-            decodeURIComponent(nombre_uni).toLowerCase()
+          d => d.nombre_uni.toLowerCase() === decodeURIComponent(nombre_uni).toLowerCase()
         );
         setDestino(match);
       });
   }, [nombre_uni]);
 
+  // Cargar experiencias
+  useEffect(() => {
+    if (destino?.codigo && user?.codigo_grado) {
+      fetch(
+        `http://localhost:5000/api/experiencias/${encodeURIComponent(user.codigo_grado)}/${encodeURIComponent(destino.codigo)}`
+      )
+        .then(res => res.json())
+        .then(setExperiencias)
+        .catch(err => console.error("Error cargando experiencias:", err));
+    }
+  }, [destino, user]);
+
   if (!destino) {
     return (
-      <div className="min-h-screen bg-stone-100 flex items-center justify-center" style={{ fontFamily: "Inter, sans-serif" }}>
+      <div className="min-h-screen bg-stone-100 flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-red-600 mx-auto mb-4"></div>
           <p className="text-gray-600 text-lg">Cargando destino...</p>
@@ -36,7 +108,7 @@ export default function DestinoDetalle() {
   const imagenes = [
     destino.imagenes?.principal || `https://source.unsplash.com/1200x400/?university,${destino.pais}`,
     destino.imagenes?.secundarias?.[0] || `https://source.unsplash.com/600x400/?campus,${destino.nombre_uni}`,
-    destino.imagenes?.secundarias?.[1] || `https://source.unsplash.com/600x400/?students,${destino.nombre_uni}`,
+    destino.imagenes?.secundarias?.[1] || `https://source.unsplash.com/600x400/?students,${destino.nombre_uni}`
   ];
 
   return (
@@ -293,20 +365,84 @@ export default function DestinoDetalle() {
             )}
           </div>
         )}
-
-
-        {/* TAB: Experiencias */}
         {tab === "experiencias" && (
-          <div className="text-center py-16">
-            <div className="w-16 h-16 bg-gray-200 rounded-full flex items-center justify-center mx-auto mb-4">
-              <MapPin className="w-8 h-8 text-gray-400" />
+          Object.keys(experienciasAgrupadas).length === 0 ? (
+            <div className="text-center py-16">
+              <MapPin className="w-8 h-8 text-gray-400 mx-auto mb-4" />
+              <p className="text-gray-500 text-lg italic">
+                Aún no hay experiencias registradas en esta universidad.
+              </p>
             </div>
-            <p className="text-gray-500 text-lg italic">
-              Aún no hay experiencias registradas en esta universidad.
-            </p>
-          </div>
+          ) : (
+            Object.entries(experienciasAgrupadas).map(([codigo, datos]) => {
+              const indice = indicesExperiencias[codigo] || 0;
+              const experienciaActual = datos.experiencias[indice];
+
+              return (
+                <div key={codigo} className="bg-white rounded-2xl p-6 shadow-lg border border-gray-100 mb-6">
+                  {/* Resumen de medias */}
+                  <h3 className="text-xl font-bold text-red-700 mb-4">
+                    Resumen de valoraciones 
+                  </h3>
+                  <div className="grid grid-cols-2 gap-2 text-sm text-gray-500 mb-6">
+                    <p>Puntuación general: {datos.medias.puntuacion_general}/10</p>
+                    <p>Profesorado: {datos.medias.valoracion_profesorado}/10</p>
+                    <p>Facilidad materia: {datos.medias.facilidad_materia}/10</p>
+                    <p>Coste de vida: {datos.medias.coste_vida}/10</p>
+                    <p>Alojamiento: {datos.medias.alojamiento}/10</p>
+                    <p>Seguridad: {datos.medias.seguridad}/10</p>
+                    <p>Ocio: {datos.medias.ocio}/10</p>
+                  </div>
+
+                  {/* Navegación entre experiencias */}
+                  <div className="flex justify-between items-center mb-4">
+                    <button
+                      onClick={() =>
+                        setIndicesExperiencias(prev => ({
+                          ...prev,
+                          [codigo]: indice > 0 ? indice - 1 : datos.experiencias.length - 1
+                        }))
+                      }
+                      className="text-gray-500 hover:text-red-600"
+                    >
+                      ⬅
+                    </button>
+                    <span className="text-sm text-gray-400">
+                      Opinión {indice + 1} de {datos.experiencias.length}
+                    </span>
+                    <button
+                      onClick={() =>
+                        setIndicesExperiencias(prev => ({
+                          ...prev,
+                          [codigo]: (indice + 1) % datos.experiencias.length
+                        }))
+                      }
+                      className="text-gray-500 hover:text-red-600"
+                    >
+                      ➡
+                    </button>
+                  </div>
+
+                  {/* Texto de la experiencia actual */}
+                  {experienciaActual.experiencia_academica && (
+                    <>
+                      <h4 className="font-semibold text-gray-800 mb-1">Experiencia académica:</h4>
+                      <p className="text-gray-700 mb-4">{experienciaActual.experiencia_academica}</p>
+                    </>
+                  )}
+                  {experienciaActual.opinion_general && (
+                    <>
+                      <h4 className="font-semibold text-gray-800 mb-1">Valoración general:</h4>
+                      <p className="text-gray-600 mb-4">{experienciaActual.opinion_general}</p>
+                    </>
+                  )}
+                </div>
+              );
+            })
+          )
         )}
       </div>
     </div>
+
   );
 }
