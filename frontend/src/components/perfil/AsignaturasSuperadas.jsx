@@ -32,7 +32,7 @@ export default function AsignaturasSuperadas({ editando, asignaturasBD, seleccio
 
   return (
     <div className="bg-white shadow rounded-xl p-6 space-y-4">
-      <h2 className="text-2xl font-semibold text-black flex items-center gap-2" style={{ fontFamily: "Inter, sans-serif" }}>
+      <h2 className="text-xl font-semibold text-black flex items-center gap-2" style={{ fontFamily: "Inter, sans-serif" }}>
         <BookOpen className="w-6 h-6 text-red-500" /> {/* Ícono de libro */}
         Asignaturas superadas
       </h2>

@@ -85,7 +85,7 @@ export default function EstudianteDashboard() {
     <Sidebar siempreVisible>
       <div className="min-h-screen p-6 max-w-7xl">
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-800 mb-2">
+          <h1 className="text-3xl font-bold text-gray-800 mb-2" style={{ fontFamily: "Inter, sans-serif" }}>
             ¡Hola, {user.nombre}!
           </h1>
           <p className="text-gray-600 text-lg">
@@ -98,7 +98,7 @@ export default function EstudianteDashboard() {
           <div className="flex items-center gap-4 mb-4">
             <div className="w-3 h-3 bg-yellow-400 rounded-full animate-pulse"></div>
             <h2 className="text-xl font-semibold text-gray-800">
-              Estado Actual: {user.estado_proceso === "con destino" ? "Destino confirmado" : "Acuerdo Pendiente"}
+              Estado Actual: {user.estado_proceso === "con destino" ? "Destino asignado" : "Acuerdo Pendiente"}
             </h2>
           </div>
           {user.destino_confirmado ? (

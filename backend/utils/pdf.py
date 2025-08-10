@@ -217,7 +217,7 @@ def generar_pdf_acuerdo(acuerdo):
     elements.append(tabla_mov)
     elements.append(Spacer(1, 20))
 
-    # ===== TABLA DE ASIGNATURAS - MEJORADA CON SPANS DINÁMICOS =====
+    # ===== TABLA DE ASIGNATURAS - MEJORADA CON SPANS BIDIRECCIONALES =====
     bloques = acuerdo.get("bloques", [])
 
     if not bloques:
@@ -260,19 +260,24 @@ def generar_pdf_acuerdo(acuerdo):
 
         table_data = [header1, header2, header3]
 
-        # ===== PROCESAMIENTO MEJORADO DE BLOQUES CON SPANS =====
-        def procesar_bloque(bloque):
+        # ===== PROCESAMIENTO MEJORADO DE BLOQUES CON SPANS BIDIRECCIONALES =====
+        def procesar_bloque_mejorado(bloque):
             asignaturas_ugr = bloque.get("asignaturas_ugr", [])
             asignaturas_destino = bloque.get("asignaturas_destino", [])
             
-            max_filas = max(len(asignaturas_ugr), len(asignaturas_destino))
+            num_ugr = len(asignaturas_ugr)
+            num_destino = len(asignaturas_destino)
+            
+            # Determinar el número máximo de filas necesarias
+            max_filas = max(num_ugr, num_destino)
             
             filas_bloque = []
-            spans_necesarios = []  # Lista para almacenar los spans que necesitamos aplicar
+            spans_necesarios = []
             
+            # Crear todas las filas del bloque
             for i in range(max_filas):
-                ugr = asignaturas_ugr[i] if i < len(asignaturas_ugr) else {}
-                dest = asignaturas_destino[i] if i < len(asignaturas_destino) else {}
+                ugr = asignaturas_ugr[i] if i < num_ugr else {}
+                dest = asignaturas_destino[i] if i < num_destino else {}
                 
                 # Procesar UGR
                 ugr_nombre = ugr.get('nombre', '') if ugr else ''
@@ -305,30 +310,39 @@ def generar_pdf_acuerdo(acuerdo):
                 
                 filas_bloque.append(fila)
             
-            # Determinar si necesitamos spans para las celdas de UGR
-            # Si hay menos asignaturas UGR que de destino, necesitamos spans
-            if len(asignaturas_ugr) < len(asignaturas_destino):
-                for i in range(len(asignaturas_ugr)):
-                    # Calcular cuántas filas debe ocupar cada asignatura UGR
-                    filas_por_ugr = len(asignaturas_destino) // len(asignaturas_ugr)
-                    filas_extra = len(asignaturas_destino) % len(asignaturas_ugr)
-                    
-                    # Si esta asignatura UGR debe ocupar más de una fila
-                    if i < filas_extra:
-                        filas_a_ocupar = filas_por_ugr + 1
-                    else:
-                        filas_a_ocupar = filas_por_ugr
+            # Calcular spans para asignaturas UGR (cuando hay menos UGR que destino)
+            if num_ugr < num_destino and num_ugr > 0:
+                filas_por_ugr = num_destino // num_ugr
+                filas_extra = num_destino % num_ugr
+                
+                fila_actual = 0
+                for i in range(num_ugr):
+                    filas_a_ocupar = filas_por_ugr + (1 if i < filas_extra else 0)
                     
                     if filas_a_ocupar > 1:
-                        fila_inicio = sum([
-                            (len(asignaturas_destino) // len(asignaturas_ugr) + (1 if j < filas_extra else 0))
-                            for j in range(i)
-                        ])
-                        fila_fin = fila_inicio + filas_a_ocupar - 1
-                        
+                        fila_fin = fila_actual + filas_a_ocupar - 1
                         # Añadir spans para las columnas UGR (0-4)
-                        for col in range(5):  # Columnas 0,1,2,3,4
-                            spans_necesarios.append((col, fila_inicio, col, fila_fin))
+                        for col in range(5):
+                            spans_necesarios.append((col, fila_actual, col, fila_fin))
+                    
+                    fila_actual += filas_a_ocupar
+            
+            # Calcular spans para asignaturas DESTINO (cuando hay menos destino que UGR)
+            elif num_destino < num_ugr and num_destino > 0:
+                filas_por_destino = num_ugr // num_destino
+                filas_extra = num_ugr % num_destino
+                
+                fila_actual = 0
+                for i in range(num_destino):
+                    filas_a_ocupar = filas_por_destino + (1 if i < filas_extra else 0)
+                    
+                    if filas_a_ocupar > 1:
+                        fila_fin = fila_actual + filas_a_ocupar - 1
+                        # Añadir spans para las columnas DESTINO (5-7)
+                        for col in range(5, 8):
+                            spans_necesarios.append((col, fila_actual, col, fila_fin))
+                    
+                    fila_actual += filas_a_ocupar
             
             return filas_bloque, spans_necesarios
 
@@ -337,7 +351,7 @@ def generar_pdf_acuerdo(acuerdo):
         todos_los_spans = []
         
         for bloque in bloques:
-            filas_del_bloque, spans_del_bloque = procesar_bloque(bloque)
+            filas_del_bloque, spans_del_bloque = procesar_bloque_mejorado(bloque)
             
             # Ajustar los índices de las filas de los spans según la posición en la tabla
             fila_offset = len(table_data) + len(filas_bloques)
@@ -355,7 +369,7 @@ def generar_pdf_acuerdo(acuerdo):
         total_dest_ects = 0
         
         for bloque in bloques:
-            # Sumar créditos de UGR (evitar duplicados si hay múltiples asignaturas UGR)
+            # Sumar créditos de UGR
             for ugr in bloque.get("asignaturas_ugr", []):
                 try:
                     ects = float(ugr.get("ects", 0))

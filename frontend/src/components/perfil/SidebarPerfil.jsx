@@ -57,8 +57,8 @@ export default function SidebarPerfil({
   };
 
   return (
-    <aside className="w-full bg-white rounded-xl shadow-sm p-5 font-inter">
-      <div className="flex flex-col items-center">
+    <aside className="w-full bg-white rounded-xl p-5 font-inter min-h-[500px] flex flex-col  shadow-lg">
+      <div className="flex flex-col items-center flex-1">
         {/* Foto */}
         <div className="w-36 h-36 relative mb-3">
           <img src={estrella} alt="Marco de foto" className="w-full h-full object-contain" />
@@ -68,9 +68,9 @@ export default function SidebarPerfil({
                 src={fotoSrc}
                 alt="Foto de perfil"
                 className="w-24 h-24 rounded-full object-cover border border-gray-300 shadow-sm"
-                // onError={(e) => {
-                //   e.currentTarget.src = "/assets/avatar-placeholder.png";
-                // }}
+              // onError={(e) => {
+              //   e.currentTarget.src = "/assets/avatar-placeholder.png";
+              // }}
               />
             ) : (
               <div className="w-24 h-24 rounded-full bg-gray-100 flex items-center justify-center text-gray-400 text-xs">

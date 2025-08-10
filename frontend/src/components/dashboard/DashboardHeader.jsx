@@ -26,7 +26,7 @@ export default function DashboardHeader({ titulo, subtitulo }) {
       {/* Contenido */}
       <div className="relative z-20 flex items-center justify-between">
         <div>
-          <h1 className="text-4xl font-semibold text-white mb-1" 
+          <h1 className="text-3xl font-semibold text-white mb-1" 
               style={{fontFamily: "Inter, sans-serif", letterSpacing: "-0.02em"}}>
             {titulo}
           </h1>

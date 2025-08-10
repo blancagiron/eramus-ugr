@@ -44,20 +44,41 @@ def acuerdo_ultimo(email):
     acuerdo["_id"] = str(acuerdo["_id"])
     return jsonify(acuerdo)
 
+# @acuerdos.route("/api/acuerdos/<email>", methods=["PUT"])
+# def actualizar_acuerdo_existente(email):
+#     data = request.json
+#     acuerdo_actual = db.acuerdos.find_one({"email_estudiante": email}, sort=[("version", -1)])
+#     if not acuerdo_actual:
+#         return jsonify({"error": "No hay acuerdo que actualizar"}), 404
+
+#     db.acuerdos.update_one(
+#         {"_id": acuerdo_actual["_id"]},
+#         {"$set": {
+#             "bloques": data.get("bloques", []),
+#             "datos_personales": data.get("datos_personales", {}),
+#             "datos_movilidad": data.get("datos_movilidad", {}),
+#             "estado": data.get("estado", "borrador"),
+#             "fecha_ultima_modificacion": datetime.utcnow()
+#         }}
+#     )
+#     return jsonify({"msg": "Acuerdo actualizado"})
+
 @acuerdos.route("/api/acuerdos/<email>", methods=["PUT"])
 def actualizar_acuerdo_existente(email):
-    data = request.json
+    data = request.json or {}
     acuerdo_actual = db.acuerdos.find_one({"email_estudiante": email}, sort=[("version", -1)])
     if not acuerdo_actual:
         return jsonify({"error": "No hay acuerdo que actualizar"}), 404
 
+    estado_nuevo = data.get("estado", acuerdo_actual.get("estado", "borrador"))
+
     db.acuerdos.update_one(
         {"_id": acuerdo_actual["_id"]},
         {"$set": {
-            "bloques": data.get("bloques", []),
-            "datos_personales": data.get("datos_personales", {}),
-            "datos_movilidad": data.get("datos_movilidad", {}),
-            "estado": data.get("estado", "borrador"),
+            "bloques": data.get("bloques", acuerdo_actual.get("bloques", [])),
+            "datos_personales": data.get("datos_personales", acuerdo_actual.get("datos_personales", {})),
+            "datos_movilidad": data.get("datos_movilidad", acuerdo_actual.get("datos_movilidad", {})),
+            "estado": estado_nuevo,
             "fecha_ultima_modificacion": datetime.utcnow()
         }}
     )
@@ -78,35 +99,63 @@ def eliminar_version(email, version):
     return jsonify({"msg": f"Versión {version} eliminada"}), 200
 
 
+# @acuerdos.route("/api/acuerdos/<email>/comentario", methods=["POST"])
+# def comentar_acuerdo(email):
+#     data = request.json
+#     comentario = data.get("comentarios_tutor", "")
+#     bloques_comentados = data.get("bloques", [])  # [{index, comentario}]
+#     nuevo_estado = data.get("estado", "comentado")
+
+#     acuerdo = db.acuerdos.find_one({"email_estudiante": email}, sort=[("version", -1)])
+#     if not acuerdo:
+#         return jsonify({"error": "Acuerdo no encontrado"}), 404
+
+#     for bloque in bloques_comentados:
+#         index = bloque.get("index")
+#         texto = bloque.get("comentario")
+#         if index is not None and 0 <= index < len(acuerdo["bloques"]):
+#             acuerdo["bloques"][index]["comentario_tutor"] = texto
+
+#     acuerdo["comentarios_tutor"] = comentario
+
+#     db.acuerdos.update_one(
+#         {"_id": acuerdo["_id"]},
+#         {"$set": {
+#             "bloques": acuerdo["bloques"],
+#             "comentarios_tutor": comentario,
+#             "estado": nuevo_estado,
+#             "fecha_ultima_modificacion": datetime.utcnow()
+#         }}
+#     )
+#     return jsonify({"msg": "Comentarios guardados"})
+
 @acuerdos.route("/api/acuerdos/<email>/comentario", methods=["POST"])
 def comentar_acuerdo(email):
-    data = request.json
-    comentario = data.get("comentarios_tutor", "")
-    bloques_comentados = data.get("bloques", [])  # [{index, comentario}]
-    nuevo_estado = data.get("estado", "comentado")
+    data = request.json or {}
+    comentario_global = data.get("comentarios_tutor") or data.get("comentario") or ""
+    bloques_comentados = data.get("bloques", [])
 
-    acuerdo = db.acuerdos.find_one({"email_estudiante": email}, sort=[("version", -1)])
-    if not acuerdo:
+    doc = db.acuerdos.find_one({"email_estudiante": email}, sort=[("version", -1)])
+    if not doc:
         return jsonify({"error": "Acuerdo no encontrado"}), 404
 
-    for bloque in bloques_comentados:
-        index = bloque.get("index")
-        texto = bloque.get("comentario")
-        if index is not None and 0 <= index < len(acuerdo["bloques"]):
-            acuerdo["bloques"][index]["comentario_tutor"] = texto
-
-    acuerdo["comentarios_tutor"] = comentario
+    bloques = doc.get("bloques", [])
+    for b in bloques_comentados:
+        i, txt = b.get("index"), (b.get("comentario") or "").strip()
+        if i is not None and 0 <= i < len(bloques):
+            bloques[i]["comentario_tutor"] = txt
 
     db.acuerdos.update_one(
-        {"_id": acuerdo["_id"]},
+        {"_id": doc["_id"]},
         {"$set": {
-            "bloques": acuerdo["bloques"],
-            "comentarios_tutor": comentario,
-            "estado": nuevo_estado,
+            "bloques": bloques,
+            "comentarios_tutor": comentario_global,
+            "estado": "cambios_solicitados",
             "fecha_ultima_modificacion": datetime.utcnow()
         }}
     )
     return jsonify({"msg": "Comentarios guardados"})
+
 
 @acuerdos.route("/api/acuerdos/<email>/exportar", methods=["GET"])
 def exportar_pdf_acuerdo(email):
@@ -158,86 +207,78 @@ def enviar_a_revision(email):
         return jsonify({"error": "Acuerdo no encontrado"}), 404
     db.acuerdos.update_one(
         {"_id": doc["_id"]},
-        {"$set": {
-            "estado": "enviado",
-            "fecha_ultima_modificacion": datetime.utcnow()
-        },
-         "$push": {
-            "historial": {
-                "evento": "enviar",
-                "por": email,
-                "rol": "estudiante",
-                "ts": datetime.utcnow(),
-                "meta": {"version": doc["version"]}
-            }
-         }
-        }
+        {"$set": {"estado": "enviado", "fecha_ultima_modificacion": datetime.utcnow()},
+         "$push": {"historial": {
+            "evento": "enviar", "por": email, "rol": "estudiante",
+            "ts": datetime.utcnow(), "meta": {"version": doc["version"]}
+         }}}
     )
     return jsonify({"msg": "Acuerdo enviado a revisión"})
 
 # Tutor aprueba
 @acuerdos.route("/api/acuerdos/<email>/aprobar", methods=["POST"])
 def aprobar_acuerdo(email):
-    tutor_email = request.args.get("tutor") or request.json.get("tutor")
+    data = request.json or {}
+    tutor_email = request.args.get("tutor") or data.get("tutor")
+    comentario_global = data.get("comentarios_tutor")
+
     doc = db.acuerdos.find_one({"email_estudiante": email}, sort=[("version", -1)])
     if not doc:
         return jsonify({"error": "Acuerdo no encontrado"}), 404
+
+    set_fields = {
+        "estado": "aprobado",
+        "fecha_ultima_modificacion": datetime.utcnow(),
+        "aprobado_en": datetime.utcnow(),
+        "revisado_por": tutor_email
+    }
+    if comentario_global is not None:
+        set_fields["comentarios_tutor"] = comentario_global
+
     db.acuerdos.update_one(
         {"_id": doc["_id"]},
-        {"$set": {
-            "estado": "aprobado",
-            "fecha_ultima_modificacion": datetime.utcnow(),
-            "aprobado_en": datetime.utcnow(),
-            "revisado_por": tutor_email
-        },
-         "$push": {
-            "historial": {
-                "evento": "aprobar",
-                "por": tutor_email,
-                "rol": "tutor",
-                "ts": datetime.utcnow(),
-                "meta": {"version": doc["version"]}
-            }
-         }
-        }
+        {"$set": set_fields,
+         "$push": {"historial": {
+            "evento": "aprobar", "por": tutor_email, "rol": "tutor",
+            "ts": datetime.utcnow(), "meta": {"version": doc["version"]}
+         }}}
     )
     return jsonify({"msg": "Acuerdo aprobado"})
 
-# Tutor pide cambios (también podrías reciclar /comentario)
 @acuerdos.route("/api/acuerdos/<email>/pedir-cambios", methods=["POST"])
 def pedir_cambios(email):
     data = request.json or {}
-    comentario = data.get("comentario", "")
+    comentario_global = data.get("comentarios_tutor") or data.get("comentario") or ""
     bloques_comentados = data.get("bloques", [])  # [{index, comentario}]
+    tutor_email = data.get("tutor")
+
     doc = db.acuerdos.find_one({"email_estudiante": email}, sort=[("version", -1)])
     if not doc:
         return jsonify({"error": "Acuerdo no encontrado"}), 404
 
-    # guardar comentarios por bloque
     bloques = doc.get("bloques", [])
     for b in bloques_comentados:
-        i, txt = b.get("index"), b.get("comentario")
+        i, txt = b.get("index"), (b.get("comentario") or "").strip()
         if i is not None and 0 <= i < len(bloques):
             bloques[i]["comentario_tutor"] = txt
 
     db.acuerdos.update_one(
         {"_id": doc["_id"]},
         {"$set": {
-            "estado": "comentado",
+            "estado": "cambios_solicitados",
             "bloques": bloques,
-            "comentarios_tutor": comentario,
+            "comentarios_tutor": comentario_global,
             "fecha_ultima_modificacion": datetime.utcnow()
         },
          "$push": {
             "historial": {
                 "evento": "pedir_cambios",
-                "por": data.get("tutor"),
+                "por": tutor_email,
                 "rol": "tutor",
                 "ts": datetime.utcnow(),
                 "meta": {"version": doc["version"]}
             }
-         }
-        }
+         }}
     )
     return jsonify({"msg": "Cambios solicitados"})
 
@@ -249,35 +290,60 @@ def listar_mensajes(email):
         return jsonify({"error":"Acuerdo no encontrado"}), 404
     return jsonify({"version": doc["version"], "estado": doc["estado"], "mensajes": doc.get("mensajes", [])})
 
+# @acuerdos.route("/api/acuerdos/<email>/mensajes", methods=["POST"])
+# def crear_mensaje(email):
+#     data = request.json or {}
+#     texto = data.get("texto", "").strip()
+#     autor = data.get("autor")          # email autor
+#     rol = data.get("rol")              # "estudiante" | "tutor"
+#     if not texto or not autor or rol not in ("estudiante","tutor"):
+#         return jsonify({"error":"texto, autor y rol requeridos"}), 400
+
+#     doc = db.acuerdos.find_one({"email_estudiante": email}, sort=[("version", -1)])
+#     if not doc:
+#         return jsonify({"error":"Acuerdo no encontrado"}), 404
+
+#     evento = {
+#         "texto": texto,
+#         "autor": autor,
+#         "rol": rol,
+#         "ts": datetime.utcnow(),
+#         "version": doc["version"]
+#     }
+#     db.acuerdos.update_one(
+#         {"_id": doc["_id"]},
+#         {"$push": {
+#             "mensajes": evento,
+#             "historial": {"evento":"mensaje", "por": autor, "rol": rol, "ts": datetime.utcnow(), "meta": {"version": doc["version"]}}
+#         },
+#          "$set": {"fecha_ultima_modificacion": datetime.utcnow()}}
+#     )
+#     return jsonify({"msg":"Mensaje guardado"})
+
 @acuerdos.route("/api/acuerdos/<email>/mensajes", methods=["POST"])
 def crear_mensaje(email):
     data = request.json or {}
-    texto = data.get("texto", "").strip()
-    autor = data.get("autor")          # email autor
-    rol = data.get("rol")              # "estudiante" | "tutor"
-    if not texto or not autor or rol not in ("estudiante","tutor"):
-        return jsonify({"error":"texto, autor y rol requeridos"}), 400
+    texto = (data.get("texto") or "").strip()
+    autor = data.get("autor")
+    rol = data.get("rol")  # "estudiante" | "tutor"
+    if not texto or not autor or rol not in ("estudiante", "tutor"):
+        return jsonify({"error": "texto, autor y rol requeridos"}), 400
 
     doc = db.acuerdos.find_one({"email_estudiante": email}, sort=[("version", -1)])
     if not doc:
-        return jsonify({"error":"Acuerdo no encontrado"}), 404
+        return jsonify({"error": "Acuerdo no encontrado"}), 404
 
-    evento = {
-        "texto": texto,
-        "autor": autor,
-        "rol": rol,
-        "ts": datetime.utcnow(),
-        "version": doc["version"]
-    }
+    evento = {"texto": texto, "autor": autor, "rol": rol, "ts": datetime.utcnow(), "version": doc["version"]}
     db.acuerdos.update_one(
         {"_id": doc["_id"]},
         {"$push": {
             "mensajes": evento,
-            "historial": {"evento":"mensaje", "por": autor, "rol": rol, "ts": datetime.utcnow(), "meta": {"version": doc["version"]}}
+            "historial": {"evento": "mensaje", "por": autor, "rol": rol, "ts": datetime.utcnow(),
+                          "meta": {"version": doc["version"]}}
         },
          "$set": {"fecha_ultima_modificacion": datetime.utcnow()}}
     )
-    return jsonify({"msg":"Mensaje guardado"})
+    return jsonify({"msg": "Mensaje guardado"})
 
 # Estado compacto (para badge)
 @acuerdos.route("/api/acuerdos/<email>/estado", methods=["GET"])
