@@ -20,6 +20,8 @@ import GestionAsignaturas from "./components/dashboard/admin/asignaturas/Gestion
 import TestAsignaturas from "./components/destinos/TestAsignaturas";
 import DestinoNoAsignado from "./components/destinos/DestinoNoAsignado";
 import VerificarEmail from "./components/VerificarCorreo";
+import EstudianteComunicacion from "./components/dashboard/EstudianteComunicacion";
+import TutorRevisarAcuerdo from "./components/dashboard/TutorRevisarAcuerdo";
 
 import AcuerdoEditor from "./components/acuerdo/AcuerdoEditor";
 function App() {
@@ -44,7 +46,9 @@ function App() {
         <Route path="/test-asignaturas" element={<TestAsignaturas />} />
         <Route path="/estudiante/destino-no-asignado" element={<DestinoNoAsignado />} />
         <Route path="/verificar-email" element={<VerificarEmail />} />
+        <Route path="/estudiante/comunicacion" element={<EstudianteComunicacion />} />
 
+        <Route path="/tutor/acuerdo/:email" element={<TutorRevisarAcuerdo />} />
         {/* Rutas privadas */}
         <Route
           path="/perfil"

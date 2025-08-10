@@ -66,10 +66,10 @@ export default function EstudianteDashboard() {
       descripcion: "Subir y gestionar documentos"
     },
     {
-      label: "Chat con Tutor",
+      label: "Comunicación con Tutor",
       icon: <MessageCircle className="w-8 h-8" />,
       color: "bg-gradient-to-br from-cyan-500 to-blue-500",
-      ruta: "/estudiante/chat",
+      ruta: "/estudiante/comunicacion",
       descripcion: "Comunicación con tu tutor"
     },
     {
