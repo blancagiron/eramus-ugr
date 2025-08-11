@@ -582,7 +582,8 @@ def dashboard_tutor(email):
             "apellido1": est.get("primer_apellido", ""),
             "apellido2": est.get("segundo_apellido", ""),
             "destino": est["destino_confirmado"]["nombre_uni"],
-            "acuerdo": estado_acuerdo
+            "acuerdo": estado_acuerdo,
+            "estado_proceso": est.get("estado_proceso", "sin estado")
         })
 
     return jsonify({

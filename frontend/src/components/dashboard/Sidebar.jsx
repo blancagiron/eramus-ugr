@@ -10,7 +10,8 @@ import {
   GraduationCap,
   School,
   Users,
-  BookOpen
+  BookOpen,
+  LayoutGrid,
 } from "lucide-react";
 import logo from "../../assets/logo-tfg-final-v2.svg";
 
@@ -29,32 +30,32 @@ export default function Sidebar({ children, siempreVisible = false, visible = tr
     rol === "tutor"
       ? "/dashboard/tutor"
       : rol === "admin"
-      ? "/dashboard/admin"
-      : "/dashboard/estudiante";
+        ? "/dashboard/admin"
+        : "/dashboard/estudiante";
 
   // Enlaces por rol
   const linksEstudiante = [
+    { label: "Dashboard", icon: <LayoutGrid size={18} />, to: dashboardPath },
     { label: "Mi Perfil", icon: <User size={18} />, to: "/perfil" },
-    { label: "Dashboard", icon: <Home size={18} />, to: dashboardPath },
     { label: "Destinos", icon: <MapPin size={18} />, to: "/destinos" },
     { label: "Mi acuerdo", icon: <FileText size={18} />, to: "/estudiante/acuerdo" },
   ];
 
   const linksTutor = [
+    { label: "Dashboard", icon: <LayoutGrid size={18} />, to: dashboardPath },
     { label: "Mi Perfil", icon: <User size={18} />, to: "/perfil" },
-    { label: "Dashboard", icon: <Home size={18} />, to: dashboardPath },
     { label: "Destinos", icon: <MapPin size={18} />, to: "/destinos" },
   ];
 
   const linksAdmin = [
+    { label: "Dashboard", icon: <LayoutGrid size={18} />, to: dashboardPath },
     { label: "Mi Perfil", icon: <User size={18} />, to: "/perfil" },
-    { label: "Dashboard", icon: <Home size={18} />, to: dashboardPath },
     { label: "Usuarios", icon: <Users size={18} />, to: "/admin/usuarios" },
     { label: "Destinos", icon: <MapPin size={18} />, to: "/admin/destinos" },
     { label: "Centros", icon: <School size={18} />, to: "/admin/centros" },
     { label: "Grados", icon: <GraduationCap size={18} />, to: "/admin/grados" },
     { label: "Asignaturas", icon: <BookOpen size={18} />, to: "/admin/asignaturas" },
-   
+
   ];
 
   const links =
@@ -80,10 +81,9 @@ export default function Sidebar({ children, siempreVisible = false, visible = tr
                 key={label}
                 to={to}
                 className={({ isActive }) =>
-                  `flex items-center gap-3 px-4 py-2 w-full rounded-full transition-all text-m ${
-                    isActive || location.pathname.startsWith(to)
-                      ? "bg-red-600 text-white font-semibold hover:text-black"
-                      : "text-gray-700 hover:text-red-700"
+                  `flex items-center gap-3 px-4 py-2 w-full rounded-full transition-all text-m ${isActive || location.pathname.startsWith(to)
+                    ? "bg-red-600 text-white font-semibold hover:text-black"
+                    : "text-gray-700 hover:text-red-700"
                   }`
                 }
               >

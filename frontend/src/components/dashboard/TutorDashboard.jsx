@@ -28,7 +28,7 @@ export default function TutorDashboard() {
   return (
     <Sidebar>
       <div className="p-6 max-w-7xl ">
-        <h1 className="text-3xl font-bold mb-4">Bienvenido/a, {user?.nombre}</h1>
+        <h1 className="text-3xl font-bold mb-4" style={{ fontFamily: "Inter, sans-serif" }}>Bienvenido/a, {user?.nombre}</h1>
         <p className="text-gray-600 mb-6">Este es tu panel como tutor Erasmus.</p>
 
         {/* WIDGETS */}
@@ -81,6 +81,7 @@ export default function TutorDashboard() {
                   <th className="border p-2 text-left">Email</th>
                   <th className="border p-2 text-left">Destino</th>
                   <th className="border p-2 text-left">Estado Acuerdo</th>
+                  <th className="border p-2 text-left">Estado Proceso</th>
                   <th className="border p-2 text-center">Acciones</th>
                 </tr>
               </thead>

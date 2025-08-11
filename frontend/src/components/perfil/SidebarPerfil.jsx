@@ -6,9 +6,37 @@ import {
   XCircle,
   UserRound,
   Pencil,
-  ShieldCheck
+  ShieldCheck,
+  FileText,
+  Send,
+  ClipboardList,
+  BadgeCheck,
+  Ban,
 } from "lucide-react";
 import estrella from "../../assets/landing/estrella_roja_pagina.svg";
+
+function EstadoPill({ estado }) {
+  const map = {
+    "no iniciado": { bg: "bg-gray-100", text: "text-gray-700", border: "border-gray-200", icon: <FileText className="w-4 h-4" />, label: "No iniciado" },
+    "sin destino": { bg: "bg-gray-100", text: "text-gray-700", border: "border-gray-200", icon: <FileText className="w-4 h-4" />, label: "Sin destino" },
+    "con destino": { bg: "bg-blue-50", text: "text-blue-700", border: "border-blue-200", icon: <Send className="w-4 h-4" />, label: "Destino asignado" },
+    "acuerdo_borrador": { bg: "bg-slate-50", text: "text-slate-700", border: "border-slate-200", icon: <FileText className="w-4 h-4" />, label: "Borrador Acuerdo" },
+    "en revision": { bg: "bg-amber-50", text: "text-amber-800", border: "border-amber-200", icon: <ClipboardList className="w-4 h-4" />, label: "Acuerdo en revisión" },
+    "aprobado": { bg: "bg-emerald-50", text: "text-emerald-800", border: "border-emerald-200", icon: <BadgeCheck className="w-4 h-4" />, label: "Acuerdo aprobado" },
+    "rechazado": { bg: "bg-red-50", text: "text-red-700", border: "border-red-200", icon: <Ban className="w-4 h-4" />, label: "Rechazado" },
+  };
+  const c = map[estado] || map["no iniciado"];
+  return (
+    <div
+      className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-sm font-semibold border ${c.bg} ${c.text} ${c.border} max-w-full`}
+      title={c.label}
+      aria-label={`Estado: ${c.label}`}
+    >
+      {c.icon}
+      <span className="whitespace-normal leading-snug">{c.label}</span>
+    </div>
+  );
+}
 
 export default function SidebarPerfil({
   perfil,
@@ -141,8 +169,11 @@ export default function SidebarPerfil({
 
         {/* Estado (solo estudiantes) */}
         {rol === "estudiante" && (
-          <div className={`text-l rounded-full px-3 py-1.5 mb-6 ${estadoClase}`}>
-            Estado: <span className="font-medium">{estadoTexto}</span>
+          <div className="w-full mb-6 flex items-center justify-center">
+            <div className="flex flex-col items-center gap-2 max-w-[90%] text-center">
+              <span className="text-xs text-gray-500">Estado</span>
+              <EstadoPill estado={estado} />
+            </div>
           </div>
         )}
 

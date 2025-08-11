@@ -2,11 +2,12 @@ import { useEffect, useState, useMemo } from "react";
 import Sidebar from "./Sidebar";
 import Hamburguesa from "../dashboard/Hamburguesa";
 import DashboardHeader from "../dashboard/DashboardHeader";
-import { 
-  MessageSquareText, 
-  Send, 
-  FileDown, 
-  CheckCircle2, 
+import { useNavigate } from "react-router-dom";
+import {
+  MessageSquareText,
+  Send,
+  FileDown,
+  CheckCircle2,
   Loader2,
   User,
   Clock,
@@ -20,6 +21,7 @@ import {
 } from "lucide-react";
 
 export default function EstudianteComunicacion() {
+  const navigate = useNavigate();
   const [user, setUser] = useState(null);
   const [acuerdo, setAcuerdo] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -152,20 +154,31 @@ export default function EstudianteComunicacion() {
                   <h2 className="text-lg font-bold text-gray-900 mb-1 font-['Inter',system-ui,sans-serif]">
                     Acciones disponibles
                   </h2>
+
+
                   <p className="text-gray-600 text-sm">
-                    {estado === "aprobado" 
+                    {estado === "aprobado"
                       ? "Tu acuerdo ha sido aprobado. Puedes descargar el PDF oficial."
-                      : puedeEnviar 
-                      ? "Puedes enviar tu acuerdo al tutor para revisión."
-                      : "Tu acuerdo está en revisión. Espera comentarios del tutor."
+                      : puedeEnviar
+                        ? "Puedes enviar tu acuerdo al tutor para revisión."
+                        : "Tu acuerdo está en revisión. Espera comentarios del tutor."
                     }
                   </p>
                 </div>
-                
+
                 <div className="flex flex-wrap items-center gap-3">
+
+                  <button
+                    onClick={() => navigate("/estudiante/acuerdo")}
+                    className="inline-flex items-center gap-2 px-5 py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-xl transition-colors shadow-sm"
+                  >
+                    <FileText className="w-5 h-5" />
+                    Abrir editor
+                  </button>
+
                   {estado === "aprobado" && (
-                    <button 
-                      onClick={descargarPDF} 
+                    <button
+                      onClick={descargarPDF}
                       className="inline-flex items-center gap-2 px-5 py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold rounded-xl transition-colors shadow-sm"
                     >
                       <FileDown className="w-5 h-5" />
@@ -173,8 +186,8 @@ export default function EstudianteComunicacion() {
                     </button>
                   )}
                   {puedeEnviar && (
-                    <button 
-                      onClick={enviar} 
+                    <button
+                      onClick={enviar}
                       className="inline-flex items-center gap-2 px-5 py-3 bg-red-600 hover:bg-red-700 text-white font-semibold rounded-xl transition-colors shadow-sm"
                     >
                       <Send className="w-5 h-5" />
@@ -270,7 +283,7 @@ export default function EstudianteComunicacion() {
                         <div className="flex items-center gap-2 mb-4">
                           <h5 className="font-bold text-gray-900 font-['Inter',system-ui,sans-serif]">Universidad de Granada</h5>
                         </div>
-                        
+
                         <div className="space-y-4">
                           {(bloque.asignaturas_ugr || []).map((asignatura, k) => (
                             <div key={k} className="bg-white rounded-lg p-4 border border-red-100">
@@ -279,11 +292,11 @@ export default function EstudianteComunicacion() {
                                   {asignatura.nombre}
                                 </h6>
                                 <div className="flex items-center gap-1 ml-3">
-                                  
+
                                   <span className="font-bold text-red-600 text-sm">{asignatura.ects} ECTS</span>
                                 </div>
                               </div>
-                              
+
                               <div className="flex flex-wrap gap-2 mb-3">
                                 {asignatura.tipo && (
                                   <span className="px-2 py-1 bg-gray-100 text-gray-700 text-xs font-medium rounded-full">
@@ -301,7 +314,7 @@ export default function EstudianteComunicacion() {
                                   </span>
                                 )}
                               </div>
-                              
+
                               {asignatura.guia && (
                                 <a
                                   href={asignatura.guia}
@@ -323,7 +336,7 @@ export default function EstudianteComunicacion() {
                         <div className="flex items-center gap-2 mb-4">
                           <h5 className="font-bold text-gray-900 font-['Inter',system-ui,sans-serif]">Universidad de Destino</h5>
                         </div>
-                        
+
                         <div className="space-y-4">
                           {(bloque.asignaturas_destino || []).map((asignatura, k) => (
                             <div key={k} className="bg-white rounded-lg p-4 border border-blue-100">
@@ -337,11 +350,11 @@ export default function EstudianteComunicacion() {
                                   )}
                                 </h6>
                                 <div className="flex items-center gap-1 ml-3">
-                                
+
                                   <span className="font-bold text-blue-600 text-sm">{asignatura.ects} ECTS</span>
                                 </div>
                               </div>
-                              
+
                               <div className="flex flex-wrap gap-2 mb-3">
                                 {asignatura.curso && (
                                   <span className="px-2 py-1 bg-blue-100 text-blue-700 text-xs font-medium rounded-full">
@@ -354,7 +367,7 @@ export default function EstudianteComunicacion() {
                                   </span>
                                 )}
                               </div>
-                              
+
                               {asignatura.guia && (
                                 <a
                                   href={asignatura.guia}

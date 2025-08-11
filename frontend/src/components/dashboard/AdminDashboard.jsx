@@ -55,7 +55,7 @@ export default function AdminDashboard() {
       <Sidebar siempreVisible>
         <div className="min-h-screen p-6 max-w-7xl">
           <div className="mb-8">
-            <h1 className="text-3xl font-bold text-gray-800 mb-2">
+            <h1 className="text-3xl font-bold text-gray-800 mb-2" style={{ fontFamily: "Inter, sans-serif" }}>
               Bienvenido/a, {user?.nombre}
             </h1>
             <p className="text-gray-600 text-lg">
