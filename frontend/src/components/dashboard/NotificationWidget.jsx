@@ -68,7 +68,7 @@ export default function NotificacionesWidget({ email }) {
                             <Bell className="w-6 h-6 text-gray-600" />
                         )}
                         <div>
-                            <h3 className="text-lg font-semibold text-gray-800">Notificaciones</h3>
+                            <h3 className="text-xl font-semibold text-black" style={{ fontFamily: "Inter, sans-serif" }}>Notificaciones</h3>
                             {noLeidasCount > 0 && (
                                 <p className="text-sm text-red-600">{noLeidasCount} nueva{noLeidasCount !== 1 ? "s" : ""}</p>
                             )}

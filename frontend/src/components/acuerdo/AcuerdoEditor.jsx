@@ -1,33 +1,95 @@
+// src/acuerdo/AcuerdoEditor.jsx
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Plus, Trash2, Save, Layers, Download, Info, HelpCircle, X, Sparkles, CheckCircle2, AlertTriangle } from "lucide-react";
+import {
+  Plus, Trash2, Save, Layers, Download, FileText, ClipboardList, BadgeCheck,
+  Info, HelpCircle, CheckCircle2, AlertTriangle, MessageSquareText, Building2,
+  User, GraduationCap, CreditCard, BookOpen, Sigma
+} from "lucide-react";
 import DashboardHeader from "../dashboard/DashboardHeader";
 import Sidebar from "../dashboard/Sidebar";
 import Hamburguesa from "../dashboard/Hamburguesa";
 import InfoModal from "./InfoModal";
 
-// ---- UI helpers ----
+/* =========================
+   Botones (coherentes UI)
+   ========================= */
 const btn = {
   primary:
-    "inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm bg-blue-600 text-white hover:bg-blue-700 disabled:bg-gray-400",
+    "inline-flex items-center justify-center gap-2 px-5 py-3 rounded-xl text-sm bg-blue-600 text-white hover:bg-blue-700 disabled:bg-gray-400 font-semibold transition-colors",
   secondary:
-    "inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm bg-gray-200 hover:bg-gray-300 disabled:bg-gray-300",
-  danger:
-    "inline-flex items-center gap-2 px-3 py-2 rounded-lg text-sm bg-red-600 text-white hover:bg-red-700 disabled:bg-red-300",
+    "inline-flex items-center justify-center gap-2 px-5 py-3 rounded-xl text-sm bg-green-500 hover:bg-green-700 text-white disabled:bg-gray-300 font-semibold transition-colors",
   ghost:
-    "inline-flex items-center gap-2 px-3 py-2 rounded-lg text-sm  bg-green-600 text-white border hover:bg-green-700",
+    "inline-flex items-center justify-center gap-2 px-5 py-3 rounded-xl text-sm border border-gray-200 bg-white hover:bg-gray-50 text-gray-900 font-semibold transition-colors",
+  danger:
+    "inline-flex items-center justify-center gap-2 px-4 py-2 rounded-xl text-sm bg-amber-600 text-white hover:bg-amber-700 disabled:bg-gray-400 font-semibold transition-colors",
+  smallDanger:
+    "inline-flex items-center gap-2 px-3 py-2 rounded-lg text-sm bg-red-600 text-white hover:bg-red-700 disabled:bg-red-300 transition-colors",
+  chip:
+    "inline-flex items-center gap-2 px-3 py-2 rounded-lg text-sm bg-blue-600 text-white hover:bg-blue-700",
 };
 
-function SectionCard({ title, subtitle, help, children }) {
+/* =========================
+   Badges de estado
+   ========================= */
+const EstadoBadge = ({ estado }) => {
+  const configs = {
+    borrador: {
+      bg: "bg-gray-100",
+      text: "text-gray-700",
+      border: "border-gray-200",
+      icon: <FileText className="w-4 h-4" />,
+      label: "Borrador",
+    },
+    enviado: {
+      bg: "bg-blue-50",
+      text: "text-blue-700",
+      border: "border-blue-200",
+      icon: <FileText className="w-4 h-4" />,
+      label: "Enviado",
+    },
+    comentado: {
+      bg: "bg-amber-50",
+      text: "text-amber-800",
+      border: "border-amber-200",
+      icon: <ClipboardList className="w-4 h-4" />,
+      label: "Cambios solicitados",
+    },
+    aprobado: {
+      bg: "bg-emerald-50",
+      text: "text-emerald-800",
+      border: "border-emerald-200",
+      icon: <BadgeCheck className="w-4 h-4" />,
+      label: "Aprobado",
+    },
+  };
+  const c = configs[estado] || configs.borrador;
   return (
-    <section className="bg-white p-6 border rounded-xl shadow-sm space-y-4">
-      <div>
-        <h2 className="text-lg font-semibold text-gray-800">{title}</h2>
-        {subtitle && <p className="text-sm text-gray-500">{subtitle}</p>}
+    <div className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-sm font-semibold border ${c.bg} ${c.text} ${c.border}`}>
+      {c.icon}
+      <span>{c.label}</span>
+    </div>
+  );
+};
+
+/* =========================
+   Card de sección coherente
+   ========================= */
+function SectionCard({ title, icon, children, help, subtitle }) {
+  return (
+    <section className="bg-white rounded-2xl border border-gray-200 p-6 shadow-sm space-y-5">
+      <div className="flex items-center gap-3">
+        <div className="p-2 bg-red-100 rounded-xl">{icon}</div>
+        <div>
+          <h2 className="text-xl font-bold text-gray-900" style={{ fontFamily: "Inter, sans-serif" }}>
+            {title}
+          </h2>
+          {subtitle && <p className="text-sm text-gray-600">{subtitle}</p>}
+        </div>
       </div>
       {children}
       {help && (
-        <div className="mt-2 p-3 bg-yellow-50 border border-yellow-300 rounded text-sm text-yellow-900 flex items-start gap-2">
+        <div className="mt-2 p-3 bg-yellow-50 border border-yellow-200 rounded-xl text-sm text-yellow-900 flex items-start gap-2">
           <Info className="w-4 h-4 mt-0.5" />
           <div>{help}</div>
         </div>
@@ -36,17 +98,20 @@ function SectionCard({ title, subtitle, help, children }) {
   );
 }
 
+/* =========================
+   Avisos inline
+   ========================= */
 function InlineNotice({ type = "info", children }) {
   const isSuccess = type === "success";
   const isError = type === "error";
   const classes = isSuccess
-    ? "bg-green-50 border-green-300 text-green-800"
+    ? "bg-emerald-50 border-emerald-200 text-emerald-800"
     : isError
-      ? "bg-red-50 border-red-300 text-red-800"
-      : "bg-yellow-50 border-yellow-300 text-yellow-800";
+    ? "bg-red-50 border-red-200 text-red-800"
+    : "bg-blue-50 border-blue-200 text-blue-800";
   const Icon = isSuccess ? CheckCircle2 : isError ? AlertTriangle : Info;
   return (
-    <div className={`mt-3 p-3 border rounded text-sm flex items-start gap-2 ${classes}`}>
+    <div className={`p-3 border rounded-xl text-sm flex items-start gap-2 ${classes}`}>
       <Icon className="w-4 h-4 mt-0.5" />
       <div>{children}</div>
     </div>
@@ -68,24 +133,27 @@ export default function AcuerdoEditor() {
   const [mostrarInfo, setMostrarInfo] = useState(false);
 
   // Mensajes
-  const [mensajeValidacion, setMensajeValidacion] = useState(""); // por secciones (duplicados, etc)
-  const [versionMsg, setVersionMsg] = useState({ type: "", text: "" }); // zona de versiones/guardado
+  const [mensajeValidacion, setMensajeValidacion] = useState("");
+  const [versionMsg, setVersionMsg] = useState({ type: "", text: "" });
 
   const [nombreTutorDocente, setNombreTutorDocente] = useState("");
 
-  // Bloque personalizado (hasta 3 por lado) - EXISTENTES
+  // Bloque personalizado
   const [asignaturasUGRDisponibles, setAsignaturasUGRDisponibles] = useState([]);
-  const [seleccionUGR, setSeleccionUGR] = useState([]);        // array de códigos (UGR)
-  const [seleccionDestino, setSeleccionDestino] = useState([]); // array de objetos destino
+  const [seleccionUGR, setSeleccionUGR] = useState([]);
+  const [seleccionDestino, setSeleccionDestino] = useState([]);
   const [optPersonalizado, setOptPersonalizado] = useState(false);
 
-  // Sección APARTE: Propuestas (lado destino nuevo) con mapeo a UGR (n×m)
-  const [propUGR, setPropUGR] = useState([]); // codigos ugr (máx 3) para propuesta
-  const [propDestinos, setPropDestinos] = useState([]); // sólo destinos propuestos (máx 3)
+  // Propuestas
+  const [propUGR, setPropUGR] = useState([]);
+  const [propDestinos, setPropDestinos] = useState([]);
   const [propOpt, setPropOpt] = useState(false);
+
   const navigate = useNavigate();
 
-  // cargar usuario + datos
+  /* =========================
+     Carga: usuario, versiones, grado, destino
+     ========================= */
   useEffect(() => {
     const raw = localStorage.getItem("usuario");
     if (!raw) return;
@@ -97,7 +165,6 @@ export default function AcuerdoEditor() {
         setUsuario(user);
         localStorage.setItem("usuario", JSON.stringify(user));
 
-        // versiones
         fetch(`http://localhost:5000/api/acuerdos/${user.email}`)
           .then((res) => (res.status === 404 ? [] : res.json()))
           .then((lista) => {
@@ -112,7 +179,6 @@ export default function AcuerdoEditor() {
             }
           });
 
-        // asignaturas del grado
         fetch("http://localhost:5000/api/asignaturas")
           .then((res) => res.json())
           .then((lista) => {
@@ -122,7 +188,6 @@ export default function AcuerdoEditor() {
             }
           });
 
-        // destino
         if (user.destino_confirmado?.codigo) {
           fetch(`http://localhost:5000/api/destinos/codigo/${encodeURIComponent(user.destino_confirmado.codigo)}`)
             .then((res) => res.json())
@@ -138,7 +203,7 @@ export default function AcuerdoEditor() {
                       setDatosMovilidad((prev) => ({ ...prev, email_tutor: tutor.email }));
                     }
                   })
-                  .catch(() => { });
+                  .catch(() => {});
               }
             })
             .finally(() => setCargando(false));
@@ -162,7 +227,9 @@ export default function AcuerdoEditor() {
     }
   }, [versionMsg]);
 
-  // ===== Helpers y duplicados =====
+  /* =========================
+     Helpers duplicados
+     ========================= */
   const claveDestino = (asig) => `${asig?.codigo_ugr || ""}-${asig?.codigos_grado?.[0] || "sin-grado"}`;
 
   const codigosUGRUsados = useMemo(
@@ -181,7 +248,9 @@ export default function AcuerdoEditor() {
     [bloques]
   );
 
-  // ===== selección múltiple UGR (hasta 3) — si Optatividad ON, deshabilitamos la selección
+  /* =========================
+     Selectores UGR / Destino
+     ========================= */
   const toggleUGR = (codigoUGR) => {
     if (optPersonalizado) return;
     if (codigosUGRUsados.has(codigoUGR) && !seleccionUGR.includes(codigoUGR)) {
@@ -198,14 +267,6 @@ export default function AcuerdoEditor() {
     });
   };
 
-  const refrescarUsuario = async () => {
-    if (!usuario?.email) return;
-    const u = await fetch(`http://localhost:5000/usuarios/${usuario.email}`).then(r => r.json());
-    setUsuario(u);
-    localStorage.setItem("usuario", JSON.stringify(u));
-  };
-
-  // ===== selección múltiple destino (hasta 3) sin duplicar global y por bloque =====
   const toggleDestino = (asig) => {
     const k = claveDestino(asig);
     if (clavesDestinoUsadas.has(k) && !seleccionDestino.find((x) => claveDestino(x) === k)) {
@@ -223,7 +284,9 @@ export default function AcuerdoEditor() {
     });
   };
 
-  // ===== construir bloque personalizado (n×m) — sólo destinos EXISTENTES aquí
+  /* =========================
+     Construcción de bloques
+     ========================= */
   const crearBloquePersonalizado = () => {
     const destinosExistentes = seleccionDestino.map((a) => ({
       codigo_mapeo_destino: claveDestino(a),
@@ -239,7 +302,6 @@ export default function AcuerdoEditor() {
       setMensajeValidacion("Selecciona al menos 1 asignatura de destino.");
       return;
     }
-    // Validaciones de duplicados globales de destino
     for (const d of destinosExistentes) {
       if (clavesDestinoUsadas.has(d.codigo_mapeo_destino)) {
         setMensajeValidacion("Alguna asignatura de destino ya está en otro bloque.");
@@ -300,7 +362,7 @@ export default function AcuerdoEditor() {
     setVersionMsg({ type: "success", text: "Bloque añadido." });
   };
 
-  // ===== Sección APARTE: Propuestas n×m mapeadas a UGR =====
+  // Propuestas
   const togglePropUGR = (codigoUGR) => {
     if (propOpt) return;
     if (codigosUGRUsados.has(codigoUGR) && !propUGR.includes(codigoUGR)) {
@@ -391,7 +453,6 @@ export default function AcuerdoEditor() {
     };
 
     setBloques((prev) => [...prev, bloque]);
-    // limpiar
     setPropUGR([]);
     setPropDestinos([]);
     setPropOpt(false);
@@ -405,16 +466,9 @@ export default function AcuerdoEditor() {
     setVersionMsg({ type: "success", text: "Bloque eliminado." });
   };
 
-  const exportarPDF = async () => {
-    if (!usuario?.email) return;
-    const ok = await guardarAcuerdo("borrador");  // ✅ garantiza persistencia
-    if (ok) {
-      window.open(`http://localhost:5000/api/acuerdos/${usuario.email}/exportar`, "_blank");
-    }
-  };
-  
-
-  // ===== Guardado / actualización =====
+  /* =========================
+     Guardado / export
+     ========================= */
   const construirPayload = (estado = "borrador") => ({
     email_estudiante: usuario.email,
     destino_codigo: usuario.destino_confirmado.codigo,
@@ -439,159 +493,6 @@ export default function AcuerdoEditor() {
     estado,
   });
 
-  const actualizarAcuerdo = async (estado = "borrador") => {
-    if (!acuerdo?.version) {
-      setVersionMsg({ type: "error", text: "No se ha cargado la versión actual." });
-      return;
-    }
-    try {
-      const res = await fetch(`http://localhost:5000/api/acuerdos/${usuario.email}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(construirPayload(estado)),
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data?.error || "Error al guardar.");
-      setVersionMsg({ type: "success", text: data.msg || "Acuerdo actualizado." });
-      await recargarVersiones();
-    } catch (err) {
-      setVersionMsg({ type: "error", text: err.message });
-    }
-  };
-
-  // const guardarAcuerdo = async (estado = "borrador", nuevaVersion = false) => {
-  //   try {
-  //     const endpoint =
-  //       nuevaVersion || !acuerdo?.version
-  //         ? "http://localhost:5000/api/acuerdos"
-  //         : `http://localhost:5000/api/acuerdos/${usuario.email}`;
-  //     const method = nuevaVersion || !acuerdo?.version ? "POST" : "PUT";
-
-  //     const res = await fetch(endpoint, {
-  //       method,
-  //       headers: { "Content-Type": "application/json" },
-  //       body: JSON.stringify(construirPayload(estado)),
-  //     });
-
-  //     const data = await res.json();
-  //     if (!res.ok) throw new Error(data?.error || "Error al guardar.");
-  //     setVersionMsg({ type: "success", text: data.msg || (nuevaVersion ? "Nueva versión guardada." : "Cambios guardados.") });
-  //     await recargarVersiones();
-  //   } catch (err) {
-  //     setVersionMsg({ type: "error", text: err.message });
-  //   }
-  // };
-
-  // const guardarAcuerdo = async (estado = "borrador", nuevaVersion = false) => {
-  //   try {
-  //     const endpoint =
-  //       nuevaVersion || !acuerdo?.version
-  //         ? "http://localhost:5000/api/acuerdos"
-  //         : `http://localhost:5000/api/acuerdos/${usuario.email}`;
-  //     const method = nuevaVersion || !acuerdo?.version ? "POST" : "PUT";
-
-  //     const res = await fetch(endpoint, {
-  //       method,
-  //       headers: { "Content-Type": "application/json" },
-  //       body: JSON.stringify(construirPayload(estado)),
-  //     });
-
-  //     const data = await res.json();
-  //     if (!res.ok) throw new Error(data?.error || "Error al guardar.");
-
-  //     // ✅ Si era "con destino", lo pasamos a "acuerdo_borrador"
-  //     if (estado === "borrador" && usuario?.estado_proceso === "con destino") {
-  //       try {
-  //         const upd = await fetch(`http://localhost:5000/usuarios/${encodeURIComponent(usuario.email)}`, {
-  //           method: "PATCH",
-  //           headers: { "Content-Type": "application/json" },
-  //           body: JSON.stringify({ estado_proceso: "acuerdo_borrador" }),
-  //         });
-  //         if (upd.ok) {
-  //           const nuevoUsuario = { ...usuario, estado_proceso: "acuerdo_borrador" };
-  //           setUsuario(nuevoUsuario);
-  //           localStorage.setItem("usuario", JSON.stringify(nuevoUsuario));
-  //         }
-  //       } catch {}
-  //     }
-
-  //     setVersionMsg({
-  //       type: "success",
-  //       text: data.msg || (nuevaVersion ? "Nueva versión guardada." : "Cambios guardados."),
-  //     });
-  //     await recargarVersiones();
-  //   } catch (err) {
-  //     setVersionMsg({ type: "error", text: err.message });
-  //   }
-  // };
-
-  const guardarAcuerdo = async (estado = "borrador", nuevaVersion = false) => {
-    try {
-      const endpoint =
-        nuevaVersion || !acuerdo?.version
-          ? "http://localhost:5000/api/acuerdos"
-          : `http://localhost:5000/api/acuerdos/${usuario.email}`;
-      const method = nuevaVersion || !acuerdo?.version ? "POST" : "PUT";
-
-      const res = await fetch(endpoint, {
-        method,
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(construirPayload(estado)),
-      });
-
-      const data = await res.json();
-      if (!res.ok) throw new Error(data?.error || "Error al guardar.");
-
-      // si era "con destino", pásalo a "acuerdo_borrador" (coherencia UI)
-      if (estado === "borrador" && usuario?.estado_proceso === "con destino") {
-        try {
-          const upd = await fetch(`http://localhost:5000/usuarios/${encodeURIComponent(usuario.email)}`, {
-            method: "PATCH",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ estado_proceso: "acuerdo_borrador" }),
-          });
-          if (upd.ok) {
-            const nuevoUsuario = { ...usuario, estado_proceso: "acuerdo_borrador" };
-            setUsuario(nuevoUsuario);
-            localStorage.setItem("usuario", JSON.stringify(nuevoUsuario));
-          }
-        } catch { }
-      }
-
-      setVersionMsg({
-        type: "success",
-        text: data.msg || (nuevaVersion ? "Nueva versión guardada." : "Cambios guardados."),
-      });
-
-      await recargarVersiones();
-      return true; // ✅ importante para flujos encadenados (PDF, enviar, etc.)
-    } catch (err) {
-      setVersionMsg({ type: "error", text: err.message });
-      return false;
-    }
-  };
-
-
-  const borrarVersion = async () => {
-    const v = versiones[indiceVersionSeleccionada];
-    if (!v?.version) {
-      setVersionMsg({ type: "error", text: "No hay versión seleccionada." });
-      return;
-    }
-    try {
-      const res = await fetch(
-        `http://localhost:5000/api/acuerdos/${encodeURIComponent(usuario.email)}/versiones/${v.version}`,
-        { method: "DELETE" }
-      );
-      const data = await res.json();
-      if (!res.ok) throw new Error(data?.error || "Error al eliminar.");
-      setVersionMsg({ type: "success", text: data.msg || `v${v.version} eliminada.` });
-      await recargarVersiones();
-    } catch (e) {
-      setVersionMsg({ type: "error", text: e.message });
-    }
-  };
-
   const recargarVersiones = async () => {
     if (!usuario?.email) return;
     const res = await fetch(`http://localhost:5000/api/acuerdos/${usuario.email}`);
@@ -615,7 +516,59 @@ export default function AcuerdoEditor() {
     }
   };
 
-  // ===== Cargar versión seleccionada =====
+  const guardarAcuerdo = async (estado = "borrador", nuevaVersion = false) => {
+    try {
+      const endpoint =
+        nuevaVersion || !acuerdo?.version
+          ? "http://localhost:5000/api/acuerdos"
+          : `http://localhost:5000/api/acuerdos/${usuario.email}`;
+      const method = nuevaVersion || !acuerdo?.version ? "POST" : "PUT";
+
+      const res = await fetch(endpoint, {
+        method,
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(construirPayload(estado)),
+      });
+
+      const data = await res.json();
+      if (!res.ok) throw new Error(data?.error || "Error al guardar.");
+
+      if (estado === "borrador" && usuario?.estado_proceso === "con destino") {
+        try {
+          const upd = await fetch(`http://localhost:5000/usuarios/${encodeURIComponent(usuario.email)}`, {
+            method: "PATCH",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ estado_proceso: "acuerdo_borrador" }),
+          });
+          if (upd.ok) {
+            const nuevoUsuario = { ...usuario, estado_proceso: "acuerdo_borrador" };
+            setUsuario(nuevoUsuario);
+            localStorage.setItem("usuario", JSON.stringify(nuevoUsuario));
+          }
+        } catch {}
+      }
+
+      setVersionMsg({
+        type: "success",
+        text: data.msg || (nuevaVersion ? "Nueva versión guardada." : "Cambios guardados."),
+      });
+
+      await recargarVersiones();
+      return true;
+    } catch (err) {
+      setVersionMsg({ type: "error", text: err.message });
+      return false;
+    }
+  };
+
+  const exportarPDF = async () => {
+    if (!usuario?.email) return;
+    const ok = await guardarAcuerdo("borrador");
+    if (ok) {
+      window.open(`http://localhost:5000/api/acuerdos/${usuario.email}/exportar`, "_blank");
+    }
+  };
+
   const onCambiarVersion = (idx) => {
     setIndiceVersionSeleccionada(idx);
     const elegido = versiones[idx];
@@ -627,7 +580,9 @@ export default function AcuerdoEditor() {
     }
   };
 
-  // ===== Totales =====
+  /* =========================
+     Totales
+     ========================= */
   const totalECTSUGR = useMemo(
     () =>
       (bloques || []).reduce(
@@ -636,7 +591,6 @@ export default function AcuerdoEditor() {
       ),
     [bloques]
   );
-
   const totalECTSDest = useMemo(
     () =>
       (bloques || []).reduce(
@@ -646,35 +600,75 @@ export default function AcuerdoEditor() {
     [bloques]
   );
 
-  if (cargando) return <div className="p-10 text-center text-gray-600">Cargando datos...</div>;
+  /* =========================
+     Render
+     ========================= */
+  if (cargando)
+    return (
+      <>
+        <Hamburguesa onClick={() => setSidebarVisible((p) => !p)} />
+        <Sidebar visible={sidebarVisible}>
+          <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+            <div className="flex items-center gap-3 text-gray-600">
+              <svg className="w-6 h-6 animate-spin text-red-600" viewBox="0 0 24 24" />
+              <span className="text-lg font-medium">Cargando datos…</span>
+            </div>
+          </div>
+        </Sidebar>
+      </>
+    );
+
   if (!usuario?.destino_confirmado) {
-    return <div className="p-10 text-center text-red-600">No tienes destino confirmado.</div>;
+    return (
+      <>
+        <Hamburguesa onClick={() => setSidebarVisible((prev) => !prev)} />
+        <Sidebar visible={sidebarVisible}>
+          <div className="min-h-screen bg-gradient-to-b from-gray-50 to-gray-100 flex items-center justify-center px-6">
+            <div className="text-center bg-white rounded-2xl border border-gray-200 shadow-md p-8 max-w-lg">
+              <div className="p-4 bg-red-100 rounded-xl mb-4 inline-block">
+                <MessageSquareText className="w-12 h-12 text-red-600" />
+              </div>
+              <h2 className="text-xl font-bold text-gray-900 mb-2 font-['Inter',system-ui,sans-serif]">
+                No tienes un destino confirmado
+              </h2>
+              <p className="text-gray-600">
+                Cuando confirmes un destino podrás crear o editar tu acuerdo.
+              </p>
+            </div>
+          </div>
+        </Sidebar>
+      </>
+    );
   }
 
   return (
     <>
       <Hamburguesa onClick={() => setSidebarVisible((prev) => !prev)} />
       <Sidebar visible={sidebarVisible}>
-        <div className="min-h-screen">
+        <div className="min-h-screen bg-gray-50">
           <DashboardHeader
             titulo="Acuerdo de Estudios"
-            subtitulo="Gestiona y envía tu propuesta de asignaturas para tu movilidad"
+            subtitulo={
+              <div className="flex items-center gap-3">
+                <EstadoBadge estado={acuerdo?.estado} />
+              </div>
+            }
           />
 
-          {/* Barra superior con ayuda y versiones */}
-          <div className="max-w-6xl mx-auto px-6 py-4 flex items-center gap-3">
-            <button
-              onClick={() => setMostrarInfo(true)}
-              className="inline-flex items-center gap-2 text-sm text-blue-700 underline"
-            >
-              <HelpCircle className="w-4 h-4" />
-              ¿Necesitas ayuda para rellenar tu acuerdo?
-            </button>
+          {/* Toolbar superior: ayuda + versiones, todo junto */}
+          <div className="max-w-7xl mx-auto px-6 mt-6">
+            <div className="bg-white rounded-2xl border border-gray-200 p-4 shadow-sm mb-6">
+              <div className="flex flex-col md:flex-row md:items-center gap-3">
+                <button
+                  onClick={() => setMostrarInfo(true)}
+                  className="inline-flex items-center gap-2 text-sm text-blue-700 hover:text-blue-800 underline"
+                >
+                  <HelpCircle className="w-4 h-4" />
+                  ¿Necesitas ayuda para rellenar tu acuerdo?
+                </button>
 
-            {versiones.length > 0 && (
-              <div className="ml-auto flex flex-col gap-2 items-stretch">
-                <div className="flex items-center gap-2">
-                  <label className="text-sm text-gray-600">Versión:</label>
+                <div className="md:ml-auto flex flex-wrap items-center gap-2">
+                  <label className="text-sm text-gray-600">Versión</label>
                   <select
                     className="input"
                     value={indiceVersionSeleccionada}
@@ -687,14 +681,9 @@ export default function AcuerdoEditor() {
                     ))}
                   </select>
 
-                  <button className={btn.danger} onClick={borrarVersion} title="Eliminar versión">
-                    <Trash2 className="w-4 h-4" />
-                    Eliminar versión
-                  </button>
-
                   <button
                     onClick={() => guardarAcuerdo("borrador", true)}
-                    className={btn.primary}
+                    className={btn.chip}
                     title="Guardar como nueva versión"
                   >
                     <Layers className="w-4 h-4" />
@@ -702,34 +691,47 @@ export default function AcuerdoEditor() {
                   </button>
 
                   <button
-                    onClick={() => guardarAcuerdo("borrador")}
-                    className={btn.secondary}
-                    title="Guardar cambios en esta versión"
+                    onClick={async () => {
+                      const v = versiones[indiceVersionSeleccionada];
+                      if (!v?.version) return;
+                      try {
+                        const res = await fetch(
+                          `http://localhost:5000/api/acuerdos/${encodeURIComponent(usuario.email)}/versiones/${v.version}`,
+                          { method: "DELETE" }
+                        );
+                        const data = await res.json();
+                        if (!res.ok) throw new Error(data?.error || "Error al eliminar.");
+                        setVersionMsg({ type: "success", text: data.msg || `v${v.version} eliminada.` });
+                        await recargarVersiones();
+                      } catch (e) {
+                        setVersionMsg({ type: "error", text: e.message });
+                      }
+                    }}
+                    className={btn.smallDanger}
+                    title="Eliminar versión"
                   >
-                    <Save className="w-4 h-4" />
-                    Guardar cambios
+                    <Trash2 className="w-4 h-4" />
+                    Eliminar
                   </button>
                 </div>
-
-                {versionMsg.text && (
-                  <InlineNotice type={versionMsg.type}>
-                    {versionMsg.text}
-                  </InlineNotice>
-                )}
               </div>
-            )}
+
+              {versionMsg.text && <div className="mt-3"><InlineNotice type={versionMsg.type}>{versionMsg.text}</InlineNotice></div>}
+            </div>
           </div>
 
+          {/* Contenido principal */}
           <InfoModal open={mostrarInfo} onClose={() => setMostrarInfo(false)} />
 
-          <div className="max-w-6xl mx-auto px-6 py-6 space-y-6">
-            {/* DATOS PERSONALES */}
+          <div className="max-w-7xl mx-auto px-6 pb-28 space-y-6">
+            {/* Datos personales */}
             <SectionCard
-              title="Datos Personales"
-              subtitle="Estos datos se rellenan automáticamente desde tu perfil. Solo debes añadir tu DNI."
-              help="La información personal debe coincidir con la que figure en tu expediente. Si detectas algún error, actualízalo en tu perfil antes de exportar el PDF."
+              title="Datos del Estudiante"
+              icon={<User className="w-5 h-5 text-red-600" />}
+              subtitle="Se rellenan desde tu perfil; solo añade tu DNI si falta."
+              help="Verifica que estos datos coinciden con tu expediente. Si hay errores, corrige tu perfil antes de exportar el PDF."
             >
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <input className="input" disabled value={usuario.nombre || ""} />
                 <input className="input" disabled value={usuario.primer_apellido || ""} />
                 <input className="input" disabled value={usuario.segundo_apellido || ""} />
@@ -744,21 +746,22 @@ export default function AcuerdoEditor() {
               </div>
             </SectionCard>
 
-            {/* DATOS MOVILIDAD */}
+            {/* Datos movilidad */}
             <SectionCard
               title="Datos de Movilidad"
-              subtitle="Introduce información relevante de tu estancia y del personal académico responsable."
-              help="El 'Responsable académico' puede diferir del 'Tutor docente'. Si el tutor no aparece, es probable que aún no esté asignado por tu centro."
+              icon={<Building2 className="w-5 h-5 text-red-600" />}
+              subtitle="Información de tu estancia y personal académico."
+              help="El Responsable académico puede diferir del Tutor docente. Si el tutor no aparece aún, puede no estar asignado por tu centro."
             >
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <input
                   className="input"
                   placeholder="Curso académico"
                   value={datosMovilidad.curso_academico || ""}
                   onChange={(e) => setDatosMovilidad({ ...datosMovilidad, curso_academico: e.target.value })}
                 />
-                <div className="flex items-center gap-4">
-                  <label className="flex items-center gap-2">
+                <div className="flex items-center gap-4 text-sm">
+                  <label className="inline-flex items-center gap-2">
                     <input
                       type="radio"
                       name="programa"
@@ -768,7 +771,7 @@ export default function AcuerdoEditor() {
                     />
                     ERASMUS+
                   </label>
-                  <label className="flex items-center gap-2">
+                  <label className="inline-flex items-center gap-2">
                     <input
                       type="radio"
                       name="programa"
@@ -803,22 +806,22 @@ export default function AcuerdoEditor() {
               </div>
             </SectionCard>
 
-            {/* ASIGNATURAS DISPONIBLES (rápidos 1x1 / OPT) */}
+            {/* Lista rápida 1x1 / OPT */}
             <SectionCard
               title={`Asignaturas en ${destino?.nombre_uni || ""}`}
-              subtitle="Lista de asignaturas reconocidas previamente en tu titulación."
-              help="Si la asignatura no aparece, usa la sección de 'Propuestas de equivalencia' para crear un bloque con destino nuevo."
+              icon={<GraduationCap className="w-5 h-5 text-red-600" />}
+              subtitle="Equivalencias ya reconocidas en tu titulación."
+              help="Si no encuentras una asignatura, usa 'Propuestas de equivalencia' para crear un bloque con destino nuevo."
             >
-              <ul className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              <ul className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {destino?.asignaturas?.map((asig, idx) => {
                   const k = claveDestino(asig);
                   const disabled1x1 = codigosUGRUsados.has(asig.codigo_ugr) || clavesDestinoUsadas.has(k);
                   return (
-                    <li key={idx} className="p-4 border rounded-lg shadow-sm space-y-2">
-                      <div className="font-medium">{asig.nombre_destino}</div>
+                    <li key={idx} className="p-4 border border-gray-200 rounded-xl shadow-sm space-y-2 bg-white">
+                      <div className="font-semibold text-blue-00">{asig.nombre_destino}</div>
                       <div className="text-sm text-gray-500">{asig.creditos} ECTS</div>
                       <div className="flex gap-2 flex-wrap">
-                        {/* 1x1 normal */}
                         <button
                           className={btn.primary}
                           onClick={() => {
@@ -868,9 +871,8 @@ export default function AcuerdoEditor() {
                           Añadir 1×1
                         </button>
 
-                        {/* 1x1 como OPTATIVIDAD */}
                         <button
-                          className={btn.ghost}
+                          className={btn.secondary}
                           onClick={() => {
                             if (clavesDestinoUsadas.has(k)) {
                               setMensajeValidacion("Esa asignatura de destino ya está en otro bloque.");
@@ -910,7 +912,7 @@ export default function AcuerdoEditor() {
                           disabled={clavesDestinoUsadas.has(k)}
                           title={clavesDestinoUsadas.has(k) ? "Destino ya usado" : "Añadir como Optatividad"}
                         >
-                          <Sparkles className="w-4 h-4" />
+                          <Plus className="w-4 h-4" />
                           Añadir como Optatividad
                         </button>
                       </div>
@@ -920,10 +922,11 @@ export default function AcuerdoEditor() {
               </ul>
             </SectionCard>
 
-            {/* BLOQUE PERSONALIZADO n×m (existentes) */}
+            {/* Bloque personalizado n×m */}
             <SectionCard
-              title="Crear Bloque Personalizado (1×2, 2×1, hasta 3×3)"
-              help="No puedes reutilizar una misma asignatura (UGR o destino) en más de un bloque. Selecciona hasta 3 por cada lado. Activa 'Optatividad' si quieres que los créditos del destino cuenten como optativos en UGR."
+              title="Crear Bloque Personalizado (hasta 3×3)"
+              icon={<BookOpen className="w-5 h-5 text-red-600" />}
+              help="No puedes reutilizar una misma asignatura (UGR o destino) en más de un bloque. Selecciona hasta 3 por cada lado. Activa 'Optatividad' para que los créditos del destino cuenten como OPT en UGR."
             >
               <div className="flex items-center gap-3 mb-2">
                 <label className="inline-flex items-center gap-2 text-sm">
@@ -932,7 +935,7 @@ export default function AcuerdoEditor() {
                     checked={optPersonalizado}
                     onChange={(e) => {
                       setOptPersonalizado(e.target.checked);
-                      if (e.target.checked) setSeleccionUGR([]); // limpiar UGR al activar OPT
+                      if (e.target.checked) setSeleccionUGR([]);
                     }}
                   />
                   Contabilizar como Optatividad (UGR)
@@ -945,7 +948,7 @@ export default function AcuerdoEditor() {
                   <label className="block text-sm mb-1 text-gray-600">
                     Asignaturas UGR (máx 3){optPersonalizado ? " · desactivado por Optatividad" : ""}
                   </label>
-                  <div className={`border rounded p-2 max-h-56 overflow-y-auto space-y-1 ${optPersonalizado ? "opacity-50 pointer-events-none" : ""}`}>
+                  <div className={`border border-gray-200 rounded-xl p-3 max-h-56 overflow-y-auto space-y-2 ${optPersonalizado ? "opacity-50 pointer-events-none" : ""}`}>
                     {asignaturasUGRDisponibles
                       .filter((a) => !usuario.asignaturas_superadas.includes(a.codigo))
                       .map((a) => {
@@ -970,11 +973,13 @@ export default function AcuerdoEditor() {
                 {/* Destino existentes */}
                 <div>
                   <label className="block text-sm mb-1 text-gray-600">Asignaturas destino (máx 3)</label>
-                  <div className="border rounded p-2 max-h-56 overflow-y-auto space-y-1">
+                  <div className="border border-gray-200 rounded-xl p-3 max-h-56 overflow-y-auto space-y-2">
                     {destino?.asignaturas?.map((asig) => {
                       const k = claveDestino(asig);
                       const yaSel = !!seleccionDestino.find((x) => claveDestino(x) === k);
-                      const disabled = (!yaSel && seleccionDestino.length >= 3) || (clavesDestinoUsadas.has(k) && !yaSel);
+                      const disabled =
+                        (!yaSel && seleccionDestino.length >= 3) ||
+                        (clavesDestinoUsadas.has(k) && !yaSel);
                       return (
                         <label key={k} className="flex items-center gap-2 text-sm">
                           <input
@@ -999,18 +1004,16 @@ export default function AcuerdoEditor() {
                   <Plus className="w-4 h-4" />
                   Añadir bloque personalizado
                 </button>
+                {mensajeValidacion && <InlineNotice>{mensajeValidacion}</InlineNotice>}
               </div>
-
-              {mensajeValidacion && (
-                <InlineNotice>{mensajeValidacion}</InlineNotice>
-              )}
             </SectionCard>
 
-            {/* SECCIÓN APARTE: PROPUESTAS DE EQUIVALENCIA (bloques con destino nuevo) */}
+            {/* Propuestas */}
             <SectionCard
-              title="Propuestas de equivalencia (bloque con destino nuevo)"
+              title="Propuestas de equivalencia (destino nuevo)"
+              icon={<Info className="w-5 h-5 text-red-600" />}
               subtitle="Crea un bloque n×m indicando UGR(s) y asignaturas de destino nuevas."
-              help="Las propuestas quedan con estado 'pendiente de revisión' y se imprimirán como parte del acuerdo. Puedes usar Optatividad si procede."
+              help="Las propuestas quedan 'pendiente de revisión' y se imprimirán en el acuerdo. Puedes usar Optatividad si procede."
             >
               <div className="flex items-center gap-3 mb-2">
                 <label className="inline-flex items-center gap-2 text-sm">
@@ -1032,7 +1035,7 @@ export default function AcuerdoEditor() {
                   <label className="block text-sm mb-1 text-gray-600">
                     Asignaturas UGR (máx 3){propOpt ? " · desactivado por Optatividad" : ""}
                   </label>
-                  <div className={`border rounded p-2 max-h-56 overflow-y-auto space-y-1 ${propOpt ? "opacity-50 pointer-events-none" : ""}`}>
+                  <div className={`border border-gray-200 rounded-xl p-3 max-h-56 overflow-y-auto space-y-2 ${propOpt ? "opacity-50 pointer-events-none" : ""}`}>
                     {asignaturasUGRDisponibles
                       .filter((a) => !usuario.asignaturas_superadas.includes(a.codigo))
                       .map((a) => {
@@ -1066,7 +1069,7 @@ export default function AcuerdoEditor() {
 
                   <div className="space-y-3">
                     {propDestinos.map((p, idx) => (
-                      <div key={idx} className="grid grid-cols-1 md:grid-cols-6 gap-2 items-end border rounded p-2">
+                      <div key={idx} className="grid grid-cols-1 md:grid-cols-6 gap-2 items-end border border-gray-200 rounded-xl p-3 bg-white">
                         <div className="md:col-span-2">
                           <label className="block text-xs text-gray-600 mb-1">Nombre</label>
                           <input
@@ -1115,9 +1118,9 @@ export default function AcuerdoEditor() {
                           />
                         </div>
                         <div className="md:col-span-6">
-                          <button className={btn.danger} onClick={() => removePropuesto(idx)}>
+                          <button className={btn.smallDanger} onClick={() => removePropuesto(idx)}>
                             <Trash2 className="w-4 h-4" />
-                            Quitar propuesta
+                            Quitar
                           </button>
                         </div>
                       </div>
@@ -1126,23 +1129,21 @@ export default function AcuerdoEditor() {
                 </div>
               </div>
 
-              <div className="mt-3">
+              <div className="mt-3 flex flex-wrap gap-2">
                 <button className={btn.primary} onClick={crearPropuestaBloque}>
                   <Plus className="w-4 h-4" />
                   Añadir bloque con propuestas
                 </button>
+                {versionMsg.text && <InlineNotice type={versionMsg.type}>{versionMsg.text}</InlineNotice>}
               </div>
-
-              {versionMsg.text && (
-                <InlineNotice type={versionMsg.type}>{versionMsg.text}</InlineNotice>
-              )}
             </SectionCard>
 
-            {/* BLOQUES AÑADIDOS */}
+            {/* Bloques añadidos */}
             <SectionCard
-              title="Asignaturas Seleccionadas"
-              subtitle="Estas son las asignaturas que has vinculado entre la UGR y la universidad de destino."
-              help="Revisa que la suma de créditos sea coherente. Las propuestas nuevas figuran como 'propuesta'."
+              title="Asignaturas seleccionadas"
+              icon={<BookOpen className="w-5 h-5 text-red-600" />}
+              subtitle="Vinculaciones entre la UGR y la universidad de destino."
+              help="Verifica que la suma de créditos sea coherente. Las nuevas propuestas figuran como 'propuesta'."
             >
               <div className="overflow-x-auto">
                 <table className="min-w-full border text-sm text-left">
@@ -1190,7 +1191,7 @@ export default function AcuerdoEditor() {
                             <td className="px-2 py-1 border">{dest.ects || ""}</td>
                             {j === 0 ? (
                               <td className="px-2 py-1 border text-center" rowSpan={maxFilas}>
-                                <button onClick={() => eliminarBloque(i)} className={`${btn.danger} !px-2`}>
+                                <button onClick={() => eliminarBloque(i)} className="inline-flex items-center gap-2 px-3 py-2 rounded-lg text-sm bg-red-600 text-white hover:bg-red-700">
                                   <Trash2 className="w-4 h-4" />
                                   Eliminar
                                 </button>
@@ -1216,37 +1217,38 @@ export default function AcuerdoEditor() {
                 </table>
               </div>
             </SectionCard>
+          </div>
 
-            {/* Acciones finales */}
-            {/* <div className="flex gap-4">
-              {/* <button onClick={() => guardarAcuerdo("borrador")} className={btn.secondary}>
-                <Save className="w-4 h-4" />
-                Guardar cambios
-              </button>
-              <button onClick={exportarPDF} className={btn.primary}>
-                <Download className="w-4 h-4" />
-                Descargar PDF
-              </button> */}
+          {/* Barra de acciones fija (coherente y siempre accesible) */}
+          <div className="fixed bottom-0 inset-x-0 border-t border-gray-200 bg-white/90 backdrop-blur supports-[backdrop-filter]:bg-white/70">
+            <div className="max-w-7xl mx-auto px-6 py-3">
+              <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 items-stretch sm:items-center">
+                <div className="hidden sm:flex items-center gap-2 mr-auto">
+                  <div className="p-2 bg-red-100 rounded-xl">
+                    <Sigma className="w-5 h-5 text-red-600" />
+                  </div>
+                  <div className="text-sm text-gray-700">
+                    <span className="font-semibold">Totales</span>: UGR <span className="font-bold">{totalECTSUGR} ECTS</span> · Destino <span className="font-bold">{totalECTSDest} ECTS</span>
+                  </div>
+                </div>
 
-            {/* </div>  */}
-            <div className="flex gap-4">
-              <div className="flex flex-wrap gap-4">
-                <button onClick={() => guardarAcuerdo("borrador")} className={btn.secondary}>
+                <button
+                  onClick={() => guardarAcuerdo("borrador")}
+                  className={btn.secondary}
+                  title="Guardar cambios en esta versión"
+                >
                   <Save className="w-4 h-4" />
-                  Guardar cambios
+                  Guardar
                 </button>
 
                 <button
                   onClick={async () => {
-                    // guarda antes por si hay cambios sin persistir (en borrador)
                     await guardarAcuerdo("borrador");
-                    // ahora envía a tutor
                     const r = await fetch(`http://localhost:5000/api/acuerdos/${usuario.email}/enviar`, { method: "POST" });
                     if (r.ok) {
                       setVersionMsg({ type: "success", text: "Acuerdo enviado al tutor para revisión." });
-                      // actualizar estado_proceso local
-                      setUsuario(prev => ({ ...prev, estado_proceso: "en revision" }));
                       const nuevo = { ...usuario, estado_proceso: "en revision" };
+                      setUsuario(nuevo);
                       localStorage.setItem("usuario", JSON.stringify(nuevo));
                       await recargarVersiones();
                     } else {
@@ -1265,6 +1267,13 @@ export default function AcuerdoEditor() {
                   Descargar PDF
                 </button>
               </div>
+
+              {/* Mensaje inline reutilizado, para feedback inmediato al guardar/enviar */}
+              {versionMsg.text && (
+                <div className="mt-3">
+                  <InlineNotice type={versionMsg.type}>{versionMsg.text}</InlineNotice>
+                </div>
+              )}
             </div>
           </div>
         </div>

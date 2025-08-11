@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Sidebar from "../dashboard/Sidebar";
 import Hamburguesa from "../dashboard/Hamburguesa";
+import NotificacionesWidget from "./NotificationWidget";
 import {
   Users,
   MapPin,
@@ -90,6 +91,7 @@ export default function AdminDashboard() {
               </button>
             ))}
           </div>
+          <NotificacionesWidget email={user?.email} />
         </div>
       </Sidebar>
     </>

@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import AsignaturaSelector from "./AsignaturaSelector";
-import { BookOpen} from "lucide-react";
+import { BookOpen } from "lucide-react";
 function sonIguales(arr1, arr2) {
   if (arr1.length !== arr2.length) return false;
   const s1 = [...arr1].sort();
@@ -32,10 +32,14 @@ export default function AsignaturasSuperadas({ editando, asignaturasBD, seleccio
 
   return (
     <div className="bg-white shadow rounded-xl p-6 space-y-4">
-      <h2 className="text-xl font-semibold text-black flex items-center gap-2" style={{ fontFamily: "Inter, sans-serif" }}>
-        <BookOpen className="w-6 h-6 text-red-500" /> {/* Ícono de libro */}
-        Asignaturas superadas
-      </h2>
+      <div className="flex items-center gap-3 mb-6">
+        <div className="p-2 bg-red-100 rounded-xl">
+          <BookOpen className="w-6 h-6 text-red-600" />
+        </div>
+        <h2 className="text-xl font-bold text-gray-900" style={{ fontFamily: "Inter, sans-serif" }}>
+          Asignaturas Superadas
+        </h2>
+      </div>
 
       {editando ? (
         asignaturasBD.length === 0 ? (
@@ -52,9 +56,8 @@ export default function AsignaturasSuperadas({ editando, asignaturasBD, seleccio
                     .map(a => (
                       <span
                         key={a.codigo}
-                        className={`px-3 py-1 text-sm rounded-full text-black ${
-                          coloresCurso[a.curso] || "bg-gray-100"
-                        }`}
+                        className={`px-3 py-1 text-sm rounded-full text-black ${coloresCurso[a.curso] || "bg-gray-100"
+                          }`}
                       >
                         {a.nombre}
                       </span>
@@ -95,9 +98,8 @@ export default function AsignaturasSuperadas({ editando, asignaturasBD, seleccio
                 {asignaturasCurso.map(a => (
                   <span
                     key={a.codigo}
-                    className={`px-3 py-1 text-sm rounded-full text-black ${
-                      coloresCurso[a.curso] || "bg-gray-100"
-                    }`}
+                    className={`px-3 py-1 text-sm rounded-full text-black ${coloresCurso[a.curso] || "bg-gray-100"
+                      }`}
                   >
                     {a.nombre}
                   </span>

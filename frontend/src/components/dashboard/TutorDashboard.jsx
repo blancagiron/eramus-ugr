@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import Sidebar from "./Sidebar";
-import { FileText, GraduationCap, Globe, ClipboardCheck, Clock } from "lucide-react";
+import { FileText, GraduationCap, Globe, ClipboardCheck, CircleUserRound } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
 import NotificacionesWidget from "./NotificationWidget";
@@ -34,7 +34,7 @@ export default function TutorDashboard() {
         {/* WIDGETS */}
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6 mb-10">
           <WidgetCard icon={<Globe className="w-6 h-6" />} title="Destinos asignados" value={destinos.length} color="from-indigo-500 to-blue-600" />
-          <WidgetCard icon={<GraduationCap className="w-6 h-6" />} title="Estudiantes asignados" value={estudiantes.length} color="from-green-500 to-emerald-600" />
+          <WidgetCard icon={<CircleUserRound className="w-6 h-6" />} title="Estudiantes asignados" value={estudiantes.length} color="from-green-500 to-emerald-600" />
           <WidgetCard icon={<FileText className="w-6 h-6" />} title="Acuerdos enviados" value={acuerdosEnviados} color="from-yellow-500 to-amber-500" />
           <WidgetCard icon={<ClipboardCheck className="w-6 h-6" />} title="Pendientes de revisión" value={acuerdosPendientes} color="from-red-500 to-pink-500" />
         </div>
@@ -43,10 +43,14 @@ export default function TutorDashboard() {
 
         {/* DESTINOS */}
         <div className="bg-white rounded-xl shadow-md p-6 mb-10 border border-gray-100 mt-10">
-          <h2 className="text-xl font-semibold mb-3 flex items-center gap-2">
-            <Globe className="w-5 h-5" />
-            Destinos asignados
-          </h2>
+          <div className="flex items-center gap-3 mb-6">
+            <div className="p-2 bg-blue-100 rounded-xl">
+              <Globe className="w-6 h-6 text-blue-600" />
+            </div>
+            <h2 className="text-xl font-bold text-gray-900" style={{ fontFamily: "Inter, sans-serif" }}>
+              Destinos asignados
+            </h2>
+          </div>
           <ul className="list-disc pl-6 text-gray-700">
             {destinos.map((d) => (
               <li key={d.codigo}>
@@ -58,10 +62,14 @@ export default function TutorDashboard() {
 
         {/* ESTUDIANTES */}
         <div className="bg-white rounded-xl shadow-md p-6 border border-gray-100">
-          <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
-            <GraduationCap className="w-5 h-5" />
-            Estudiantes con destino asignado
-          </h2>
+          <div className="flex items-center gap-3 mb-6">
+            <div className="p-2 bg-green-100 rounded-xl">
+              <CircleUserRound className="w-6 h-6 text-green-600" />
+            </div>
+            <h2 className="text-xl font-bold text-gray-900" style={{ fontFamily: "Inter, sans-serif" }}>
+              Estudiantes asignados
+            </h2>
+          </div>
 
           {estudiantes.length === 0 ? (
             <p className="text-gray-500">No hay estudiantes asignados a tus destinos todavía.</p>

@@ -9,10 +9,14 @@ export default function InfoAcademica({ perfil, form, nombreCentro, editando, se
 
   return (
     <div className="bg-white rounded-2xl shadow-lg p-6 space-y-6">
-      <h2 className="text-xl font-semibold text-black flex items-center gap-3" style={{ fontFamily: "Inter, sans-serif" }}>
-        <GraduationCap className="w-6 h-6 text-red-500 bg-red-100 rounded-xl" />
-        Información académica
-      </h2>
+      <div className="flex items-center gap-3 mb-6">
+        <div className="p-2 bg-red-100 rounded-xl">
+          <GraduationCap className="w-6 h-6 text-red-600" />
+        </div>
+        <h2 className="text-xl font-bold text-gray-900" style={{ fontFamily: "Inter, sans-serif" }}>
+          Información académica
+        </h2>
+      </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Centro */}
