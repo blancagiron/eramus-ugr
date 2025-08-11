@@ -12,6 +12,7 @@ from routes.asignaturas import asignaturas_api
 from routes.centros import centros_api
 from routes.acuerdos import acuerdos
 from routes.experiencias import experiencias
+from routes.notificaciones import notificaciones
 import os
 
 app = Flask(__name__)
@@ -36,7 +37,7 @@ app.register_blueprint(asignaturas_api)
 app.register_blueprint(centros_api)
 app.register_blueprint(experiencias)
 app.register_blueprint(acuerdos)
-
+app.register_blueprint(notificaciones)
 
 if __name__ == "__main__":
     app.run(debug=True)

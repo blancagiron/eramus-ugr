@@ -5,6 +5,7 @@ import {
   FileText, MapPin, Calendar, CheckCircle, Upload,
   MessageCircle, HandHelping, BookOpen, AlertCircle, User
 } from "lucide-react";
+import NotificacionesWidget from "./NotificationWidget";
 
 export default function EstudianteDashboard() {
   const navigate = useNavigate();
@@ -42,7 +43,7 @@ export default function EstudianteDashboard() {
     {
       label: "Mi Destino",
       icon: <MapPin className="w-8 h-8" />,
-      color: "bg-gradient-to-br from-violet-500 to-purple-600",
+      color: "bg-gradient-to-br from-orange-500 to-red-600",
       ruta:
         user.estado_proceso === "con destino" && user.destino_confirmado?.nombre_uni
           ? `/destinos/${encodeURIComponent(user.destino_confirmado.nombre_uni)}`
@@ -57,13 +58,6 @@ export default function EstudianteDashboard() {
       descripcion: "Fechas importantes y plazos",
       externalLink:
         "https://internacional.ugr.es/estudiantes/movilidad-saliente/grado-estudio/movilidad-internacional"
-    },
-    {
-      label: "Documentación",
-      icon: <Upload className="w-8 h-8" />,
-      color: "bg-gradient-to-br from-amber-500 to-orange-500",
-      ruta: "/estudiante/documentos",
-      descripcion: "Subir y gestionar documentos"
     },
     {
       label: "Comunicación con Tutor",
@@ -95,19 +89,42 @@ export default function EstudianteDashboard() {
 
         {/* Resumen rápido del estado */}
         <div className="mb-8 p-6 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl border border-blue-100">
-          <div className="flex items-center gap-4 mb-4">
-            <div className="w-3 h-3 bg-yellow-400 rounded-full animate-pulse"></div>
-            <h2 className="text-xl font-semibold text-gray-800">
-              Estado Actual: {user.estado_proceso === "con destino" ? "Destino asignado" : "Acuerdo Pendiente"}
-            </h2>
-          </div>
-          {user.destino_confirmado ? (
-            <div className="text-sm text-gray-700">
-              <strong>Destino:</strong> {user.destino_confirmado.nombre_uni}
-            </div>
-          ) : (
-            <p className="text-gray-600">Aún no tienes un destino asignado.</p>
-          )}
+          {(() => {
+            const estado = user?.estado_proceso || "pendiente";
+            const mapa = {
+              "sin destino": { titulo: "Sin destino asignado", dot: "bg-gray-400" },
+              "con destino": { titulo: "Destino asignado", dot: "bg-blue-500" },
+              "en revision": { titulo: "Acuerdo en revisión", dot: "bg-amber-500" },
+              "acuerdo_borrador": { titulo: "Borrador de Acuerdo", dot: "bg-orange-500" },
+              "cambios_solicitados": { titulo: "Acuerdo con cambios solicitados", dot: "bg-orange-500" },
+              "aprobado": { titulo: "Acuerdo aprobado", dot: "bg-green-500" },
+              pendiente: { titulo: "Acuerdo pendiente", dot: "bg-yellow-400" },
+            };
+            const info = mapa[estado] || mapa.pendiente;
+
+            return (
+              <>
+                <div className="flex items-center gap-4 mb-4">
+                  <div className={`w-3 h-3 ${info.dot} rounded-full animate-pulse`}></div>
+                  <h2 className="text-xl font-semibold text-gray-800">
+                    Estado actual: {info.titulo}
+                  </h2>
+                </div>
+
+                {user?.destino_confirmado ? (
+                  <div className="text-sm text-gray-700">
+                    <strong>Destino:</strong> {user.destino_confirmado.nombre_uni}
+                  </div>
+                ) : (
+                  <p className="text-gray-600">
+                    {estado === "sin destino"
+                      ? "Aún no tienes un destino asignado."
+                      : "Cuando tengas destino confirmado aparecerá aquí."}
+                  </p>
+                )}
+              </>
+            );
+          })()}
         </div>
 
         {/* Grid de widgets */}
@@ -132,7 +149,7 @@ export default function EstudianteDashboard() {
               <div className="absolute inset-0 rounded-2xl bg-white/10 opacity-0 hover:opacity-100 transition-opacity duration-200"></div>
               <div className="relative z-10 flex flex-col items-center gap-2 text-center">
                 {icon}
-                <span className="text-base font-medium leading-tight">
+                <span className="text-lg font-medium leading-tight">
                   {label}
                 </span>
                 <span className="text-xs opacity-90 font-normal leading-tight">
@@ -142,6 +159,9 @@ export default function EstudianteDashboard() {
             </button>
           ))}
         </div>
+
+        <NotificacionesWidget email={user?.email} />
+
 
         {/* Accesos rápidos adicionales */}
         <div className="mt-8 grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -166,6 +186,7 @@ export default function EstudianteDashboard() {
             </div>
           </div>
         </div>
+
       </div>
     </Sidebar>
   );

@@ -3,6 +3,8 @@ import Sidebar from "./Sidebar";
 import { FileText, GraduationCap, Globe, ClipboardCheck, Clock } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
+import NotificacionesWidget from "./NotificationWidget";
+
 export default function TutorDashboard() {
   const user = JSON.parse(localStorage.getItem("usuario"));
   const [destinos, setDestinos] = useState([]);
@@ -22,7 +24,7 @@ export default function TutorDashboard() {
 
   const acuerdosEnviados = estudiantes.filter(e => e.acuerdo !== "no enviado").length;
   const acuerdosPendientes = estudiantes.filter(e => e.acuerdo === "enviado").length;
-
+  const puedeVer = (estado) => ["enviado", "cambios_solicitados", "aprobado"].includes(estado);
   return (
     <Sidebar>
       <div className="p-6 max-w-7xl ">
@@ -36,9 +38,11 @@ export default function TutorDashboard() {
           <WidgetCard icon={<FileText className="w-6 h-6" />} title="Acuerdos enviados" value={acuerdosEnviados} color="from-yellow-500 to-amber-500" />
           <WidgetCard icon={<ClipboardCheck className="w-6 h-6" />} title="Pendientes de revisión" value={acuerdosPendientes} color="from-red-500 to-pink-500" />
         </div>
+        <NotificacionesWidget email={user?.email} />
+
 
         {/* DESTINOS */}
-        <div className="bg-white rounded-xl shadow-md p-6 mb-10 border border-gray-100">
+        <div className="bg-white rounded-xl shadow-md p-6 mb-10 border border-gray-100 mt-10">
           <h2 className="text-xl font-semibold mb-3 flex items-center gap-2">
             <Globe className="w-5 h-5" />
             Destinos asignados
@@ -79,8 +83,20 @@ export default function TutorDashboard() {
                     <td className="border px-2 py-1">{e.email}</td>
                     <td className="border px-2 py-1">{e.destino}</td>
                     <td className="border px-2 py-1 capitalize">{e.acuerdo}</td>
-                    <td className="border px-2 py-1 text-center">
+                    {/* <td className="border px-2 py-1 text-center">
                       {e.acuerdo !== "no enviado" ? (
+                        <button
+                          onClick={() => navigate(`/tutor/acuerdo/${e.email}`)}
+                          className="text-blue-600 hover:underline"
+                        >
+                          Ver Acuerdo
+                        </button>
+                      ) : (
+                        <span className="text-gray-400 italic">Pendiente</span>
+                      )}
+                    </td> */}
+                    <td className="border px-2 py-1 text-center">
+                      {puedeVer(e.acuerdo) ? (
                         <button
                           onClick={() => navigate(`/tutor/acuerdo/${e.email}`)}
                           className="text-blue-600 hover:underline"

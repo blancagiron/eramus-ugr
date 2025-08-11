@@ -37,7 +37,6 @@ export default function Sidebar({ children, siempreVisible = false, visible = tr
     { label: "Mi Perfil", icon: <User size={18} />, to: "/perfil" },
     { label: "Dashboard", icon: <Home size={18} />, to: dashboardPath },
     { label: "Destinos", icon: <MapPin size={18} />, to: "/destinos" },
-    { label: "Documentación", icon: <Folder size={18} />, to: "/documentacion" },
     { label: "Mi acuerdo", icon: <FileText size={18} />, to: "/estudiante/acuerdo" },
   ];
 

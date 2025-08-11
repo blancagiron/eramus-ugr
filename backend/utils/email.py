@@ -37,3 +37,4 @@ def enviar_correo_verificacion(destinatario, token):
     except Exception as e:
         print("Error al enviar correo:", e)
         return False
+

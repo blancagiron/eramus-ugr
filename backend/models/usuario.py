@@ -1,4 +1,25 @@
-from datetime import date
+from datetime import date, datetime
+from db import db
+
+
+
+def _notif(to_email, titulo, mensaje="", tipo="info", enlace=None):
+    try:
+        db.notificaciones.insert_one({
+            "usuario_email": to_email,
+            "titulo": titulo,
+            "mensaje": mensaje or "",
+            "tipo": tipo,
+            "leida": False,
+            "enlace": enlace,
+            "fecha_creacion": datetime.utcnow(),
+        })
+    except Exception:
+        pass
+
+def _notificar_admins(titulo, mensaje="", tipo="info", enlace=None):
+    for admin in db.usuarios.find({"rol": "admin"}, {"email": 1, "_id": 0}):
+        _notif(admin["email"], titulo, mensaje, tipo=tipo, enlace=enlace)
 
 def crear_usuario(data):
     return {

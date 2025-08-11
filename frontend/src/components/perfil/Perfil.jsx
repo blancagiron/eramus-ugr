@@ -7,6 +7,7 @@ import AsignaturasSuperadas from "./AsignaturasSuperadas";
 import Idiomas from "./Idiomas";
 import Hamburguesa from "../dashboard/Hamburguesa";
 import DashboardHeader from "../dashboard/DashboardHeader";
+import RenunciaDestinoCard from "./RenunciaDestinoCard";
 
 /**
  * Transforma una URL de Cloudinary (avatar cuadrado, centrado en cara, redondeado).
@@ -281,6 +282,16 @@ export default function Perfil() {
                   {mensaje}
                 </div>
               )}
+
+              <RenunciaDestinoCard
+                rol={rol}
+                perfil={perfil}
+                email={email}
+                onPerfilActualizado={setPerfil}
+                setMensaje={setMensaje}
+                setTipoMensaje={setTipoMensaje}
+              />
+
 
               <div className="pt-4">
                 <InfoAcademica

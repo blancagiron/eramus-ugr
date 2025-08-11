@@ -36,14 +36,14 @@ function SectionCard({ title, subtitle, help, children }) {
   );
 }
 
-function InlineNotice({ type="info", children }) {
+function InlineNotice({ type = "info", children }) {
   const isSuccess = type === "success";
   const isError = type === "error";
   const classes = isSuccess
     ? "bg-green-50 border-green-300 text-green-800"
     : isError
-    ? "bg-red-50 border-red-300 text-red-800"
-    : "bg-yellow-50 border-yellow-300 text-yellow-800";
+      ? "bg-red-50 border-red-300 text-red-800"
+      : "bg-yellow-50 border-yellow-300 text-yellow-800";
   const Icon = isSuccess ? CheckCircle2 : isError ? AlertTriangle : Info;
   return (
     <div className={`mt-3 p-3 border rounded text-sm flex items-start gap-2 ${classes}`}>
@@ -138,7 +138,7 @@ export default function AcuerdoEditor() {
                       setDatosMovilidad((prev) => ({ ...prev, email_tutor: tutor.email }));
                     }
                   })
-                  .catch(() => {});
+                  .catch(() => { });
               }
             })
             .finally(() => setCargando(false));
@@ -196,6 +196,13 @@ export default function AcuerdoEditor() {
       }
       return [...prev, codigoUGR];
     });
+  };
+
+  const refrescarUsuario = async () => {
+    if (!usuario?.email) return;
+    const u = await fetch(`http://localhost:5000/usuarios/${usuario.email}`).then(r => r.json());
+    setUsuario(u);
+    localStorage.setItem("usuario", JSON.stringify(u));
   };
 
   // ===== selección múltiple destino (hasta 3) sin duplicar global y por bloque =====
@@ -398,10 +405,14 @@ export default function AcuerdoEditor() {
     setVersionMsg({ type: "success", text: "Bloque eliminado." });
   };
 
-  const exportarPDF = () => {
+  const exportarPDF = async () => {
     if (!usuario?.email) return;
-    window.open(`http://localhost:5000/api/acuerdos/${usuario.email}/exportar`, "_blank");
+    const ok = await guardarAcuerdo("borrador");  // ✅ garantiza persistencia
+    if (ok) {
+      window.open(`http://localhost:5000/api/acuerdos/${usuario.email}/exportar`, "_blank");
+    }
   };
+  
 
   // ===== Guardado / actualización =====
   const construirPayload = (estado = "borrador") => ({
@@ -448,6 +459,72 @@ export default function AcuerdoEditor() {
     }
   };
 
+  // const guardarAcuerdo = async (estado = "borrador", nuevaVersion = false) => {
+  //   try {
+  //     const endpoint =
+  //       nuevaVersion || !acuerdo?.version
+  //         ? "http://localhost:5000/api/acuerdos"
+  //         : `http://localhost:5000/api/acuerdos/${usuario.email}`;
+  //     const method = nuevaVersion || !acuerdo?.version ? "POST" : "PUT";
+
+  //     const res = await fetch(endpoint, {
+  //       method,
+  //       headers: { "Content-Type": "application/json" },
+  //       body: JSON.stringify(construirPayload(estado)),
+  //     });
+
+  //     const data = await res.json();
+  //     if (!res.ok) throw new Error(data?.error || "Error al guardar.");
+  //     setVersionMsg({ type: "success", text: data.msg || (nuevaVersion ? "Nueva versión guardada." : "Cambios guardados.") });
+  //     await recargarVersiones();
+  //   } catch (err) {
+  //     setVersionMsg({ type: "error", text: err.message });
+  //   }
+  // };
+
+  // const guardarAcuerdo = async (estado = "borrador", nuevaVersion = false) => {
+  //   try {
+  //     const endpoint =
+  //       nuevaVersion || !acuerdo?.version
+  //         ? "http://localhost:5000/api/acuerdos"
+  //         : `http://localhost:5000/api/acuerdos/${usuario.email}`;
+  //     const method = nuevaVersion || !acuerdo?.version ? "POST" : "PUT";
+
+  //     const res = await fetch(endpoint, {
+  //       method,
+  //       headers: { "Content-Type": "application/json" },
+  //       body: JSON.stringify(construirPayload(estado)),
+  //     });
+
+  //     const data = await res.json();
+  //     if (!res.ok) throw new Error(data?.error || "Error al guardar.");
+
+  //     // ✅ Si era "con destino", lo pasamos a "acuerdo_borrador"
+  //     if (estado === "borrador" && usuario?.estado_proceso === "con destino") {
+  //       try {
+  //         const upd = await fetch(`http://localhost:5000/usuarios/${encodeURIComponent(usuario.email)}`, {
+  //           method: "PATCH",
+  //           headers: { "Content-Type": "application/json" },
+  //           body: JSON.stringify({ estado_proceso: "acuerdo_borrador" }),
+  //         });
+  //         if (upd.ok) {
+  //           const nuevoUsuario = { ...usuario, estado_proceso: "acuerdo_borrador" };
+  //           setUsuario(nuevoUsuario);
+  //           localStorage.setItem("usuario", JSON.stringify(nuevoUsuario));
+  //         }
+  //       } catch {}
+  //     }
+
+  //     setVersionMsg({
+  //       type: "success",
+  //       text: data.msg || (nuevaVersion ? "Nueva versión guardada." : "Cambios guardados."),
+  //     });
+  //     await recargarVersiones();
+  //   } catch (err) {
+  //     setVersionMsg({ type: "error", text: err.message });
+  //   }
+  // };
+
   const guardarAcuerdo = async (estado = "borrador", nuevaVersion = false) => {
     try {
       const endpoint =
@@ -464,12 +541,36 @@ export default function AcuerdoEditor() {
 
       const data = await res.json();
       if (!res.ok) throw new Error(data?.error || "Error al guardar.");
-      setVersionMsg({ type: "success", text: data.msg || (nuevaVersion ? "Nueva versión guardada." : "Cambios guardados.") });
+
+      // si era "con destino", pásalo a "acuerdo_borrador" (coherencia UI)
+      if (estado === "borrador" && usuario?.estado_proceso === "con destino") {
+        try {
+          const upd = await fetch(`http://localhost:5000/usuarios/${encodeURIComponent(usuario.email)}`, {
+            method: "PATCH",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ estado_proceso: "acuerdo_borrador" }),
+          });
+          if (upd.ok) {
+            const nuevoUsuario = { ...usuario, estado_proceso: "acuerdo_borrador" };
+            setUsuario(nuevoUsuario);
+            localStorage.setItem("usuario", JSON.stringify(nuevoUsuario));
+          }
+        } catch { }
+      }
+
+      setVersionMsg({
+        type: "success",
+        text: data.msg || (nuevaVersion ? "Nueva versión guardada." : "Cambios guardados."),
+      });
+
       await recargarVersiones();
+      return true; // ✅ importante para flujos encadenados (PDF, enviar, etc.)
     } catch (err) {
       setVersionMsg({ type: "error", text: err.message });
+      return false;
     }
   };
+
 
   const borrarVersion = async () => {
     const v = versiones[indiceVersionSeleccionada];
@@ -599,8 +700,9 @@ export default function AcuerdoEditor() {
                     <Layers className="w-4 h-4" />
                     Nueva versión
                   </button>
+
                   <button
-                    onClick={() => actualizarAcuerdo("borrador")}
+                    onClick={() => guardarAcuerdo("borrador")}
                     className={btn.secondary}
                     title="Guardar cambios en esta versión"
                   >
@@ -1116,15 +1218,53 @@ export default function AcuerdoEditor() {
             </SectionCard>
 
             {/* Acciones finales */}
-            <div className="flex gap-4">
-              <button onClick={() => guardarAcuerdo("borrador")} className={btn.secondary}>
+            {/* <div className="flex gap-4">
+              {/* <button onClick={() => guardarAcuerdo("borrador")} className={btn.secondary}>
                 <Save className="w-4 h-4" />
                 Guardar cambios
               </button>
               <button onClick={exportarPDF} className={btn.primary}>
                 <Download className="w-4 h-4" />
                 Descargar PDF
-              </button>
+              </button> */}
+
+            {/* </div>  */}
+            <div className="flex gap-4">
+              <div className="flex flex-wrap gap-4">
+                <button onClick={() => guardarAcuerdo("borrador")} className={btn.secondary}>
+                  <Save className="w-4 h-4" />
+                  Guardar cambios
+                </button>
+
+                <button
+                  onClick={async () => {
+                    // guarda antes por si hay cambios sin persistir (en borrador)
+                    await guardarAcuerdo("borrador");
+                    // ahora envía a tutor
+                    const r = await fetch(`http://localhost:5000/api/acuerdos/${usuario.email}/enviar`, { method: "POST" });
+                    if (r.ok) {
+                      setVersionMsg({ type: "success", text: "Acuerdo enviado al tutor para revisión." });
+                      // actualizar estado_proceso local
+                      setUsuario(prev => ({ ...prev, estado_proceso: "en revision" }));
+                      const nuevo = { ...usuario, estado_proceso: "en revision" };
+                      localStorage.setItem("usuario", JSON.stringify(nuevo));
+                      await recargarVersiones();
+                    } else {
+                      const data = await r.json().catch(() => ({}));
+                      setVersionMsg({ type: "error", text: data.error || "No se pudo enviar al tutor." });
+                    }
+                  }}
+                  className={btn.primary}
+                >
+                  <CheckCircle2 className="w-4 h-4" />
+                  Enviar a tutor
+                </button>
+
+                <button onClick={exportarPDF} className={btn.ghost}>
+                  <Download className="w-4 h-4" />
+                  Descargar PDF
+                </button>
+              </div>
             </div>
           </div>
         </div>

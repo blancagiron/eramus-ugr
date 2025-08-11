@@ -24,6 +24,25 @@ def listar_destinos():
         d["_id"] = str(d["_id"])
     return jsonify(docs)
 
+
+@destinos.route("/api/destinos/<codigo>/ocupacion", methods=["GET"])
+def ocupacion_destino(codigo):
+    ocupados = db.usuarios.count_documents({
+        "rol": "estudiante",
+        "destino_confirmado.codigo": codigo
+    })
+    return jsonify({"codigo": codigo, "ocupados": int(ocupados)})
+
+@destinos.route("/api/destinos/ocupacion", methods=["GET"])
+def ocupacion_todos():
+    pipeline = [
+        {"$match": {"rol": "estudiante", "destino_confirmado.codigo": {"$exists": True}}},
+        {"$group": {"_id": "$destino_confirmado.codigo", "ocupados": {"$sum": 1}}},
+    ]
+    rows = list(db.usuarios.aggregate(pipeline))
+    out = {r["_id"]: int(r["ocupados"]) for r in rows}
+    return jsonify(out)
+
 # @destinos.route("/api/destinos", methods=["POST"])
 # def crear_nuevo_destino():
 #     data = request.json

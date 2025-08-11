@@ -279,7 +279,7 @@ export default function EstudianteComunicacion() {
                                   {asignatura.nombre}
                                 </h6>
                                 <div className="flex items-center gap-1 ml-3">
-                                  <CreditCard className="w-4 h-4 text-red-600" />
+                                  
                                   <span className="font-bold text-red-600 text-sm">{asignatura.ects} ECTS</span>
                                 </div>
                               </div>
@@ -337,7 +337,7 @@ export default function EstudianteComunicacion() {
                                   )}
                                 </h6>
                                 <div className="flex items-center gap-1 ml-3">
-                                  <CreditCard className="w-4 h-4 text-blue-600" />
+                                
                                   <span className="font-bold text-blue-600 text-sm">{asignatura.ects} ECTS</span>
                                 </div>
                               </div>

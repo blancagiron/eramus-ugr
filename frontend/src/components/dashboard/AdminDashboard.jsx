@@ -83,7 +83,7 @@ export default function AdminDashboard() {
                 <div className="absolute inset-0 rounded-2xl bg-white/10 opacity-0 hover:opacity-100 transition-opacity duration-200"></div>
                 <div className="relative z-10 flex flex-col items-center gap-2">
                   {icon}
-                  <span className="text-center text-base font-medium leading-tight">
+                  <span className="text-center text-lg font-medium leading-tight">
                     {label}
                   </span>
                 </div>

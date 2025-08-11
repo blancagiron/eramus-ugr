@@ -32,9 +32,10 @@ export default function SidebarPerfil({
     "no iniciado": { texto: "No iniciado", estilo: "bg-gray-200 text-gray-700" },
     "sin destino": { texto: "Sin destino", estilo: "bg-gray-100 text-gray-600" },
     "con destino": { texto: "Destino asignado", estilo: "bg-blue-100 text-blue-700" },
-    "en revision": { texto: "En revisión", estilo: "bg-yellow-100 text-yellow-700" },
-    "aceptado": { texto: "Aceptado", estilo: "bg-green-100 text-green-700" },
+    "en revision": { texto: "Acuerdo en revisión", estilo: "bg-yellow-100 text-yellow-700" },
+    "aprobado": { texto: "Acuerdo aprobado", estilo: "bg-green-100 text-green-700" },
     "rechazado": { texto: "Rechazado", estilo: "bg-red-100 text-red-700" },
+    "acuerdo_borrador": { texto: "Borrador Acuerdo", estilo: "bg-orange-100 text-orange-700" },
   };
   const { texto: estadoTexto, estilo: estadoClase } = estados[estado] || {
     texto: "Desconocido",
