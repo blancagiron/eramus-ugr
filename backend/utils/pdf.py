@@ -477,18 +477,26 @@ def generar_pdf_acuerdo(acuerdo):
     ]
     
     # Anchos para firmas
-    firma_width = page_width * 0.5
+     # ===== FIRMAS =====
+    elements.append(Spacer(1, 20))
+    firma_table = [
+        [Paragraph("<b>Firma Tutor/a Docente</b>", tiny_style)],
+        [Paragraph("", tiny_style)],
+        [Paragraph("<b>Fecha:</b>", tiny_style)],
+        [Paragraph("", tiny_style)]
+    ]
     
-    tabla_firma = Table(firma_table, colWidths=[firma_width, firma_width])
+    tabla_firma = Table(firma_table, colWidths=[page_width], rowHeights=[25, 60, 25, 20])
     tabla_firma.setStyle(TableStyle([
         ("BOX", (0, 0), (-1, -1), 0.5, colors.black),
         ("INNERGRID", (0, 0), (-1, -1), 0.25, colors.black),
-        ("BACKGROUND", (0, 0), (-1, 0), colors.lightgrey),
-        ("ALIGN", (0, 0), (-1, 0), "CENTER"),
+        ("BACKGROUND", (0, 0), (0, 0), colors.lightgrey),  # Encabezado firma
+        ("BACKGROUND", (0, 2), (0, 2), colors.lightgrey),  # Encabezado fecha
+        ("ALIGN", (0, 0), (-1, -1), "CENTER"),
         ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
         ("FONTSIZE", (0, 0), (-1, -1), 8),
-        # Altura mínima para las firmas
-        ("ROWBACKGROUNDS", (0, 1), (-1, 1), [colors.white]),
+        ("ROWBACKGROUNDS", (0, 1), (0, 1), [colors.white]),  # Espacio firma
+        ("ROWBACKGROUNDS", (0, 3), (0, 3), [colors.white]),  # Espacio fecha
     ]))
     elements.append(tabla_firma)
 
