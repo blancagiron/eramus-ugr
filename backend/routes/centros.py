@@ -20,7 +20,7 @@ def crear_centro():
     if db.centros.find_one({ "codigo": data["codigo"] }):
         return jsonify({"error": "Ya existe un centro con este código"}), 409
 
-    db.centros.insert_one({ "codigo": data["codigo"], "nombre": data["nombre"] })
+    db.centros.insert_one({ "codigo": data["codigo"], "nombre": data["nombre"], "responsable_academico": data["responsable_academico"] })
     return jsonify({ "message": "Centro creado" }), 201
 
 @centros_api.route("/api/centros/<id>", methods=["PATCH"])
@@ -40,6 +40,9 @@ def actualizar_centro(id):
 
     if "nombre" in data:
         update["nombre"] = data["nombre"]
+    
+    if "responsable_academico" in data:
+        update["responsable_academico"] = data["responsable_academico"]
 
     db.centros.update_one({ "_id": ObjectId(id) }, { "$set": update })
     return jsonify({ "message": "Centro actualizado" })

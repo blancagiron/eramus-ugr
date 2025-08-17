@@ -4,6 +4,7 @@ import { X } from "lucide-react";
 export default function EditarCentroModal({ centro, onClose }) {
   const [codigo, setCodigo] = useState(centro.codigo || "");
   const [nombre, setNombre] = useState(centro.nombre || "");
+  const [responsableAcademico, setResponsableAcademico] = useState(centro.responsable_academico || "");
   const [mensaje, setMensaje] = useState("");
 
   useEffect(() => {
@@ -24,7 +25,7 @@ export default function EditarCentroModal({ centro, onClose }) {
       const res = await fetch(url, {
         method: metodo,
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ codigo, nombre }),
+        body: JSON.stringify({ codigo, nombre, responsable_academico: responsableAcademico }),
       });
 
       if (res.ok) {
@@ -52,7 +53,7 @@ export default function EditarCentroModal({ centro, onClose }) {
           <h2 className="text-2xl font-semibold text-gray-800" style={{ fontFamily: "Inter, sans-serif" }}>
             {centro._id ? "Editar Centro" : "Nuevo Centro"}
           </h2>
-          <button 
+          <button
             onClick={onClose}
             className="p-2 hover:bg-gray-200 rounded-full transition-colors duration-200"
           >
@@ -93,6 +94,15 @@ export default function EditarCentroModal({ centro, onClose }) {
                     required
                   />
                 </div>
+                <div>
+                  <label className="block text-base font-medium text-gray-700 mb-2">Responsable académico</label>
+                  <input
+                    value={responsableAcademico}
+                    onChange={(e) => setResponsableAcademico(e.target.value)}
+                    placeholder="Nombre completo del responsable"
+                    className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                  />
+                </div>
               </div>
             </div>
           </div>
@@ -100,14 +110,14 @@ export default function EditarCentroModal({ centro, onClose }) {
 
         {/* Footer */}
         <div className="bg-stone-50 px-8 py-6 border-t border-gray-200 flex justify-end gap-4">
-          <button 
-            onClick={onClose} 
+          <button
+            onClick={onClose}
             className="px-6 py-3 bg-gray-200 hover:bg-gray-300 text-gray-700 font-medium rounded-lg transition-colors duration-200"
           >
             Cancelar
           </button>
-          <button 
-            onClick={guardarCambios} 
+          <button
+            onClick={guardarCambios}
             className="px-6 py-3 bg-red-500 hover:bg-red-700 text-white font-medium rounded-lg transition-colors duration-200"
           >
             Guardar centro

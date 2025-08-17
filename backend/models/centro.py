@@ -1,5 +1,6 @@
-def crear_cemtro(data):
+def crear_centro(data):
     return {
         "codigo": data["codigo"],
-        "nombre": data["nombre"]
+        "nombre": data["nombre"],
+        "responsable_academico": data.get("responsable_academico", "")
     }

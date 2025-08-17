@@ -107,8 +107,8 @@ function InlineNotice({ type = "info", children }) {
   const classes = isSuccess
     ? "bg-emerald-50 border-emerald-200 text-emerald-800"
     : isError
-    ? "bg-red-50 border-red-200 text-red-800"
-    : "bg-blue-50 border-blue-200 text-blue-800";
+      ? "bg-red-50 border-red-200 text-red-800"
+      : "bg-blue-50 border-blue-200 text-blue-800";
   const Icon = isSuccess ? CheckCircle2 : isError ? AlertTriangle : Info;
   return (
     <div className={`p-3 border rounded-xl text-sm flex items-start gap-2 ${classes}`}>
@@ -188,6 +188,21 @@ export default function AcuerdoEditor() {
             }
           });
 
+        if (user.codigo_centro) {
+          fetch("http://localhost:5000/api/centros")
+            .then((res) => res.json())
+            .then((centros) => {
+              const centroUsuario = centros.find(c => c.codigo === user.codigo_centro);
+              if (centroUsuario?.responsable_academico) {
+                setDatosMovilidad((prev) => ({
+                  ...prev,
+                  responsable: centroUsuario.responsable_academico,
+                }));
+              }
+            })
+            .catch(() => { });
+        }
+
         if (user.destino_confirmado?.codigo) {
           fetch(`http://localhost:5000/api/destinos/codigo/${encodeURIComponent(user.destino_confirmado.codigo)}`)
             .then((res) => res.json())
@@ -203,7 +218,7 @@ export default function AcuerdoEditor() {
                       setDatosMovilidad((prev) => ({ ...prev, email_tutor: tutor.email }));
                     }
                   })
-                  .catch(() => {});
+                  .catch(() => { });
               }
             })
             .finally(() => setCargando(false));
@@ -545,7 +560,7 @@ export default function AcuerdoEditor() {
             setUsuario(nuevoUsuario);
             localStorage.setItem("usuario", JSON.stringify(nuevoUsuario));
           }
-        } catch {}
+        } catch { }
       }
 
       setVersionMsg({
@@ -795,11 +810,18 @@ export default function AcuerdoEditor() {
                   <option value="1er cuatrimestre">1er cuatrimestre</option>
                   <option value="2º cuatrimestre">2º cuatrimestre</option>
                 </select>
+                {/* <input
+                  className="input"
+                  placeholder="Responsable académico"
+                  value={datosMovilidad.responsable || ""}
+                  onChange={(e) => setDatosMovilidad({ ...datosMovilidad, responsable: e.target.value })}
+                /> */}
                 <input
                   className="input"
                   placeholder="Responsable académico"
                   value={datosMovilidad.responsable || ""}
                   onChange={(e) => setDatosMovilidad({ ...datosMovilidad, responsable: e.target.value })}
+                  disabled 
                 />
                 <input className="input" disabled value={nombreTutorDocente || "Tutor todavía no asignado"} />
                 <input className="input" disabled value={destino?.tutor_asignado || "Tutor todavía no asignado"} />

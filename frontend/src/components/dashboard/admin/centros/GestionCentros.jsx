@@ -64,6 +64,7 @@ export default function GestionCentros() {
                                     <tr>
                                         <th className="p-4 font-semibold text-gray-700">Código</th>
                                         <th className="p-4 font-semibold text-gray-700">Nombre</th>
+                                        <th className="p-4 font-semibold text-gray-700">Responsable académico</th>
                                         <th className="p-4 text-center font-semibold text-gray-700">Acciones</th>
                                     </tr>
                                 </thead>
@@ -72,6 +73,7 @@ export default function GestionCentros() {
                                         <tr key={c._id} className="border-t hover:bg-gray-50">
                                             <td className="p-4">{c.codigo}</td>
                                             <td className="p-4">{c.nombre}</td>
+                                            <td className="p-4">{c.responsable_academico || "-"}</td>
                                             <td className="p-4 flex justify-center gap-3">
                                                 <button onClick={() => setEditando(c)} className="text-blue-600 hover:text-blue-800">
                                                     <Pencil className="w-5 h-5" />
