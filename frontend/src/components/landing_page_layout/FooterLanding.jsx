@@ -47,7 +47,7 @@ export default function FooterLanding() {
                             <li>
                                 <a href="/legal" className="text-white hover:text-red-200 transition-colors duration-200 flex items-center group/link no-underline">
                                     <span className="w-2 h-2 bg-white rounded-full mr-3 opacity-0 group-hover/link:opacity-100 transition-opacity duration-200"></span>
-                                    Términos y condiciones
+                                    Aviso Legal
                                 </a>
                             </li>
                             <li>
