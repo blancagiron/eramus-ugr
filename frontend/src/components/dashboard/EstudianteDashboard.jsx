@@ -92,6 +92,7 @@ export default function EstudianteDashboard() {
           {(() => {
             const estado = user?.estado_proceso || "pendiente";
             const mapa = {
+             
               "sin destino": { titulo: "Sin destino asignado", dot: "bg-gray-400" },
               "con destino": { titulo: "Destino asignado", dot: "bg-blue-500" },
               "en revision": { titulo: "Acuerdo en revisión", dot: "bg-amber-500" },
@@ -163,30 +164,8 @@ export default function EstudianteDashboard() {
         <NotificacionesWidget email={user?.email} />
 
 
-        {/* Accesos rápidos adicionales */}
-        <div className="mt-8 grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div className="p-6 bg-white rounded-xl shadow-md border border-gray-100">
-            <h3 className="text-lg font-semibold text-gray-800 mb-3 flex items-center gap-2">
-              <CheckCircle className="w-5 h-5 text-green-500" />
-              Progreso General
-            </h3>
-            <div className="space-y-3">
-              <div>
-                <div className="flex justify-between text-sm mb-1">
-                  <span>Completado</span>
-                  <span>60%</span>
-                </div>
-                <div className="w-full bg-gray-200 rounded-full h-2">
-                  <div className="bg-blue-600 h-2 rounded-full" style={{ width: '60%' }}></div>
-                </div>
-              </div>
-              <p className="text-xs text-gray-600">
-                3 de 5 tareas principales completadas
-              </p>
-            </div>
-          </div>
-        </div>
-
+       
+        
       </div>
     </Sidebar>
   );

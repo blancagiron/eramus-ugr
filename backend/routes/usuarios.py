@@ -422,3 +422,25 @@ def renunciar_destino(email):
         )
 
     return jsonify({"mensaje": "Renuncia registrada y notificada"}), 200
+
+@usuarios.route("/usuarios/<email>", methods=["DELETE"])
+def eliminar_usuario(email):
+    # Verificar si el usuario existe
+    usuario = db.usuarios.find_one({"email": email})
+    if not usuario:
+        return jsonify({"error": "Usuario no encontrado"}), 404
+
+    # Eliminar el usuario de la base de datos
+    resultado = db.usuarios.delete_one({"email": email})
+    if resultado.deleted_count == 0:
+        return jsonify({"error": "No se pudo eliminar el usuario"}), 500
+
+    # (Opcional) Eliminar notificaciones asociadas al usuario
+    db.notificaciones.delete_many({"usuario_email": email})
+
+    # (Opcional) Eliminar acuerdos asociados al usuario si es estudiante
+    if usuario.get("rol") == "estudiante":
+        db.acuerdos.delete_many({"email_estudiante": email})
+
+    return jsonify({"mensaje": f"Usuario con email {email} eliminado correctamente"}), 200
+
