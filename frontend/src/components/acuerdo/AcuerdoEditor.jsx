@@ -282,6 +282,53 @@ export default function AcuerdoEditor() {
     });
   };
 
+  const EstadoBadge = ({ estado }) => {
+    const configs = {
+      borrador: {
+        bg: "bg-gray-100",
+        text: "text-gray-700",
+        border: "border-gray-200",
+        icon: <FileText className="w-4 h-4" />,
+        label: "Borrador"
+      },
+      enviado: {
+        bg: "bg-blue-50",
+        text: "text-blue-700",
+        border: "border-blue-200",
+        icon: <FileText className="w-4 h-4" />,
+        label: "Enviado"
+      },
+      comentado: {
+        bg: "bg-amber-50",
+        text: "text-amber-800",
+        border: "border-amber-200",
+        icon: <ClipboardList className="w-4 h-4" />,
+        label: "Cambios solicitados"
+      },
+      aprobado: {
+        bg: "bg-emerald-50",
+        text: "text-emerald-800",
+        border: "border-emerald-200",
+        icon: <BadgeCheck className="w-4 h-4" />,
+        label: "Aprobado"
+      },
+      cambios_solicitados: {
+        bg: "bg-amber-50",
+        text: "text-amber-800",
+        border: "border-amber-200",
+        icon: <ClipboardList className="w-4 h-4" />,
+        label: "Cambios solicitados"
+      },
+    };
+    const config = configs[estado] || configs.borrador;
+    return (
+      <div className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-sm font-semibold border ${config.bg} ${config.text} ${config.border}`}>
+        {config.icon}
+        <span>{config.label}</span>
+      </div>
+    );
+  };
+
   const toggleDestino = (asig) => {
     const k = claveDestino(asig);
     if (clavesDestinoUsadas.has(k) && !seleccionDestino.find((x) => claveDestino(x) === k)) {
