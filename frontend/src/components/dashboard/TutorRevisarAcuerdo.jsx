@@ -93,7 +93,7 @@ export default function TutorRevisarAcuerdo() {
       ),
     [acuerdo]
   );
-  
+
   const totalDest = useMemo(
     () =>
       (acuerdo?.bloques || []).reduce(
@@ -178,16 +178,6 @@ export default function TutorRevisarAcuerdo() {
           />
 
           <div className="max-w-7xl mx-auto px-6 py-8">
-            {/* Mensaje de estado */}
-            {msg && (
-              <div className="mb-6 p-4 rounded-xl bg-emerald-50 border border-emerald-200">
-                <div className="flex items-center gap-2">
-                  <CheckCircle2 className="w-5 h-5 text-emerald-600" />
-                  <p className="text-emerald-800 font-medium">{msg}</p>
-                </div>
-              </div>
-            )}
-
             {/* Tarjetas de información */}
             <div className="grid lg:grid-cols-2 gap-6 mb-8">
               {/* Datos de Movilidad */}
@@ -198,13 +188,13 @@ export default function TutorRevisarAcuerdo() {
                   </div>
                   <h2 className="text-xl font-bold text-gray-900" style={{ fontFamily: "Inter, sans-serif" }}>Datos de Movilidad</h2>
                 </div>
-                
+
                 <div className="space-y-4">
                   <Campo label="Universidad" icon={<Building2 className="w-5 h-5 text-gray-400 mt-0.5" />} value={acuerdo?.datos_movilidad?.nombre_universidad} />
                   <Campo label="Código" icon={<Hash className="w-5 h-5 text-gray-400 mt-0.5" />} value={acuerdo?.datos_movilidad?.codigo_universidad} />
                   <Campo label="País" icon={<MapPin className="w-5 h-5 text-gray-400 mt-0.5" />} value={acuerdo?.datos_movilidad?.pais} />
                   <Campo label="Periodo" icon={<Calendar className="w-5 h-5 text-gray-400 mt-0.5" />} value={acuerdo?.datos_movilidad?.periodo_estudios} />
-                  
+
                   <div className="border-t border-gray-100 pt-4">
                     <div className="flex items-start gap-3">
                       <User className="w-5 h-5 text-gray-400 mt-0.5" />
@@ -226,7 +216,7 @@ export default function TutorRevisarAcuerdo() {
                   </div>
                   <h2 className="text-xl font-bold text-gray-900" style={{ fontFamily: "Inter, sans-serif" }}>Datos del Estudiante</h2>
                 </div>
-                
+
                 <div className="space-y-4">
                   <Campo
                     label="Nombre completo"
@@ -288,7 +278,7 @@ export default function TutorRevisarAcuerdo() {
                         <div className="flex items-center gap-2 mb-4">
                           <h5 className="font-bold text-gray-900" style={{ fontFamily: "Inter, sans-serif" }}>Universidad de Granada</h5>
                         </div>
-                        
+
                         <div className="space-y-4">
                           {(bloque.asignaturas_ugr || []).map((asignatura, k) => (
                             <div key={k} className="bg-white rounded-lg p-4 border border-red-100">
@@ -297,11 +287,11 @@ export default function TutorRevisarAcuerdo() {
                                   {asignatura.nombre}
                                 </h6>
                                 <div className="flex items-center gap-1 ml-3">
-                                 
+
                                   <span className="font-bold text-red-600 text-sm">{asignatura.ects} ECTS</span>
                                 </div>
                               </div>
-                              
+
                               <div className="flex flex-wrap gap-2 mb-3">
                                 {asignatura.tipo && (
                                   <span className="px-2 py-1 bg-gray-100 text-gray-700 text-xs font-medium rounded-full">
@@ -319,7 +309,7 @@ export default function TutorRevisarAcuerdo() {
                                   </span>
                                 )}
                               </div>
-                              
+
                               {asignatura.guia && (
                                 <a
                                   href={asignatura.guia}
@@ -339,10 +329,10 @@ export default function TutorRevisarAcuerdo() {
                       {/* Destino */}
                       <div className="bg-blue-50 rounded-xl p-5 border border-blue-100">
                         <div className="flex items-center gap-2 mb-4">
-                    
+
                           <h5 className="font-bold text-gray-900" style={{ fontFamily: "Inter, sans-serif" }}>Universidad de Destino</h5>
                         </div>
-                        
+
                         <div className="space-y-4">
                           {(bloque.asignaturas_destino || []).map((asignatura, k) => (
                             <div key={k} className="bg-white rounded-lg p-4 border border-blue-100">
@@ -356,11 +346,11 @@ export default function TutorRevisarAcuerdo() {
                                   )}
                                 </h6>
                                 <div className="flex items-center gap-1 ml-3">
-                                
+
                                   <span className="font-bold text-blue-600 text-sm">{asignatura.ects} ECTS</span>
                                 </div>
                               </div>
-                              
+
                               <div className="flex flex-wrap gap-2 mb-3">
                                 {asignatura.curso && (
                                   <span className="px-2 py-1 bg-blue-100 text-blue-700 text-xs font-medium rounded-full">
@@ -373,7 +363,7 @@ export default function TutorRevisarAcuerdo() {
                                   </span>
                                 )}
                               </div>
-                              
+
                               {asignatura.guia && (
                                 <a
                                   href={asignatura.guia}
@@ -430,7 +420,7 @@ export default function TutorRevisarAcuerdo() {
               <div className="flex flex-col sm:flex-row gap-4 pt-6 border-t border-gray-200">
                 <button
                   onClick={pedirCambios}
-                  disabled={saving}
+                  disabled={saving || acuerdo?.estado === "aprobado"}
                   className="flex-1 inline-flex items-center justify-center gap-2 px-6 py-4 bg-amber-600 hover:bg-amber-700 disabled:bg-gray-400 text-white font-semibold rounded-xl transition-colors disabled:cursor-not-allowed"
                 >
                   {saving ? (
@@ -440,10 +430,10 @@ export default function TutorRevisarAcuerdo() {
                   )}
                   Solicitar Cambios
                 </button>
-                
+
                 <button
                   onClick={aprobar}
-                  disabled={saving}
+                  disabled={saving || acuerdo?.estado === "aprobado"}
                   className="flex-1 inline-flex items-center justify-center gap-2 px-6 py-4 bg-red-600 hover:bg-red-700 disabled:bg-gray-400 text-white font-semibold rounded-xl transition-colors disabled:cursor-not-allowed"
                 >
                   {saving ? (
@@ -454,6 +444,16 @@ export default function TutorRevisarAcuerdo() {
                   Aprobar Acuerdo
                 </button>
               </div>
+
+              {/* Mensaje de estado - Ahora al final después de los botones */}
+              {msg && (
+                <div className="mt-6 p-4 rounded-xl bg-emerald-50 border border-emerald-200">
+                  <div className="flex items-center gap-2">
+                    <CheckCircle2 className="w-5 h-5 text-emerald-600" />
+                    <p className="text-emerald-800 font-medium">{msg}</p>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         </div>
@@ -478,7 +478,7 @@ function ResumenCard({ title, value, icon, bg, border }) {
   return (
     <div className={`${bg} border ${border} rounded-xl p-6`}>
       <div className="flex items-center gap-3">
-        <div className={`p-2 ${bg.replace('50','100')} rounded-lg`}>
+        <div className={`p-2 ${bg.replace('50', '100')} rounded-lg`}>
           {icon}
         </div>
         <div>
