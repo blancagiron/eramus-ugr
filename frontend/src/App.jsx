@@ -22,7 +22,7 @@ import DestinoNoAsignado from "./components/destinos/DestinoNoAsignado";
 import VerificarEmail from "./components/VerificarCorreo";
 import EstudianteComunicacion from "./components/dashboard/EstudianteComunicacion";
 import TutorRevisarAcuerdo from "./components/dashboard/TutorRevisarAcuerdo";
-
+import ProgresoEstudiante from "./components/dashboard/ProgresoEstudiante";
 import AcuerdoEditor from "./components/acuerdo/AcuerdoEditor";
 function App() {
   return (
@@ -47,7 +47,7 @@ function App() {
         <Route path="/estudiante/destino-no-asignado" element={<DestinoNoAsignado />} />
         <Route path="/verificar-email" element={<VerificarEmail />} />
         <Route path="/estudiante/comunicacion" element={<EstudianteComunicacion />} />
-
+        <Route path="/estudiante/progreso" element={<PrivateRoute><ProgresoEstudiante /></PrivateRoute>} />
         <Route path="/tutor/acuerdo/:email" element={<TutorRevisarAcuerdo />} />
         {/* Rutas privadas */}
         <Route
