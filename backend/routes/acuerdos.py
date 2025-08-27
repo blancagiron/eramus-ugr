@@ -773,3 +773,76 @@ def crear_notificacion(email, titulo, mensaje, tipo="info", enlace=None):
         "enlace": enlace,
         "fecha_creacion": datetime.utcnow()
     })
+
+
+def _iso(dt):
+    # Asegura ISO string incluso si ya es str
+    if isinstance(dt, str):
+        return dt
+    return (dt or datetime.utcnow()).isoformat()
+
+@acuerdos.route("/api/progreso/<email>", methods=["GET"])
+def progreso_por_email(email):
+    """
+    Devuelve un timeline unificado (notificaciones + historial de acuerdo) para el estudiante.
+    """
+    # 1) Notificaciones del alumno
+    notifs = list(db.notificaciones.find(
+        {"usuario_email": email},
+        {"usuario_email": 0}  # devolvemos campos útiles
+    ).sort("fecha_creacion", -1))
+
+    timeline = []
+    for n in notifs:
+        timeline.append({
+            "id": str(n["_id"]),
+            "fuente": "notificacion",
+            "titulo": n.get("titulo"),
+            "mensaje": n.get("mensaje"),
+            "tipo": n.get("tipo", "info"),      # info | warning | success | error
+            "leida": n.get("leida", False),
+            "enlace": n.get("enlace"),
+            "timestamp": _iso(n.get("fecha_creacion")),
+        })
+
+    # 2) Último acuerdo + su historial
+    acuerdos_cursor = db.acuerdos.find(
+        {"email_estudiante": email},
+        {"historial": 1, "estado": 1, "version": 1, "fecha_ultima_modificacion": 1}
+    ).sort("version", -1)
+
+    for a in acuerdos_cursor:
+        aid = str(a.get("_id"))
+        hist = a.get("historial") or []
+
+        # Fallback mínimo si no hubiera historial
+        if not hist:
+            timeline.append({
+                "id": f"{aid}:estado:{_iso(a.get('fecha_ultima_modificacion'))}",
+                "fuente": "acuerdo",
+                "titulo": f"Acuerdo — {a.get('estado','desconocido')}",
+                "mensaje": f"Estado actual: {a.get('estado','—')}",
+                "tipo": "estado",
+                "leida": True,
+                "enlace": "/estudiante/acuerdo",
+                "timestamp": _iso(a.get("fecha_ultima_modificacion")),
+            })
+        else:
+            for ev in hist:
+                # tus eventos almacenan campos: evento, por, rol, ts, meta...
+                accion = ev.get("evento", "evento")
+                ts = ev.get("ts") or ev.get("timestamp")
+                timeline.append({
+                    "id": f"{aid}:{accion}:{_iso(ts)}",
+                    "fuente": "acuerdo",
+                    "titulo": f"Acuerdo — {accion}",
+                    "mensaje": ev.get("mensaje") or f"Evento: {accion}",
+                    "tipo": "estado",
+                    "leida": True,                       # los eventos del acuerdo no requieren “leer”
+                    "enlace": "/estudiante/acuerdo",
+                    "timestamp": _iso(ts),
+                })
+
+    # 3) Ordenar desc por timestamp
+    timeline.sort(key=lambda x: x["timestamp"], reverse=True)
+    return jsonify({"items": timeline}), 200
