@@ -34,10 +34,10 @@ export default function EstudianteDashboard() {
       descripcion: "Revisar y gestionar acuerdo de estudios"
     },
     {
-      label: "Estado del Proceso",
+      label: "Historial de tu movilidad",
       icon: <CheckCircle className="w-8 h-8" />,
       color: "bg-gradient-to-br from-emerald-500 to-teal-600",
-      ruta: "/estudiante/estado",
+      ruta: "/estudiante/progreso",
       descripcion: "Ver progreso de tu aplicación"
     },
     {
