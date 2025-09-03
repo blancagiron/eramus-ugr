@@ -5,6 +5,8 @@ import RolSelector from "./auth/RolSelector";
 import RegistroForm from "./auth/RegistroForm";
 import HeaderLanding from "./landing_page_layout/HeaderLanding";
 import FooterLanding from "./landing_page_layout/FooterLanding";
+import ForgotPasswordForm from "./auth/ForgotPasswordForm";
+import ResetPasswordForm from "./auth/ResetPasswordForm";
 
 export default function Auth() {
   const [modo, setModo] = useState("login"); // login | seleccionar-rol | registro
@@ -20,6 +22,11 @@ export default function Auth() {
   const [autenticando, setAutenticando] = useState(true);
 
   const [centros, setCentros] = useState([]);
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("resetToken")) setModo("reset");
+  }, []);
 
   useEffect(() => {
     const user = localStorage.getItem("usuario");
@@ -145,7 +152,7 @@ export default function Auth() {
             form={form}
             actualizarCampo={actualizarCampo}
             onLogin={login}
-            cambiarModo={() => setModo("seleccionar-rol")}
+            cambiarModo={(nuevo = "seleccionar-rol") => setModo(nuevo)}
             mensaje={mensaje}
             tipoMensaje={tipoMensaje}
           />
@@ -171,6 +178,13 @@ export default function Auth() {
             mensaje={mensaje}
             tipoMensaje={tipoMensaje}
           />
+        )}
+        {modo === "olvido" && (
+          <ForgotPasswordForm onBack={() => setModo("login")} />
+        )}
+
+        {modo === "reset" && (
+          <ResetPasswordForm onBack={() => setModo("login")} />
         )}
       </div>
       <FooterLanding />

@@ -2,10 +2,11 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Sidebar from "./Sidebar";
 import {
-  FileText, MapPin, Calendar, CheckCircle, Upload,
-  MessageCircle, HandHelping, BookOpen, AlertCircle, User
+  FileText, MapPin, CheckCircle, MessageCircle, HandHelping, User
 } from "lucide-react";
 import NotificacionesWidget from "./NotificationWidget";
+
+const BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
 
 export default function EstudianteDashboard() {
   const navigate = useNavigate();
@@ -15,15 +16,25 @@ export default function EstudianteDashboard() {
     const usuarioRaw = localStorage.getItem("usuario");
     if (usuarioRaw) {
       const u = JSON.parse(usuarioRaw);
-      fetch(`http://localhost:5000/usuarios/${u.email}`)
+      fetch(`${BASE_URL}/usuarios/${u.email}`)
         .then((res) => res.json())
-        .then(setUser);
+        .then(setUser)
+        .catch(() => setUser(null));
     }
   }, []);
 
   if (!user) {
     return <p className="p-6 text-gray-600">Cargando tu información...</p>;
   }
+
+  // Estado y ruta dinámica para "Mi Destino"
+  const estado = user?.estado_proceso || "pendiente";
+  const destinoRuta =
+    estado === "sin destino"
+      ? "/estudiante/destino-no-asignado"
+      : (user?.destino_confirmado?.nombre_uni
+          ? `/destinos/${encodeURIComponent(user.destino_confirmado.nombre_uni)}`
+          : "/destinos");
 
   const widgets = [
     {
@@ -44,11 +55,7 @@ export default function EstudianteDashboard() {
       label: "Mi Destino",
       icon: <MapPin className="w-8 h-8" />,
       color: "bg-gradient-to-br from-orange-500 to-red-600",
-      ruta:
-        user.estado_proceso === "con destino" && user.destino_confirmado?.nombre_uni
-          ? `/destinos/${encodeURIComponent(user.destino_confirmado.nombre_uni)}`
-          : "/estudiante/destino-no-asignado",
-
+      ruta: destinoRuta,
       descripcion: "Información de tu universidad destino"
     },
     {
@@ -90,9 +97,7 @@ export default function EstudianteDashboard() {
         {/* Resumen rápido del estado */}
         <div className="mb-8 p-6 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl border border-blue-100">
           {(() => {
-            const estado = user?.estado_proceso || "pendiente";
             const mapa = {
-             
               "sin destino": { titulo: "Sin destino asignado", dot: "bg-gray-400" },
               "con destino": { titulo: "Destino asignado", dot: "bg-blue-500" },
               "en revision": { titulo: "Acuerdo en revisión", dot: "bg-amber-500" },
@@ -162,10 +167,6 @@ export default function EstudianteDashboard() {
         </div>
 
         <NotificacionesWidget email={user?.email} />
-
-
-       
-        
       </div>
     </Sidebar>
   );

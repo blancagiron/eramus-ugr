@@ -4,7 +4,7 @@ from models.usuario import crear_usuario
 from datetime import datetime
 from models.usuario import _notif, _notificar_admins
 import secrets, uuid
-from utils.email import enviar_correo_verificacion
+from utils.email import enviar_correo_verificacion, enviar_correo_recuperacion
 import os
 from utils.auth import hash_contraseña, verificar_contraseña
 from routes.cloudinary_utils import subir_imagen, eliminar_imagen, sanitize_folder
@@ -444,3 +444,77 @@ def eliminar_usuario(email):
 
     return jsonify({"mensaje": f"Usuario con email {email} eliminado correctamente"}), 200
 
+
+# --- Recuperación de contraseña: solicitar enlace ---
+@usuarios.route("/usuarios/olvido-password", methods=["POST"])
+def solicitar_recuperacion():
+    data = request.json or {}
+    email = (data.get("email") or "").strip().lower()
+    if not email:
+        return jsonify({"error": "Email requerido"}), 400
+
+    usuario = db.usuarios.find_one({"email": email})
+
+    # Siempre respondemos 200 para no filtrar si el email existe o no
+    if not usuario:
+        return jsonify({"mensaje": "Si el email existe, enviaremos instrucciones"}), 200
+
+    # Token aleatorio + caducidad (1 hora)
+    token = secrets.token_urlsafe(32)
+    caducidad = datetime.utcnow().timestamp() + 3600  # 1h en epoch
+
+    db.usuarios.update_one(
+        {"email": email},
+        {"$set": {"reset_token": token, "reset_token_exp": caducidad}}
+    )
+
+    # Construir enlace hacia el frontend (usa FRONTEND_URL de .env)
+    frontend_url = os.getenv("FRONTEND_URL", "http://localhost:5173")
+    enlace = f"{frontend_url}/auth?resetToken={token}"
+
+    try:
+        enviar_correo_recuperacion(email, enlace)
+    except Exception as e:
+        # No tiramos el endpoint por fallo de email
+        print("Fallo al enviar correo de recuperación:", e)
+
+    return jsonify({"mensaje": "Si el email existe, enviaremos instrucciones"}), 200
+
+
+# --- Recuperación de contraseña: establecer nueva ---
+@usuarios.route("/usuarios/reset-password", methods=["POST"])
+def resetear_contraseña():
+    data = request.json or {}
+    token = (data.get("token") or "").strip()
+    nueva = (data.get("nueva_contraseña") or "").strip()
+
+    if not token or not nueva:
+        return jsonify({"error": "Token y nueva contraseña son obligatorios"}), 400
+
+    usuario = db.usuarios.find_one({"reset_token": token})
+    if not usuario:
+        return jsonify({"error": "Token inválido"}), 400
+
+    # Validar caducidad
+    ahora = datetime.utcnow().timestamp()
+    if float(usuario.get("reset_token_exp", 0)) < ahora:
+        return jsonify({"error": "El enlace ha caducado, solicita uno nuevo"}), 400
+
+    # Hashear y guardar
+    from utils.auth import hash_contraseña
+    nueva_hash = hash_contraseña(nueva)
+
+    db.usuarios.update_one(
+        {"email": usuario["email"]},
+        {"$set": {"contraseña": nueva_hash},
+         "$unset": {"reset_token": "", "reset_token_exp": ""}}
+    )
+
+    # (Opcional) notificación interna en tu sistema
+    try:
+        from models.usuario import _notif
+        _notif(usuario["email"], "Contraseña actualizada", "Tu contraseña se ha cambiado correctamente.", tipo="exito")
+    except Exception:
+        pass
+
+    return jsonify({"mensaje": "Contraseña actualizada correctamente"}), 200

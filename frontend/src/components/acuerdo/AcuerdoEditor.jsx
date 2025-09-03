@@ -29,48 +29,7 @@ const btn = {
     "inline-flex items-center gap-2 px-3 py-2 rounded-lg text-sm bg-blue-600 text-white hover:bg-blue-700",
 };
 
-/* =========================
-   Badges de estado
-   ========================= */
-const EstadoBadge = ({ estado }) => {
-  const configs = {
-    borrador: {
-      bg: "bg-gray-100",
-      text: "text-gray-700",
-      border: "border-gray-200",
-      icon: <FileText className="w-4 h-4" />,
-      label: "Borrador",
-    },
-    enviado: {
-      bg: "bg-blue-50",
-      text: "text-blue-700",
-      border: "border-blue-200",
-      icon: <FileText className="w-4 h-4" />,
-      label: "Enviado",
-    },
-    comentado: {
-      bg: "bg-amber-50",
-      text: "text-amber-800",
-      border: "border-amber-200",
-      icon: <ClipboardList className="w-4 h-4" />,
-      label: "Cambios solicitados",
-    },
-    aprobado: {
-      bg: "bg-emerald-50",
-      text: "text-emerald-800",
-      border: "border-emerald-200",
-      icon: <BadgeCheck className="w-4 h-4" />,
-      label: "Aprobado",
-    },
-  };
-  const c = configs[estado] || configs.borrador;
-  return (
-    <div className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-sm font-semibold border ${c.bg} ${c.text} ${c.border}`}>
-      {c.icon}
-      <span>{c.label}</span>
-    </div>
-  );
-};
+
 
 /* =========================
    Card de sección coherente

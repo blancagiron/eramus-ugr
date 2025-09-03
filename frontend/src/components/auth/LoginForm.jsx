@@ -7,14 +7,14 @@ export default function LoginForm({ form, actualizarCampo, onLogin, cambiarModo,
       {/* Logo y título */}
       <div className="text-center mb-8">
         <div className="flex items-center justify-center mb-2">
-          <img 
-            src={logo} 
-            alt="Erasmus UGR Logo" 
+          <img
+            src={logo}
+            alt="Erasmus UGR Logo"
             className="h-32 w-auto"
           />
         </div>
         <h1 className="text-2xl font-semibold text-black" style={{ fontFamily: "Inter, sans-serif" }}>
-         ¡Hola de nuevo!
+          ¡Hola de nuevo!
         </h1>
       </div>
 
@@ -52,7 +52,7 @@ export default function LoginForm({ form, actualizarCampo, onLogin, cambiarModo,
 
         {/* Botón y mensaje */}
         <div className="space-y-2">
-          <button 
+          <button
             type="submit"
             className="w-full bg-red-500 hover:bg-red-600 text-white font-medium py-3 px-4 rounded-lg transition-colors duration-200"
           >
@@ -60,9 +60,8 @@ export default function LoginForm({ form, actualizarCampo, onLogin, cambiarModo,
           </button>
 
           {mensaje && (
-            <p className={`text-sm text-center ${
-              tipoMensaje === "exito" ? "text-green-600" : "text-red-600"
-            }`}>
+            <p className={`text-sm text-center ${tipoMensaje === "exito" ? "text-green-600" : "text-red-600"
+              }`}>
               {mensaje}
             </p>
           )}
@@ -73,14 +72,23 @@ export default function LoginForm({ form, actualizarCampo, onLogin, cambiarModo,
       <div className="text-center mt-6">
         <p className="text-base text-gray-600">
           ¿Es tu primera vez?{" "}
-          <button 
-            type="button" 
-            onClick={cambiarModo} 
+          <button
+            type="button"
+            onClick={() => cambiarModo("seleccionar-rol")}
             className="text-red-500 hover:text-red-700 font-semibold hover:underline"
           >
             Regístrate
           </button>
         </p>
+      </div>
+      <div className="text-center mt-3">
+        <button
+          type="button"
+          onClick={() => cambiarModo("olvido")}
+          className="text-red-500 hover:text-red-700 font-semibold hover:underline"
+        >
+          ¿Olvidaste tu contraseña?
+        </button>
       </div>
     </div>
   );

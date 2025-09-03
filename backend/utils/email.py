@@ -38,3 +38,35 @@ def enviar_correo_verificacion(destinatario, token):
         print("Error al enviar correo:", e)
         return False
 
+def enviar_correo_recuperacion(destinatario, enlace):
+    email_user = os.getenv("EMAIL_ORIGEN")
+    email_pass = os.getenv("EMAIL_PASSWORD")
+    email_from = os.getenv("EMAIL_FROM")
+    # FRONTEND_URL ya se resuelve al construir el enlace en el backend; aquí no hace falta
+
+    mensaje = MIMEMultipart("alternative")
+    mensaje["Subject"] = "Recupera tu contraseña"
+    mensaje["From"] = email_from
+    mensaje["To"] = destinatario
+
+    html = f"""
+    <html>
+        <body>
+            <p>Has solicitado restablecer tu contraseña.</p>
+            <p>Haz clic en el siguiente enlace (válido 1 hora):</p>
+            <p><a href="{enlace}">{enlace}</a></p>
+            <p>Si no has sido tú, ignora este mensaje.</p>
+        </body>
+    </html>
+    """
+    parte_html = MIMEText(html, "html")
+    mensaje.attach(parte_html)
+
+    try:
+        with smtplib.SMTP_SSL("smtp.gmail.com", 465) as servidor:
+            servidor.login(email_user, email_pass)
+            servidor.sendmail(email_from, destinatario, mensaje.as_string())
+        return True
+    except Exception as e:
+        print("Error al enviar correo de recuperación:", e)
+        return False
