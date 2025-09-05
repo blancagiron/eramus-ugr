@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { Plus, X, Trash2 } from "lucide-react";
 
 export default function EditarDestinoModal({ destino, onClose }) {
+  const [indiceRecienCreado, setIndiceRecienCreado] = useState(null);
   const [datos, setDatos] = useState({
     ...destino,
     asignaturas: destino.asignaturas || [],
@@ -34,7 +35,6 @@ export default function EditarDestinoModal({ destino, onClose }) {
     setDatos(prev => ({
       ...prev,
       asignaturas: [
-        ...prev.asignaturas,
         {
           codigo_ugr: "",
           nombre_ugr: "",
@@ -42,10 +42,12 @@ export default function EditarDestinoModal({ destino, onClose }) {
           creditos: 0,
           codigos_grado: [],
           ultimo_anio_reconocimiento: ""
-        }
+        },
+        ...prev.asignaturas 
       ]
     }));
   };
+
   useEffect(() => {
     fetch("http://localhost:5000/grados")
       .then((res) => res.json())
